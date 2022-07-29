@@ -1,0 +1,9 @@
+{
+    "callId": "8699b693-c365-40f2-bff0-c7fad6cc2488",
+    "errorCode": 404,
+    "description": "La ressource demandée MspCalls avec l'id FAKE_UUID n'a pas été trouvée",
+    "label": "Not Found",
+    "status": 404,
+    "timestamp": "2022-04-12T00:34:58.675Z"
+  
+}

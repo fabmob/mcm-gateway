@@ -1,0 +1,4 @@
+{
+  "url": "https://api.jcdecaux.com/vls/v1/stations?contract=lyon&apiKey=a8b04d043bc08144f91000fecbcfb15b174acdef",
+  "method": "GET"
+}

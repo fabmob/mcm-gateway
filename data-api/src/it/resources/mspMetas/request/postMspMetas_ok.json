@@ -1,0 +1,44 @@
+{
+  "hasParking": false,
+  "hasStationStatus": true,
+  "primaryColor": "#0054BB",
+  "type": "TROTTINETTE",
+  "operator": "Dott",
+  "url": "https:\/\/www.cityscoot.eu\/paris\/",
+  "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+  "priceList": {
+    "duration": [
+      {
+        "unit": 5,
+        "fixedFare": 6,
+        "farePerUnit": 7,
+        "lowerPriceLimit": 4,
+        "upperPriceLimit": 9
+      }
+    ],
+    "parkingForbiddenFee": 3,
+    "distance": [
+      {
+        "unit": 5,
+        "fixedFare": 6,
+        "farePerUnit": 7,
+        "lowerPriceLimit": 4,
+        "upperPriceLimit": 9
+      }
+    ],
+    "outOfBoundFee": 5,
+    "comment": ""
+  },
+  "hasStation": false,
+  "hasPrefParkingZone": false,
+  "hasVehicle": null,
+  "urlWebview": false,
+  "isEnabled": null,
+  "name": "Dott",
+  "hasSpeedLimitZone": false,
+  "logoFormat": "PNG",
+  "hasNoParkingZone": false,
+  "hasHold": false,
+  "hasOperatingZone": false,
+  "secondaryColor": "#0054BB"
+}

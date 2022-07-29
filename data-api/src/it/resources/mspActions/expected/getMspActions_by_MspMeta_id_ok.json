@@ -1,0 +1,14 @@
+[{
+	"mspActionId": "7c8f8780-a6fa-495d-8b36-24a20539adca",
+	"name": "CityScoot",
+	"action": "ZONE_OPERATING",
+	"isAuthentication": 0,
+	"isRefreshAuthentication": 0,
+	"isPagination": 1,
+	"selector": {
+		"selectorId": "ec0e9a76-f1fe-422c-803b-8332ad957942",
+		"key": "test_s",
+		"value": "test_s"
+	}
+}]
+

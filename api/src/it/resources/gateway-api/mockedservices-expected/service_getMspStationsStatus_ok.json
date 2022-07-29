@@ -1,0 +1,34 @@
+[
+  {
+    "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+    "stationId": "sta1",
+    "numAssetsAvailable": 1,
+    "numAssetsAvailableType": null,
+    "numAssetsDisabled": null,
+    "numDocksAvailable": null,
+    "numDocksDisabled": null,
+    "isInstalled": true,
+    "isRenting": true,
+    "isReturning": true,
+    "actions": null,
+    "bookDeeplink": null,
+    "useDeeplink": null,
+    "lastReported": null
+  },
+  {
+    "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+    "stationId": "sta2",
+    "numAssetsAvailable": 0,
+    "numAssetsAvailableType": null,
+    "numAssetsDisabled": null,
+    "numDocksAvailable": null,
+    "numDocksDisabled": null,
+    "isInstalled": true,
+    "isRenting": true,
+    "isReturning": true,
+    "actions": null,
+    "bookDeeplink": null,
+    "useDeeplink": null,
+    "lastReported": null
+  }
+]

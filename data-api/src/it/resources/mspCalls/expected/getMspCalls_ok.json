@@ -1,0 +1,121 @@
+[
+	{
+		"mspCallId": "cfceccab-e4d0-4622-bde1-cd2dc73088c4",
+		"url": "MAAS_COMMUNAUTO_GET_BOOKINGS_URL:https://pp.reservauto.net/Scripts/Client/Ajax/MobileApplication/ReservationList.asp",
+		"method": "GET",
+		"isMocked": 0,
+		"nbCalls": 1,
+		"executionOrder": 1,
+		"mspActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265",
+		"body": {
+			"bodyId": "9404fa40-1549-4fb9-bb89-d89bc58b1eef",
+			"template": null,
+			"isStatic": 1,
+			"bodyParams": [
+				{
+					"bodyParamsId;": "c788a24a-d0e8-485f-b5b5-ad66340c30b7",
+					"keyMapper": "VhiculeID",
+					"key": null,
+					"sensitive": 30,
+					"value": null,
+					"precision": null,
+					"timezone": null,
+					"isRefreshToken": null
+				}
+			]
+		},
+		"headers": [
+			{
+				"headersId": "84f49cdd-d430-40d1-9ba2-4b52f89eed20",
+				"key": "Content-Type",
+				"sensitive": null,
+				"value": "application/json",
+				"processFunction": null,
+				"securityFlag": null,
+				"valuePrefix": null,
+				"valueTemplate": null,
+				"headersValuesTemplate": [
+					{
+						"headersValuesTemplateId": "19e9e6b8-6ac0-405e-96b1-37ca955587e0",
+						"key": "user",
+						"value": "{MAAS_CITYSCOOT_CLIENT_ID:kFEkfWQt8UATcsccM7Ey}"
+					}
+				]
+			}
+		],
+		"params": [
+			{
+				"paramsId": "5e8a4733-a504-4358-bcdc-f6fb5141ed88",
+				"key": "StartDate",
+				"sensitive": null,
+				"value": "-15",
+				"keyMapper": null,
+				"precision": null,
+				"timezone": "Europe/Paris"
+			}
+		],
+		"paramsMultiCalls": []
+	},
+	{
+		"mspCallId": "bfc126d5-d17c-4957-b1b0-e037e2dad9da",
+		"url": "@MAAS_CITYSCOOT_AUTHENTICATION_URL@",
+		"method": "GET",
+		"isMocked": 0,
+		"nbCalls": 1,
+		"executionOrder": 1,
+		"mspActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518",
+		"body": {
+			"bodyId": "531d12cc-9543-452b-aa34-105166971f1d",
+			"template": null,
+			"isStatic": 1,
+			"bodyParams": [
+				{
+					"bodyParamsId;": "72f655c2-9b76-4a9e-956d-7ea63e3be0ae",
+					"key": "CITY_LOGIN",
+					"keyMapper": "{MAAS_CITY_LOGIN:parisratpcitycontrol@goflash.com}",
+					"sensitive": 30,
+					"value": null,
+					"precision": null,
+					"timezone": null,
+					"isRefreshToken": null
+				}
+			]
+		},
+		"headers": [
+			{
+				"headersId": "6de8ce89-90d2-475b-8e81-c087de351d86",
+				"key": "Content-Type",
+				"sensitive": null,
+				"value": "application/json",
+				"processFunction": null,
+				"securityFlag": null,
+				"valuePrefix": null,
+				"valueTemplate": null,
+				"headersValuesTemplate": [
+					{
+						"headersValuesTemplateId": "a876195c-61f3-4bf3-94b8-3625c71c35b3",
+						"key": "user",
+						"value": "{MAAS_CITYSCOOT_CLIENT_ID:kFEkfWQt8UATcsccM7Ey}"
+					}
+				]
+			}
+		],
+		"params": [],
+		"paramsMultiCalls": [
+						{
+				"paramsMultiCallsId": "f3bc84a0-e9a2-4bee-9f65-a46889236028",
+				"key": "TripEndDate",
+				"valueOffset": "30",
+				"initValue": "OFFSET",
+				"timezone": "Europe/Paris"
+			},
+			{
+				"paramsMultiCallsId": "28371a09-11fd-415c-b70f-8ae98806ee85",
+				"key": "TripStartDate",
+				"valueOffset": "30",
+				"initValue": "NOW",
+				"timezone": "Europe/Paris"
+			}
+		]
+	}
+]

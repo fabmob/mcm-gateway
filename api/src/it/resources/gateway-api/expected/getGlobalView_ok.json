@@ -1,0 +1,224 @@
+{
+  "stations": [
+    {
+      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "stationId": "400",
+      "name": "Trocadero",
+      "coordinates": {
+        "lng": 6.169639,
+        "lat": 0,
+        "alt": 0
+      },
+      "physicalAddress": {
+        "streetAddress": "example street 18, 2nd floor, 18-B33",
+        "street": "string",
+        "houseNumber": 40,
+        "houseNumberAddition": "BIS",
+        "addressAdditionalInfo": "string",
+        "areaReference": "Smallcity, Pinetree county",
+        "city": "Paris",
+        "province": "string",
+        "state": "string",
+        "postalCode": "75001",
+        "country": "France"
+      },
+      "crossStreet": "Cross street",
+      "regionId": "XX",
+      "rentalMethods": [
+        "CREDITCARD",
+        "ACCOUNTNUMBER"
+      ]
+    }
+  ],
+  "stationsStatus": [
+    {
+      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "stationId": "400",
+      "numAssetsAvailable": 12,
+      "numAssetsAvailableType": {
+        "mechanical": 8,
+        "electric": 4
+      },
+      "numAssetsDisabled": 0,
+      "numDocksAvailable": 10,
+      "numDocksDisabled": 0,
+      "isInstalled": true,
+      "isRenting": true,
+      "isReturning": true,
+      "actions": [
+        {
+          "type": "BOOK_VEHICLE",
+          "deeplink": "string",
+          "apiCall": "string",
+          "webview": "string",
+          "url": "string"
+        }
+      ],
+      "bookDeeplink": null,
+      "useDeeplink": null,
+      "lastReported": 0
+    }
+  ],
+  "assets": [
+    {
+      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "assetId": "string",
+      "assetType": "string",
+      "isReserved": true,
+      "isReservedFrom": "2022-03-08T15:41:01.268Z",
+      "isReservedTo": "2022-03-08T15:41:01.268Z",
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "overriddenProperties": {
+        "name": "string",
+        "operator": null,
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 6.169639,
+            "lat": 0,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    }
+  ],
+  "parkings": [
+    {
+      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "parkingId": "95cae659-d225-454e-9d3b-32a982f73074",
+      "name": "Andrésy - Gare de Maurecourt - Sébastien Rouault",
+      "url": "https://zenpark.com/parkings/parking-andresy-gare-de-maurecourt-sebastien-rouault\"",
+      "location": {
+        "type": "Point",
+        "coordinates": [
+          2.275725,
+          48.865983
+        ]
+      },
+      "address": {
+        "full": "40, rue du Louvre, 75001, Paris, France",
+        "houseNumber": "40",
+        "street": "rue du Louvre",
+        "city": "Paris",
+        "postCode": "75001",
+        "country": "France"
+      },
+      "description": "<p>Ce parking est situé à proximité de la gare de Maurecourt à Andrésy.</p>",
+      "characteristics": {
+        "maxHeight": 1.9,
+        "indoor": true,
+        "underground": true,
+        "videoMonitoring": true,
+        "valet": true,
+        "pedestrianFriendly": true,
+        "lighted": true,
+        "guarded": true
+      },
+      "pictures": [
+        "string"
+      ],
+      "accessTypes": [
+        "Ticket",
+        "External"
+      ],
+      "assetTypes": [
+        "Small",
+        "Tall"
+      ],
+      "actions": [
+        {
+          "type": "BOOK_VEHICLE",
+          "deeplink": "string",
+          "apiCall": "string",
+          "webview": "string",
+          "url": "string"
+        }
+      ],
+      "priceInfo": "À partir de 1,30 €/h",
+      "subscriptions": {
+        "name": "Paris - demonstration - 24/7",
+        "type": "FullTime",
+        "monthlyPrice": 70,
+        "firstMonthPrice": 70
+      },
+      "availability": {
+        "reservation": true
+      }
+    }
+  ]
+}

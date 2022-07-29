@@ -1,0 +1,44 @@
+[
+  {
+    "assetTypeId": "assettype1",
+    "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+    "type": null,
+    "stationId": "sta1",
+    "nrAvailable": 1,
+    "assets": [
+      {
+        "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+        "assetId": "asset1",
+        "assetType": "trotinette",
+        "isReserved": false,
+        "isReservedFrom": null,
+        "isReservedTo": null,
+        "isDisabled": null,
+        "mileage": null,
+        "licensePlate": null,
+        "overriddenProperties": null,
+        "bookDeeplink": null,
+        "useDeeplink": null
+      },
+      {
+        "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+        "assetId": "asset2",
+        "assetType": "trotinette",
+        "isReserved": true,
+        "isReservedFrom": null,
+        "isReservedTo": null,
+        "isDisabled": null,
+        "mileage": null,
+        "licensePlate": null,
+        "overriddenProperties": null,
+        "bookDeeplink": null,
+        "useDeeplink": null
+      }
+    ],
+    "assetClass": "BICYCLE",
+    "assetSubClass": null,
+    "sharedProperties": null,
+    "applicablePricings": null,
+    "conditions": null
+  }
+]

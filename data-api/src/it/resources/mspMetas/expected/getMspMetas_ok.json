@@ -1,0 +1,242 @@
+[
+  {
+    "hasParking": false,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "TROTTINETTE",
+    "operator": "Dott",
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "86d370e4-06ce-4dd7-8c4c-2d7f80d46f3d",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "22808a15-1b7b-4605-9764-3c71a3f05ae4",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "mspId": "b814c97e-df56-4651-ac50-11525537964f",
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasSpeedLimitZone": false,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasHold": false,
+    "hasOperatingZone": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasParking": false,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "TROTTINETTE",
+    "operator": "Dott",
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "0f82a2bd-4313-4498-b0f5-4dc9a6059770",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "3070abb1-ef78-4388-992a-ed8e2632db11",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "08b05a7e-e027-48ba-8916-83c7ddca8c9e",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "mspId": "6c317901-749f-4d7d-82bb-afdc737b26b3",
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasSpeedLimitZone": false,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasHold": false,
+    "hasOperatingZone": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasParking": false,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "TROTTINETTE",
+    "operator": "Dott",
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "30820b7c-5448-4285-a13a-0708fc873af6",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "de0968a9-c598-40aa-aace-63aa863a95d5",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "2d973d40-8e33-4b59-9334-a98bbf0e18c5",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "mspId": "f6b6d937-dd91-4dd2-99d6-74958ee4e09a",
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasSpeedLimitZone": false,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasHold": false,
+    "hasOperatingZone": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasParking": false,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "TROTTINETTE",
+    "operator": "Dott",
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "15f24d7a-f36c-4d51-a979-202f411f1db6",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "af3458b0-b5a6-4474-a99d-ec2ede3dee8d",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "dad32a8c-0033-4e49-b6b9-cd051744f699",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "mspId": "28784eb7-de79-434d-a1b6-819ebfd50860",
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasSpeedLimitZone": false,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasHold": false,
+    "hasOperatingZone": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasParking": false,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "TROTTINETTE",
+    "operator": "Dott",
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "623b0a97-b759-466f-86c5-935501255a66",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "b29cb9e5-0ff5-45f5-a06f-412682f45bfb",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "50d8c105-8742-4187-b4e8-c67c51a34229",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "mspId": "3eeec675-2da2-421b-9b6c-ed05776b9f64",
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasSpeedLimitZone": false,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasHold": false,
+    "hasOperatingZone": false,
+    "secondaryColor": "#0054BB"
+  }
+]

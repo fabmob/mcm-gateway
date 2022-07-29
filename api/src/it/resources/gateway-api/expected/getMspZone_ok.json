@@ -1,0 +1,36 @@
+{
+  "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+  "msp": "Cityscoot, Velib, Voi",
+  "status": "AVAILABLE",
+  "updateDate": "2022-03-08T15:58:43.139Z",
+  "zones": [
+    {
+      "zoneType": "OPERATING",
+      "validityStartDate": null,
+      "validityEndDate": null,
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              2.275725,
+              48.865983
+            ],
+            [
+              2.3390958085656166,
+              48.85375581057431
+            ],
+            [
+              2.3648982158072323,
+              48.867872484748744
+            ],
+            [
+              2.275725,
+              48.865983
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

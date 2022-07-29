@@ -1,0 +1,38 @@
+[
+  {
+    "mspId": "ada5039d-81a5-4676-9885-516384ccdc83",
+    "name": "Trotti",
+    "operator": "Voi Trotti",
+    "type": "TROTTINETTE",
+    "url": "string",
+    "logo": null ,
+    "logoUrl": "string",
+    "logoFormat": "PNG",
+    "primaryColor": "RED",
+    "secondaryColor": "Yellow",
+    "priceList": {
+      "comment": "Trotti price list",
+      "duration": [
+        {
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "distance": [
+        {
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "parkingForbiddenFee": 5000,
+      "outOfBoundFee": 50000
+    },
+    "urlWebview": true
+  }
+]

@@ -1,0 +1,59 @@
+server:
+  port: 8084
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+
+springdoc:
+  api-docs:
+    path: /adapters
+  swagger-ui:
+    path: /api-docs.html
+
+logging:
+  level:
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+
+spring:
+  application:
+    name: routing
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  profiles:
+    active: test
+  data:
+    rest:
+      basePath: #/api
+      detection-strategy: all
+
+---
+
+spring:
+  profiles: test
+security:
+  disabled: true
+
+---
+
+spring:
+  profiles: prod
+security:
+  disabled: false
+
+
+---
+
+gateway:
+  service:
+    requestRelay:
+      url: "http://localhost:8083/v1/request-relay"
+      isMocked: false
+    dataapi:
+      url: "http://localhost:8081/v1"
+

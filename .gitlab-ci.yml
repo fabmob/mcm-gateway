@@ -1,0 +1,42 @@
+default:
+  image: maven:3-jdk-11
+  services:
+    - name: postgres:13-alpine
+      entrypoint: ["docker-entrypoint.sh"]
+      command: ["postgres"]
+
+variables:
+  POSTGRES_DB: "gateway-tests"
+  POSTGRES_USER: "postgres"
+  POSTGRES_PASSWORD: "postgres"
+  POSTGRES_HOST_AUTH_METHOD: trust
+  PGDATA: "/var/lib/postgresql/data"
+  POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+  MAVEN_TESTS_OPTS: "-Dtest.database.url=jdbc:postgresql://localhost:5432/$POSTGRES_DB -Dtest.database.username=$POSTGRES_USER -Dtest.database.password=$POSTGRES_PASSWORD"
+  SONAR_PROJECT_KEY: "com.gateway"
+  SONAR_PROJECT_NAME: "Gateway\ :\ global $CI_COMMIT_BRANCH"
+
+
+# Cache the Maven repository so that each job does not have to download it.
+cache:
+  key: mavenrepo
+  paths:
+    - .m2/repository/
+    - target/
+
+build:
+  stage: build
+  script:
+    - mvn $MAVEN_CLI_OPTS clean install -DskipTests --quiet
+
+test:
+  stage: test
+  services:
+    - postgres:13-alpine
+  script:
+    - SONAR_PROJECT_KEY="com.gateway:"`echo $CI_COMMIT_BRANCH | sed "s/\([^/]*\/\)\([^_]*\).*/\2/g"`
+    - mvn clean install -DskipTests --quiet
+    - mvn $MAVEN_CLI_OPTS $MAVEN_TESTS_OPTS test verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_URL -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.projectName="$SONAR_PROJECT_NAME"
+

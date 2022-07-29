@@ -1,0 +1,51 @@
+{
+  "url": "MAAS_COMMUNAUTO_GET_BOOKINGS_URL:https://pp.reservauto.net/Scripts/Client/Ajax/MobileApplication/ReservationList.asp",
+  "method": "GET",
+  "isMocked": 0,
+  "nbCalls": 1,
+  "mspActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265",
+  "body": {
+    "template": null,
+    "isStatic": 1,
+    "bodyParams": [
+      {
+        "keyMapper": "VhiculeID",
+        "key": null,
+        "sensitive": 30,
+        "value": null,
+        "precision": null,
+        "timezone": null,
+        "isRefreshToken": null
+      }
+    ]
+  },
+  "headers": [
+    {
+      "key": "Content-Type",
+      "sensitive": null,
+      "value": "application/json",
+      "processFunction": null,
+      "securityFlag": null,
+      "valuePrefix": null,
+      "valueTemplate": null,
+      "headersValuesTemplate": [
+        {
+          "key": "user",
+          "value": "{MAAS_CITYSCOOT_CLIENT_ID:kFEkfWQt8UATcsccM7Ey}"
+        }
+      ]
+    }
+  ],
+  "params": [
+    {
+      "paramsId": "7c2ba609-213c-448a-a51c-d108c8e4f51d",
+      "key": "StartDate",
+      "sensitive": null,
+      "value": "-15",
+      "keyMapper": null,
+      "precision": null,
+      "timezone": "Europe/Paris"
+    }
+  ],
+  "paramsMultiCalls": []
+}

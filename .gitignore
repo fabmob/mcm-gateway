@@ -1,0 +1,26 @@
+	# Logs
+logs
+*.log
+/.classpath
+
+# IDE
+/.idea/
+.vscode/
+*.iml
+/bin/
+/common-api/bin/
+/data-api/bin/
+/database/bin/
+/api/bin/
+/msp-meta/bin/
+.project
+/*/.project
+
+target
+
+*.lst
+*.class
+*.classpath
+*.factorypath
+*.prefs
+*.metadata

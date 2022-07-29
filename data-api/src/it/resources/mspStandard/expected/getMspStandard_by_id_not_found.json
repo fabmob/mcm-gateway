@@ -1,0 +1,9 @@
+{
+  "callId": "8699b693-c365-40f2-bff0-c7fad6cc2488",
+  "errorCode": 404,
+  "description": "La ressource demandée MspStandard avec l'id 00000000-0000-0001-0000-000000000666 n'a pas été trouvée",
+  "label": "Not Found",
+  "status": 404,
+  "timestamp": "2022-04-12T00:34:58.675Z"
+
+}

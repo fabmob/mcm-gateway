@@ -1,6 +1,7 @@
 package com.gateway.database.model;
 
 import java.io.Serializable;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.persistence.*;
@@ -34,5 +35,8 @@ public class MspStandard implements Serializable{
     @Column(name = "standard_name", length = 20)
     private String standardName;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "adapter_id")
+    private Adapters adapter;
 
 }

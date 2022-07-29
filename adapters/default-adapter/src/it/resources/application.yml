@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8090
   shutdown: "graceful"
   servlet:
     context-path: /
@@ -25,7 +25,22 @@ spring:
     rest:
       basePath: #/api
       detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:defaultEnv-}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
 
+appli:
+  use:
+    cache: true
 ---
 
 spring:
@@ -46,7 +61,7 @@ security:
 gateway:
   service:
     requestRelay:
-      url: "http://localhost:8083/v1/request-relay"
+      url: "http://${REQUEST_RELAY_FQDN:localhost}:8083/v1/request-relay"
       isMocked: false
     dataapi:
-      url: "http://localhost:8081/v1"
+      url: "http://${DATA_API_FQDN:localhost}:8081/v1"

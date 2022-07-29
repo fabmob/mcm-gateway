@@ -1,16 +1,17 @@
 package com.gateway.api.service.mspservice.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.api.model.MSPMeta;
-import com.gateway.api.model.MSPZone;
 import com.gateway.api.model.mapper.MSPMetaDTOMapper;
 import com.gateway.api.rest.APIController;
 import com.gateway.api.service.mspservice.MSPService;
-import com.gateway.api.util.enums.MSPType;
-import com.gateway.api.util.enums.ZoneStatus;
-import com.gateway.api.util.enums.ZoneType;
 import com.gateway.commonapi.constants.GlobalConstants;
+import com.gateway.commonapi.dto.api.MSPZone;
 import com.gateway.commonapi.dto.data.MspMetaDTO;
+import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.BadGatewayException;
+import com.gateway.commonapi.exception.InternalException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
@@ -18,23 +19,28 @@ import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
+import com.gateway.commonapi.utils.enums.ZoneType;
 import lombok.extern.slf4j.Slf4j;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+
 import java.io.IOException;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static com.gateway.api.util.constant.GatewayApiPathDict.*;
+import static com.gateway.api.util.constant.GatewayMessageDict.*;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
 
@@ -45,8 +51,10 @@ public class MSPServiceImpl implements MSPService {
 
     @Value("${gateway.service.dataapi.baseUrl}")
     private String uri;
+    @Value("${gateway.service.routingapi.baseurl}")
+    private String routingApiUri;
+    private final String correlationId = String.valueOf(CommonUtils.setHeader().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
-    private static final String MSP_META_ENDPOINT = "/msp-metas/";
 
     @Autowired
     RestTemplate restTemplate;
@@ -59,51 +67,42 @@ public class MSPServiceImpl implements MSPService {
         return new RestTemplate();
     }
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     private MSPMetaDTOMapper mapper = Mappers.getMapper(MSPMetaDTOMapper.class);
-
-    private static final String NO_PARKING_ZONE = "noParkingZone";
-    private static final String OPERATING_ZONE = "operatingZone";
-    private static final String PREFERENTIAL_PARKING_ZONE = "preferentialParkingZone";
-    private static final String SPEED_LIMIT_ZONE = "speedLimitZone";
-    private static final String STATIONS = "stations";
-    private static final String STATIONS_STATUS = "stationsStatus";
-    private static final String ASSETS = "assets";
-
-
-    //MOCKED response for getMSPZone( )
-
-    MSPMeta msp1 = new MSPMeta((UUID.fromString("14390fdf-34c1-41c9-885e-6ce66505b759")), "msp1", MSPType.TROTTINETTE, true, true, true);
-    MSPMeta msp2 = new MSPMeta((UUID.fromString("14390fdf-34c1-41c9-885e-6ce66505b735")), "msp2", MSPType.AUTOPARTAGE, true, true, true);
-    MSPMeta msp3 = new MSPMeta((UUID.fromString("14390fdf-34c1-41c9-885e-6ce669264483")), "msp3", MSPType.VELO, true, true, false);
-    List<MSPMeta> liste = List.of(msp1, msp2, msp3);
-
-
-    MSPZone mspZone1 = new MSPZone(msp1.getMspId(), "msp1", ZoneStatus.AVAILABLE);
-    MSPZone mspZone2 = new MSPZone(msp2.getMspId(), "msp2", ZoneStatus.AVAILABLE);
-    MSPZone mspZone3 = new MSPZone(msp3.getMspId(), "msp3", ZoneStatus.AVAILABLE);
-    List<MSPZone> mspZones = List.of(mspZone1, mspZone2, mspZone3);
 
 
     @Override
-    public MSPZone getMSPZone(UUID mspId, ZoneType areaType)  {
-        MSPMeta mspMeta = null;
+    public MSPZone getMSPZone(UUID mspId, ZoneType areaType) {
+        Map<String, String> params = new HashMap<>();
+        params.put(ZONE_TYPE, areaType.toString());
+        List<Object> response = (List<Object>) this.getRooting(mspId, MSP_ZONE_SEARCH, Optional.empty(), params);
+        MSPZone zone = new MSPZone();
+        try {
 
-        for (MSPMeta msp : liste) {
-            if (msp.getMspId().equals(mspId)) {
-                mspMeta = msp;
+            ObjectMapper mapper = new ObjectMapper();
+            List<MSPZone> responseList = mapper.convertValue(response, new TypeReference<List<MSPZone>>() {
+            });
+            if (responseList != null && responseList.get(0) != null) {
+                MSPZone respMspZone = responseList.get(0);
+                zone.setMspId(respMspZone.getMspId());
+                zone.setMsp(respMspZone.getMsp());
+                zone.setStatus(respMspZone.getStatus());
+                zone.setUpdateDate(respMspZone.getUpdateDate());
+                zone.setType(respMspZone.getType());
+                zone.setZones(respMspZone.getZones());
+            }
+        } catch (Exception e) {
+            if (e.getMessage() != null) {
+                log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+                throw new InternalException(e.getMessage());
+            } else {
+                throw new NotFoundException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), CommonUtils.placeholderFormat(GET_MSP_ZONE_BY_MSP_ID_AND_AREA_TYPE, MSP_ID, String.valueOf(mspId), AREA_TYPE, areaType.name())));
             }
         }
-        if (mspMeta != null) {
-            MSPZone resp = null;
-            for (MSPZone zone : mspZones) {
-                if (zone.getMspId().equals(mspId)) {
-                    resp = zone;
-                }
-            }
-            return resp;
-        } else {
-            throw new NotFoundException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),CommonUtils.placeholderFormat("/v1/msps/{mspId}/areas/{areaType}", "mspId", mspId.toString(),"areaType",areaType.name())));
-        }
+
+        return zone;
     }
 
 
@@ -129,7 +128,6 @@ public class MSPServiceImpl implements MSPService {
             ResponseEntity<MspMetaDTO[]> mspMetasDto = restTemplate.exchange(urlGetMetas, HttpMethod.GET, entity, MspMetaDTO[].class);
             //Convert MspMetaDTO into MSPMeta
             List<MSPMeta> mspsMetas = mapper.mapDataApiDtoToApiDto(Arrays.asList(mspMetasDto.getBody()));
-
             //add _links
             if (mspsMetas != null) {
                 for (MSPMeta msp : mspsMetas) {
@@ -137,19 +135,19 @@ public class MSPServiceImpl implements MSPService {
                         addLinks(msp);
                         mspMetaList.add(msp);
                     } catch (NotFoundException e) {
-                        log.error("No metadata for MSP identifier {}", msp.getMspId(), e);
+                        log.error(NO_METADATA_FOR_MSP_IDENTIFIER, msp.getMspId(), e);
                     }
                 }
             }
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMetas));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMetas));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
         } catch (Exception e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMetas));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
         }
         return mspMetaList;
     }
@@ -179,7 +177,6 @@ public class MSPServiceImpl implements MSPService {
 
             //Convert MspMetaDTO into MSPMeta
             MSPMeta mspMeta = mapper.mapDataApiDtoToApiDto(mspMetasDto.getBody());
-
             //Add _links
             if (mspMeta != null) {
                 addLinks(mspMeta);
@@ -188,14 +185,14 @@ public class MSPServiceImpl implements MSPService {
             }
             return mspMeta;
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMeta));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMeta));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMeta));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMeta));
         } catch (Exception e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
-            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(),urlGetMeta));
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMeta));
         }
 
     }
@@ -207,25 +204,18 @@ public class MSPServiceImpl implements MSPService {
      */
     void addLinks(MSPMeta mspMeta) {
         UUID mspId = mspMeta.getMspId();
-
-
         // Add links to zones
         addAreaLinks(mspMeta);
-
-
         // Various informations about MSP
         addFeaturesLinks(mspMeta);
-
-
         // Self link
-
         try {
             mspMeta.addHateoasLink(linkTo(
                     methodOn(APIController.class).
                             getMSPMeta(mspId)).
                     withSelfRel());
         } catch (NotFoundException e) {
-            log.error("No metadata for MSP identifier {}", mspId, e);
+            log.error(NO_METADATA_FOR_MSP_IDENTIFIER, mspId, e);
         }
     }
 
@@ -244,7 +234,7 @@ public class MSPServiceImpl implements MSPService {
                                 getMSPZone(mspId, (ZoneType.OPERATING))).
                         withRel(OPERATING_ZONE));
             } catch (NotFoundException e) {
-                log.error("No operating area for MSP identifier {}", mspId, e);
+                log.error(NO_OPERATING_AREA_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
         if (mspMeta.isHasNoParkingZone()) {
@@ -254,7 +244,7 @@ public class MSPServiceImpl implements MSPService {
                                 getMSPZone(mspId, (ZoneType.NO_PARKING))).
                         withRel(NO_PARKING_ZONE));
             } catch (NotFoundException e) {
-                log.error("No prohibited parking area for MSP identifier {}", mspId, e);
+                log.error(NO_PROHIBITED_PARKING_AREA_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
         if (mspMeta.isHasPrefParkingZone()) {
@@ -264,7 +254,7 @@ public class MSPServiceImpl implements MSPService {
                                 getMSPZone(mspId, (ZoneType.PREFERENTIAL_PARKING))).
                         withRel(PREFERENTIAL_PARKING_ZONE));
             } catch (NotFoundException e) {
-                log.error("No preferential parking area for MSP identifier {}", mspId, e);
+                log.error(NO_PREFERENTIAL_PARKING_AREA_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
         if (mspMeta.isHasSpeedLimitZone()) {
@@ -274,7 +264,7 @@ public class MSPServiceImpl implements MSPService {
                                 getMSPZone(mspId, (ZoneType.SPEED_LIMIT))).
                         withRel(SPEED_LIMIT_ZONE));
             } catch (NotFoundException e) {
-                log.error("No Speed limit area for MSP identifier {}", mspId, e);
+                log.error(NO_SPEED_LIMIT_AREA_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
     }
@@ -286,7 +276,6 @@ public class MSPServiceImpl implements MSPService {
      */
     private void addFeaturesLinks(MSPMeta mspMeta) {
         UUID mspId = mspMeta.getMspId();
-
         // Vehicle information about MSP
         if (mspMeta.isHasVehicle()) {
             try {
@@ -295,7 +284,7 @@ public class MSPServiceImpl implements MSPService {
                                 getMSPAssets(mspId)).
                         withRel(ASSETS));
             } catch (NotFoundException e) {
-                log.error("No Vehicules for MSP identifier {}", mspId, e);
+                log.error(NO_VEHICULES_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
 
@@ -304,21 +293,65 @@ public class MSPServiceImpl implements MSPService {
             try {
                 mspMeta.addHateoasLink(linkTo(
                         methodOn(APIController.class).
-                                getMSPStations(mspId)).
+                                getMSPStations(mspId, null, null, null)).
                         withRel(STATIONS));
             } catch (NotFoundException e) {
-                log.error("No stations for MSP identifier {}", mspId, e);
+                log.error(NO_STATIONS_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
         if (mspMeta.isHasStationStatus()) {
             try {
                 mspMeta.addHateoasLink(linkTo(
                         methodOn(APIController.class).
-                                getMSPStationsStatus(mspId)).
+                                getMSPStationsStatus(mspId, null)).
                         withRel(STATIONS_STATUS));
             } catch (NotFoundException e) {
-                log.error("No stations status for MSP identifier {}", mspId, e);
+                log.error(NO_STATIONS_STATUS_FOR_MSP_IDENTIFIER, mspId, e);
             }
         }
     }
+
+    /**
+     * Call Routing
+     *
+     * @param mspId
+     * @param actionName
+     * @param body
+     * @param params
+     * @return
+     */
+    private Object getRooting(UUID mspId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
+        String mspMetaIdValue = mspId != null ? mspId.toString() : null;
+        Object mspBusinessResponse = null;
+        String urlCall = routingApiUri + CommonUtils.placeholderFormat(GET_MSP_ID_PATH, MSP_ID, mspMetaIdValue
+                + GET_ACTION_NAME_PATH, ACTION_NAME, actionName);
+
+        String urlTemplate = CommonUtils.constructUrlTemplate(urlCall, params);
+
+        try {
+            ResponseEntity<Object> response = restTemplate.postForEntity(urlTemplate, body, Object.class);
+            if (response.getBody() != null) {
+                mspBusinessResponse = Objects.requireNonNull(response.getBody());
+            }
+        } catch (HttpClientErrorException e) {
+
+            GenericError error = new GenericError(e.getResponseBodyAsString());
+            throw new NotFoundException(error.getDescription());
+
+        } catch (HttpServerErrorException e) {
+            log.error(ERROR_FOR_URL_CALL, urlTemplate, e.getMessage(), e);
+            GenericError error = new GenericError(e.getResponseBodyAsString());
+            throw new InternalException(error.getDescription());
+
+        } catch (RestClientException e) {
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCall));
+        } catch (Exception e) {
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCall));
+        }
+        return mspBusinessResponse;
+    }
+
+
 }

@@ -14,11 +14,11 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.gateway.dataapi.util.constant.DataApiPathDict.*;
+import static com.gateway.dataapi.util.constant.DataApiPathDict.MSP_STANDARDS_TAG;
+import static com.gateway.dataapi.util.constant.DataApiPathDict.MSP_STANDARD_BASE_PATH;
 
 @Slf4j
 @RequestMapping(MSP_STANDARD_BASE_PATH)
@@ -83,7 +83,7 @@ public class MspStandardController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All MspStandards Or Get By Specific Criteria(MspMetaId,MspActionsId,VersionStandard,VersionDatamapping) ", description = "Description list of MspStandard", tags = {
+    @Operation(summary = "Get All MspStandards Or Get By Specific Criteria(MspMetaId,MspActionsId,VersionStandard,VersionDatamapping,Active) ", description = "Description list of MspStandard", tags = {
             MSP_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -92,16 +92,18 @@ public class MspStandardController {
             @ApiResponse(responseCode = "500", description = "Internal sever error", content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = "Bad Gateway", content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<MspStandardDTO>> getAllMspStandards(@RequestParam(name = "mspMetaId", required = false) UUID mspMetaId,
+    public ResponseEntity<List<MspStandardDTO>> getAllMspStandards(@RequestParam(name = "mspId", required = false) UUID mspId,
                                                                    @RequestParam(name = "mspActionsId", required = false) UUID mspActionsId,
+                                                                   @RequestParam(name = "mspActionsName", required = false) String mspActionsName,
                                                                    @RequestParam(name = "versionStandard", required = false) String versionStandard,
-                                                                   @RequestParam(name = "versionDatamapping", required = false) String versionDatamapping) {
+                                                                   @RequestParam(name = "versionDatamapping", required = false) String versionDatamapping,
+                                                                   @RequestParam(name = "isActive", required = false) Boolean isActive) {
         log.info(GET_ALL_MSP_STANDARD_OR_BY_CRITERIA);
-        if (mspMetaId == null && mspActionsId == null && versionStandard == null && versionDatamapping == null) {
+        if (mspId == null && mspActionsId == null && mspActionsName == null && versionStandard == null && versionDatamapping == null && isActive == null) {
             List<MspStandardDTO> mspStandards = mspStandardService.getAllMspStandards();
             return new ResponseEntity<>(mspStandards, HttpStatus.OK);
         }
-        List<MspStandardDTO> mspStandards = mspStandardService.getByCriteria(mspMetaId, mspActionsId, versionStandard, versionDatamapping);
+        List<MspStandardDTO> mspStandards = mspStandardService.getByCriteria(mspId, mspActionsId, mspActionsName, versionStandard, versionDatamapping, isActive);
         return new ResponseEntity<>(mspStandards, HttpStatus.OK);
     }
 

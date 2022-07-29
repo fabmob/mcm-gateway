@@ -32,7 +32,7 @@ public class ParamsMultiCallsDTO {
 	private String key;
 
 	@Schema(name = "valueOffset",
-			description = "value Offset",
+			description = "time between each call",
 			example = "30")
 	@JsonProperty("valueOffset")
 	private String valueOffset;

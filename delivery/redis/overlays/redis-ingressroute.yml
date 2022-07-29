@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: redis
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${POSTGRES_FQDN}`)
+      middlewares:
+        - name: redis-headers-middleware
+        - name: redis-ratelimit-middleware
+        - name: redis-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: redis
+          port: 6379
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

@@ -90,7 +90,7 @@ public class MspMetaApiController {
         return ResponseEntity.created(URI.create(CommonUtils.placeholderFormat(MSP_META_PATH, "id", mspMetaDTO.getMspId().toString()))).body(mspMetaDTO);
     }
 
-    /**
+    /***
      * Update MspMeta
      *
      * @param id   Identifier of the mespMeta

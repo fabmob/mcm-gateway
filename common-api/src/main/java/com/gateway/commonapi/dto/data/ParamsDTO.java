@@ -50,13 +50,13 @@ public class ParamsDTO {
 	private String keyMapper;
 
 	@Schema(name = "precision",
-			description = "the precision that will be applied to parameter according to the number of calls",
+			description = "Enlarge the search time (in minutes)",
 			example = "-15")
 	@JsonProperty("precision")
 	private String precision;
 
 	@Schema(name = "timezone",
-			description = "the timezone",
+			description = "Localization / Offset of the request",
 			example = "Europe/Paris")
 	@JsonProperty("timezone")
 	private String timezone;

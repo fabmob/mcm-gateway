@@ -19,10 +19,15 @@ logging:
       springframework.security: INFO
       springframework.web: INFO
       springframework.scheduling.concurrent: WARN
+    com:
+      gateway: DEBUG
     root: INFO
 
 
 spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
   application:
     name: data-api
   lifecycle:
@@ -33,7 +38,22 @@ spring:
     rest:
       base-path: #/v1
       detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:dev-}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
 
+appli:
+  use:
+    cache: true
 ---
 
 spring:

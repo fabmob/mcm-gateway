@@ -12,7 +12,7 @@
 
     <properties>
         <hibernate-javax-persistence.version>1.0.2.Final</hibernate-javax-persistence.version>
-        <postgres.jdbc.driver.version>42.1.4</postgres.jdbc.driver.version>
+        <postgres.jdbc.driver.version>42.4.0</postgres.jdbc.driver.version>
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <build-helper-maven-plugin.version>3.0.0</build-helper-maven-plugin.version>
@@ -23,6 +23,20 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>NEXUS Releases Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>NEXUS Snapshots Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <!-- added for unit test-->
         <dependency>
@@ -42,10 +56,6 @@
             <groupId>org.hibernate.javax.persistence</groupId>
             <artifactId>hibernate-jpa-2.1-api</artifactId>
             <version>${hibernate-javax-persistence.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -120,93 +130,6 @@
                     <source>11</source>
                     <target>11</target>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution> <!--mvn antrun:run@hbm2java-->
-                        <id>hbm2java</id>
-                        <phase>none</phase>
-                        <configuration>
-                            <target>
-                                <echo message="Start generating entities .."/>
-                                <taskdef name="hibernatetool" classname="org.hibernate.tool.ant.HibernateToolTask"/>
-                                <hibernatetool>
-                                    <jdbcconfiguration
-                                            revengfile="src/main/resources/config/hibernate.reveng.xml"
-                                            packagename="com.gateway.database.model"
-                                            detectmanytomany="false"
-                                            configurationfile="src/main/resources/config/hibernate.cfg.xml"/>
-                                    <hbm2java destdir="src/main/java" jdk5="true" ejb3="true"/>
-                                </hibernatetool>
-                                <echo message="End generating entities"/>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.hibernate</groupId>
-                        <artifactId>hibernate-core</artifactId>
-                        <version>4.3.11.Final</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate</groupId>
-                        <artifactId>hibernate-entitymanager</artifactId>
-                        <version>4.3.11.Final</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate.common</groupId>
-                        <artifactId>hibernate-commons-annotations</artifactId>
-                        <version>4.0.5.Final</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate.javax.persistence</groupId>
-                        <artifactId>hibernate-jpa-2.1-api</artifactId>
-                        <version>${hibernate-javax-persistence.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>javax.transaction</groupId>
-                        <artifactId>jta</artifactId>
-                        <version>1.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>freemarker</groupId>
-                        <artifactId>freemarker</artifactId>
-                        <version>2.3.8</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.postgresql</groupId>
-                        <artifactId>postgresql</artifactId>
-                        <version>${postgres.jdbc.driver.version}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>commons-logging</groupId>
-                        <artifactId>commons-logging</artifactId>
-                        <version>1.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>commons-collections</groupId>
-                        <artifactId>commons-collections</artifactId>
-                        <version>3.2.1</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>org.hibernate</groupId>
-                        <artifactId>hibernate-tools</artifactId>
-                        <version>4.3.5.Final</version>
-                        <exclusions>
-                            <exclusion>
-                                <groupId>*</groupId>
-                                <artifactId>*</artifactId>
-                            </exclusion>
-                        </exclusions>
-                    </dependency>
-                </dependencies>
             </plugin>
 
             <!-- Tests IT & UT -->

@@ -97,6 +97,23 @@ class MspStandardControllerTest extends DataApiITCase {
     }
 
     /**
+     * test Delete MspStandard by Id
+     *
+     * @throws Exception
+     */
+    @Test
+    @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
+    void testDeleteMspStandardById() throws Exception {
+        final String mspStandardId = "f7082f2f-317b-4e4c-ba77-54ce2f0dbfff";
+        testHttpRequestWithExpectedResult(
+                CommonUtils.placeholderFormat(DataApiPathDict.MSP_STANDARD_BASE_PATH + DataApiPathDict.MSP_STANDARD_PATH, ID, mspStandardId), HttpMethod.DELETE,
+                HttpStatus.NO_CONTENT, null, null, null,
+                "Test delete /msp-standard by id", false, false, null);
+    }
+
+
+    /**
      * test GET MspStandard with MspMetaId
      *
      * @throws Exception
@@ -106,7 +123,7 @@ class MspStandardControllerTest extends DataApiITCase {
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testGetMspStandardByMspMetaId() throws Exception {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("mspMetaId", "b814c97e-df56-4651-ac50-11525537964f");
+        parameters.add("mspId", "b814c97e-df56-4651-ac50-11525537964f");
 
         testHttpRequestWithExpectedResult(DataApiPathDict.MSP_STANDARD_BASE_PATH, HttpMethod.GET, HttpStatus.OK, null,
                 MSP_STANDARD_EXPECTED_GET_MSP_STANDARD_BY_MSP_META_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
@@ -130,6 +147,29 @@ class MspStandardControllerTest extends DataApiITCase {
                 MSP_STANDARD_EXPECTED_GET_MSP_STANDARD_BY_MSP_ACTIONS_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
                 "Test get  msp-standard By MspActionsId", true, false, parameters);
     }
+
+    /**
+     * test GET MspStandard with CRITERIA
+     *
+     * @throws Exception
+     */
+    @Test
+    @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
+    void testGetMspStandardByCriteria() throws Exception {
+        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+        parameters.add("mspId", "b814c97e-df56-4651-ac50-11525537964f");
+        parameters.add("mspActionsId", "7c8f8780-a6fa-495d-8b36-24a20539adca");
+        parameters.add("mspActionsName", "ZONE_OPERATING");
+        parameters.add("versionStandard", "V1.1");
+        parameters.add("versionDataMapping", "V1.0");
+        parameters.add("isActive", String.valueOf(false));
+        testHttpRequestWithExpectedResult(DataApiPathDict.MSP_STANDARD_BASE_PATH+DataApiPathDict.MSP_STANDARDS_PATH,
+                HttpMethod.GET, HttpStatus.OK, null,
+                MSP_STANDARD_EXPECTED_GET_MSP_STANDARD_BY_MSP_ACTIONS_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
+                "Test get  msp-standard By MspActionsId", true, false, parameters);
+    }
+
 
     /**
      * test GET not found MspStandard by Id

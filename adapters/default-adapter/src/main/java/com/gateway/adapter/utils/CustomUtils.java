@@ -53,7 +53,7 @@ public class CustomUtils {
      * @param value
      * @return censored value or not
      */
-    public static String censoredBodyParam(Integer sensitive, String value) {
-        return sensitive >= 1 ? HIDDEN_TEXT : value;
+    public static String censoredParam(Integer sensitive, String value) {
+        return ((sensitive != null) && (sensitive >= 1)) ? HIDDEN_TEXT : value;
     }
 }

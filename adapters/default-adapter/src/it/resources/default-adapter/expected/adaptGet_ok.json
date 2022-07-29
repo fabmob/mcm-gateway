@@ -1,12 +1,16 @@
 [
   {
-    "number": 2010,
-    "contract_name": "lyon",
-    "name": "2010 - CONFLUENCE / DARSE",
-    "address": "ANGLE ALLEE ANDRE MURE ET QUAI ANTOINE RIBOUD",
-    "position": {
-      "lat": 45.743317,
-      "lng": 4.815747
-    }
+    "vehicules": [
+      {
+        "data" : {
+          "vehiculeId": "f457579d-02f8-4479-b97b-ffb678e3f899",
+          "vehiculeName": "trotinette",
+          "characteristics": [
+            "travelAbroad"
+          ]
+        }
+
+      }
+    ]
   }
 ]

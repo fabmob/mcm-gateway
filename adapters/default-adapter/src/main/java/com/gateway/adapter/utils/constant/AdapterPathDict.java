@@ -10,9 +10,17 @@ public class AdapterPathDict {
 
     public static final String GET_CALLS_PATH = "/msp-calls";
 
+    public static final String MSP_ACTIONS_BASE_PATH = "/msp-actions";
+
     public static final String GET_ACTION_BY_ID_PATH = "/msp-actions/{actionId}";
 
+    public static final String GET_MSPMETA_BY_ID_PATH = "/msp-metas/{id}";
+
+    public static final String GET_DATA_MAPPER_BY_ID_PATH = "/data-mappers";
+
     public static final String GET_BY_ACTIONS_ID_PATH = "?mspActionId={actionId}";
+
+    public static final String REST_PROTOCOL = "?protocol=REST";
 
     public static final String GET_BY_MSP_META_ID_PATH = "?mspMetaId={mspId}";
 

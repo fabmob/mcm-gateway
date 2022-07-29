@@ -1,0 +1,9 @@
+ARG MAVEN_IMAGE_NAME
+
+FROM ${MAVEN_IMAGE_NAME}
+
+COPY target/default-adapter*.jar /default-adapter.jar
+
+EXPOSE 8090
+
+CMD java -jar default-adapter.jar

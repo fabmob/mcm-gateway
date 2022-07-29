@@ -1,10 +1,12 @@
-   {
-        "champInterne": "CHILD_SEAT",
-        "champExterne": "accessories",
-        "isArray": 1,
-        "format": null,
-        "timezone": "",
-        "containedValue": "BabySeat",
-        "defaultValue": null,
-        "mspActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756"
-    }
+[
+  {
+    "champInterne": "CHILD_SEAT",
+    "champExterne": "accessories",
+    "isArray": 1,
+    "format": null,
+    "timezone": "",
+    "containedValue": "BabySeat",
+    "defaultValue": null,
+    "mspActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756"
+  }
+]

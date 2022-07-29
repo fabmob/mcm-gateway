@@ -3,7 +3,7 @@
 		"mspActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265",
 		"name": "test_action",
 		"action": "search",
-		"isAuthentication": 0,
+		"isAuthentication": false,
 		"isRefreshAuthentication": 0,
 		"isPagination": 0,
 		"selector": {
@@ -16,7 +16,7 @@
 		"mspActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518",
 		"name": "test_action",
 		"action": "search",
-		"isAuthentication": 0,
+		"isAuthentication": false,
 		"isRefreshAuthentication": 0,
 		"isPagination": 0,
 		"selector": {
@@ -29,7 +29,7 @@
 		"mspActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756",
 		"name": "test_action",
 		"action": "search",
-		"isAuthentication": 0,
+		"isAuthentication": false,
 		"isRefreshAuthentication": 0,
 		"isPagination": 0,
 		"selector": {
@@ -42,7 +42,7 @@
 		"mspActionId": "7c8f8780-a6fa-495d-8b36-24a20539adca",
 		"name": "CityScoot",
 		"action": "ZONE_OPERATING",
-		"isAuthentication": 0,
+		"isAuthentication": false,
 		"isRefreshAuthentication": 0,
 		"isPagination": 1,
 		"selector": {

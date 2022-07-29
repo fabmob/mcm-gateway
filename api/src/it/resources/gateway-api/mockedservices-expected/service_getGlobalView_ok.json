@@ -1,4 +1,4 @@
-{
+[{
   "stations": [
     {
       "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
@@ -244,4 +244,4 @@
       "availability": null
     }
   ]
-}
+}]

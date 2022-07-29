@@ -5,11 +5,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
+import com.gateway.commonapi.monitoring.UserContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.net.http.HttpHeaders;
+import java.net.URL;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,6 +33,18 @@ public class CommonUtils {
     }
 
     /**
+     * prepare context and headers for http call
+     * @return httpHeaders
+     */
+    public static HttpHeaders setHttpHeaders(){
+        UserContext userContext = new ThreadLocalUserSession().get();
+        String correlationId = userContext.getContextId();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+        return httpHeaders;
+    }
+
+    /**
      * Concert GenericError to json as string
      * @param error Error DTO
      * @return String with json inside
@@ -46,10 +61,10 @@ public class CommonUtils {
     }
 
     /**
-     * Inject into a template using { } to delemiter variables the params passed. Params must be multiple of 2, first of couple is the name of the variable and the second one is the value to inject in the template.
-     * @param template String of the template with {vars} with  brackets delemiters
+     * Inject into a template using { } to delimiter variables the params passed. Params must be multiple of 2, first of couple is the name of the variable and the second one is the value to inject in the template.
+     * @param template String of the template with {vars} with  brackets delimiters
      * @param params Parameters couple of variable to inject with associated value must be multiple of 2
-     * @return the String resulting of the template formating
+     * @return the String resulting of the template formatting
      */
     public static String placeholderFormat(String template, String... params) {
         StringSubstitutor stringSubstitutor = new StringSubstitutor(toMap(params), "{", "}", '~');
@@ -84,11 +99,56 @@ public class CommonUtils {
      * @return the processed value
      */
     public static String processFunction(String value, String processFunction) {
-        String finalValue = null;
+        String finalValue = value;
         if (processFunction.equals("BASE64")) {
             finalValue = Base64.getEncoder().encodeToString(value.getBytes());
         }
         return finalValue;
+    }
+
+
+    /**
+     * Construct url with given params
+     *
+     * @param urlCall
+     * @param params
+     * @return
+     */
+    public static String constructUrlTemplate(String urlCall, Map<String,String> params) {
+
+        String urlTemplate = urlCall;
+
+        if (params != null && isValid(urlTemplate)) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                urlTemplate = UriComponentsBuilder.fromHttpUrl(urlTemplate).queryParam(key, value).encode().toUriString();
+
+            }
+        }
+
+        return urlTemplate;
+    }
+
+
+    /**
+     * Returns true if url is valid
+     * @param url
+     * @return
+     */
+    private static boolean isValid(String url)
+    {
+        /* Try creating a valid URL */
+        try {
+            new URL(url).toURI();
+            return true;
+        }
+
+        // If there was an Exception
+        // while creating URL object
+        catch (Exception e) {
+            return false;
+        }
     }
 
 

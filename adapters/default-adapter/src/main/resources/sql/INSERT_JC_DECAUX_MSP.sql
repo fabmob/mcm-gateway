@@ -1,7 +1,5 @@
 
-
-
-	/* price list */
+/* price list */
     INSERT INTO msp.price_list (price_list_id, comment, out_of_bound_fee, parking_forbidden_fee, fk_msp_meta) VALUES
        ('22808a15-1b7b-4605-9764-3c71a3f05ae4', '', 5, 3, null) ;
 
@@ -20,7 +18,17 @@
 
 	/* msp_actions */
 	INSERT INTO msp.msp_actions (msp_action_id,"action",is_authentication,is_pagination,is_refresh_authentication,name,selector_id) VALUES
-    	 ('e222f848-0f53-46fd-97fa-6b1f9f3db266','STATION_SEARCH',0,0,NULL,'JC_DECAUX','ec0e9a76-f1fe-422c-803b-8332ad957941');
+    	 ('e222f848-0f53-46fd-97fa-6b1f9f3db266','STATION_SEARCH',false,0,NULL,'JC_DECAUX','ec0e9a76-f1fe-422c-803b-8332ad957941');
+
+  /* data_mapper  */
+      INSERT INTO msp.data_mapper  (data_mapper_id,champ_externe, champ_interne,contained_value,default_value,format,is_array,timezone,action_id) VALUES
+            ('231866de-4e4f-4ab7-948b-372ce1acaef3','contract_name','crossStreet', NULL, NULL, NULL, 0, 'Europe/Paris','e222f848-0f53-46fd-97fa-6b1f9f3db266'),
+            ('231866de-4e4f-4ab7-948b-372ce1acaef8','ID_STATION','stationId', NULL, NULL, NULL, 0, NULL,'e222f848-0f53-46fd-97fa-6b1f9f3db266'),
+            ('231866de-4e4f-4ab7-948b-372ce1acaef9','NAME','name', NULL, NULL, NULL, 0, NULL,'e222f848-0f53-46fd-97fa-6b1f9f3db266'),
+            ('231866de-4e4f-4ab7-948b-372ce1acaef4','accessories','CHILD_SEAT', 'BabySeat', NULL, NULL, 1, 'Europe/Paris','e222f848-0f53-46fd-97fa-6b1f9f3db266'),
+            ('231866de-4e4f-4ab7-948b-372ce1acaef5','accessories','AUTOMATIC', 'Automatic', NULL, NULL, 1, 'Europe/Paris','e222f848-0f53-46fd-97fa-6b1f9f3db266'),
+            ('231866de-4e4f-4ab7-948b-372ce1acaef6','accessories','HYBRID', 'Hybrid', NULL, NULL, 1, 'Europe/Paris','e222f848-0f53-46fd-97fa-6b1f9f3db266');
+
 
     /* body */
     INSERT INTO msp.body (body_id,is_static, template) VALUES
@@ -46,3 +54,5 @@
     INSERT INTO msp.msp_standard (msp_standard_id,is_active,standard_name ,version_datamapping ,version_standard ,msp_action_id,msp_id) VALUES
         ('f7082f2f-317b-4e4c-ba77-54ce2f0dbfff', FALSE, 'FNMS', 'V1.0', 'V1.1', 'e222f848-0f53-46fd-97fa-6b1f9f3db266', 'b814c97e-df56-4651-ac50-11525537964a'),
         ('bffc3749-cbd3-47bd-a2d8-940693e74303', TRUE, 'FNMS', 'V2.0', 'V2.1', 'e222f848-0f53-46fd-97fa-6b1f9f3db266', 'b814c97e-df56-4651-ac50-11525537964a');
+
+

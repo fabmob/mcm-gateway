@@ -4,13 +4,17 @@
     "assetId": "string",
     "assetType": "string",
     "isReserved": true,
-    "isReservedFrom": "2022-03-08T17:28:54.606Z",
-    "isReservedTo": "2022-03-08T17:28:54.606Z",
+    "isReservedFrom": null,
+    "isReservedTo": null,
     "isDisabled": true,
     "mileage": 0,
     "licensePlate": "string",
+    "homeStationId": "sta0001",
+    "lastReported": "1970-01-19T15:11:06.109+0000",
+    "planId": "plan3",
     "overriddenProperties": {
       "name": "string",
+      "currentRangeMeters": null,
       "operator": null,
       "location": {
         "name": "string",
@@ -66,6 +70,7 @@
       "towingHook": true,
       "undergroundParking": true,
       "winterTires": true,
+      "snowChains": true,
       "maxSpeed": 0,
       "helmetRequired": true,
       "other": "string",
@@ -92,6 +97,9 @@
         }
       ]
     },
+    "rentalAndroidUrl": "http://...",
+    "rentalIosUrl": "http://...",
+    "rentalWebUrl": "http://...",
     "useDeeplink": null,
     "bookDeeplink": null
   }

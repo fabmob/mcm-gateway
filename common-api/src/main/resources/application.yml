@@ -1,0 +1,17 @@
+spring:
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:gateway-}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+
+appli:
+  use:
+    cache: true

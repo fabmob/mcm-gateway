@@ -4,6 +4,7 @@ import static com.gateway.database.util.constant.DataMessageDict.TOKEN_WITH_MSP_
 
 import java.util.UUID;
 
+import com.sun.source.tree.TryTree;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class TokenServiceImlp implements TokenService {
 
     @Override
     public TokenDTO addToken(TokenDTO tokenDTO) {
-        Token token = serviceToken.findByMspMetaId(tokenDTO.getMspMetaId());
+        Token token = serviceToken.findByMspMetaId(tokenDTO.getMspId());
         if (token != null) {
             serviceToken.deleteToken(token.getTokenId());
         }
@@ -79,8 +80,12 @@ public class TokenServiceImlp implements TokenService {
 
     @Override
     public TokenDTO getByMspMetaId(UUID id) throws NotFoundException {
-        Token token = serviceToken.findByMspMetaId(id);
-        if (token == null) {
+        Token token = new Token();
+        try {
+            token = serviceToken.findByMspMetaId(id);
+        } catch (Exception e) {
+            token = null;
+            log.error("TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND");
             throw new NotFoundException(String.format(TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND, id));
         }
         return mapper.mapEntityToDto(token);

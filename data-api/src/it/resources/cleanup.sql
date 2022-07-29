@@ -15,6 +15,11 @@ DECLARE var_msp VARCHAR(50) := to_regclass(''msp.msp_meta'');
 DECLARE var_price_list VARCHAR(50) := to_regclass(''msp.price_list'');
 DECLARE var_price_list_item VARCHAR(50) := to_regclass(''msp.price_list_item'');
 DECLARE var_data_mapper VARCHAR(50) := to_regclass(''msp.data_mapper'');
+DECLARE var_cache_param VARCHAR(50) := to_regclass(''msp.cache_param'');
+DECLARE var_msp_standard VARCHAR(50) := to_regclass(''msp.msp_standard'');
+DECLARE var_adapters VARCHAR(50) := to_regclass(''msp.adapters'');
+
+
 BEGIN
   IF var_body IS not NULL THEN
      truncate msp.body cascade;
@@ -57,6 +62,15 @@ BEGIN
    END IF;
       IF var_msp IS not NULL THEN
      truncate msp.msp_meta cascade;
+   END IF;
+   IF var_cache_param IS not NULL THEN
+     truncate msp.cache_param cascade;
+   END IF;
+      IF var_msp_standard IS not NULL THEN
+     truncate msp.msp_standard cascade;
+   END IF;
+      IF var_adapters IS not NULL THEN
+     truncate msp.adapters cascade;
    END IF;
 END; 
 '

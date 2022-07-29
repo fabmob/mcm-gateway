@@ -7,6 +7,10 @@ logging:
       springframework.scheduling.concurrent: WARN
     root: INFO
 
+appli:
+  use:
+    cache: true
+
 spring:
   application:
     name: database
@@ -25,13 +29,13 @@ spring:
       maxLifetime: 2000000
     initialization-mode: always
     url: jdbc:postgresql://localhost:5432/gateway-tests
-    password: ${DATABASE_PASSWORD:@test.database.password@}
-    username: ${DATABASE_USERNAME:@test.database.username@}
+    password: ${POSTGRES_TEST_USER:@test.database.password@}
+    username: ${POSTGRES_TEST_PASSWORD:@test.database.username@}
 
   jpa:
     show-sql: ${SHOW_SQL:false}
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         hbm2dll:
@@ -46,4 +50,15 @@ spring:
     rest:
       basePath: #/api
       detection-strategy: all
-
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:tilocal-}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis

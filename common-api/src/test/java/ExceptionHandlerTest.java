@@ -104,7 +104,7 @@ public class ExceptionHandlerTest {
     public void testhandleBindException() {
        response = responseEntityExceptionHandler.handleBindException
                (new BindException(new BeanPropertyBindingResult(this,"objectName")), headers, status, servletWebRequest);
-       checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Internal Server Error", "", 400);
+       checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Le format de la requête n'est pas celui attendu", "", 400);
     }
 
     @Test
@@ -218,7 +218,7 @@ public class ExceptionHandlerTest {
     public void testHandleServletRequestBindingException() {
         response = responseEntityExceptionHandler.handleServletRequestBindingException
                 (new ServletRequestBindingException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Internal Server Error", "", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Le format de la requête n'est pas celui attendu", "", 400);
     }
 
     @Test

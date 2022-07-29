@@ -40,9 +40,9 @@ public class TokenDTO {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 	private LocalDateTime expireAt;
 
-	@Schema(name = "mspMetaId",
+	@Schema(name = "mspId",
 			description = "mspMeta Id",
 			example = "b814c97e-df56-4651-ac50-11525537964f")
-	@JsonProperty("mspMetaId")
-	private UUID mspMetaId;
+	@JsonProperty("mspId")
+	private UUID mspId;
 }

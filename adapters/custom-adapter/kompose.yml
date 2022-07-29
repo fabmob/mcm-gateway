@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  custom-adapter:
+     image: ${CUSTOM_ADAPTER_IMAGE_NAME}
+     build:
+       context: .
+       dockerfile: ./custom-adapter-dockerfile.yml
+       args:
+         MAVEN_IMAGE_NAME: ${BASE_CUSTOM_ADAPTER_IMAGE_NAME}
+     ports:
+       - '8091'
+     labels:
+       - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+       - 'kompose.service.type=clusterip'
+     environment:
+       - SERVICE_BASE_PATH=${CUSTOM_ADAPTER_FQDN}
+       - DATA_API_HOST=data-api.${KUBERNETES_DATA_API_NAMESPACE}.svc.cluster.local
+       - REQUEST_RELAY_HOST=request-relay.${KUBERNETES_REQUEST_RELAY_NAMESPACE}.svc.cluster.local
+ #    networks:
+ #      - web-nw
+
+# web network pour cloisonner une application
+#networks:
+#  web-nw:

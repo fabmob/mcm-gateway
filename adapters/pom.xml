@@ -14,12 +14,14 @@
     <groupId>com.gateway</groupId>
     <artifactId>adapters</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <packaging>pom</packaging>
     <name>Gateway : adapters</name>
     <description>Parent module of adapters</description>
 
     <modules>
         <module>default-adapter</module>
+        <module>custom-adapter</module>
     </modules>
 
 

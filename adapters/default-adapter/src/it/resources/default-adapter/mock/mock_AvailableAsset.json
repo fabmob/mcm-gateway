@@ -1,0 +1,41 @@
+[
+  {
+    "assetTypeId": "assettype1",
+    "type": null,
+    "stationId": "sta1",
+    "nrAvailable": 1,
+    "assets": [
+      {
+        "assetId": "asset1",
+        "assetType": "trotinette",
+        "isReserved": false,
+        "isReservedFrom": null,
+        "isReservedTo": null,
+        "isDisabled": null,
+        "mileage": null,
+        "licensePlate": null,
+        "overriddenProperties": null,
+        "bookDeeplink": null,
+        "useDeeplink": null
+      },
+      {
+        "assetId": "asset2",
+        "assetType": "trotinette",
+        "isReserved": true,
+        "isReservedFrom": null,
+        "isReservedTo": null,
+        "isDisabled": null,
+        "mileage": null,
+        "licensePlate": null,
+        "overriddenProperties": null,
+        "bookDeeplink": null,
+        "useDeeplink": null
+      }
+    ],
+    "assetClass": "BICYCLE",
+    "assetSubClass": null,
+    "sharedProperties": null,
+    "applicablePricings": null,
+    "conditions": null
+  }
+]

@@ -1,0 +1,26 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: postgresgateway
+spec:
+  routes:
+    - match: Host(`${POSTGRES_FQDN}`)
+     # middlewares:
+     #   - name: postgresgateway-headers-middleware
+     #   - name: postgresgateway-ratelimit-middleware
+     #   - name: postgresgateway-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: postgresgateway
+          port: 5432
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

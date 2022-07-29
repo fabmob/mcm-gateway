@@ -4,9 +4,12 @@ import java.text.MessageFormat;
 import java.util.List;
 import java.util.UUID;
 
+import com.gateway.commonapi.exception.ConflictException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +19,7 @@ import com.gateway.database.service.DataMapperDatabaseService;
 
 import static com.gateway.database.util.constant.DataMessageDict.*;
 
+@Slf4j
 @Service
 public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService {
 
@@ -47,10 +51,18 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
     @Override
     public DataMapper addDataMapper(DataMapper datamapper) {
         DataMapper mapper;
+        if(datamapper.getAction()!= null && StringUtils.isNotBlank(datamapper.getChampInterne())){
+            if (dataMapperRepository.findByActionMspActionIdAndChampInterne(datamapper.getAction().getMspActionId(), datamapper.getChampInterne()).isPresent()) {
+                throw new ConflictException(CommonUtils.placeholderFormat(DATA_MAPPER_ALREADY_EXISTS_IN_DB_USE_PUT_INSTEAD, FIRST_PLACEHOLDER, datamapper.getAction().getMspActionId().toString(), SECOND_PLACEHOLDER, datamapper.getChampInterne()));
+            }
+        }
+
         try {
             mapper = dataMapperRepository.save(datamapper);
         } catch (Exception e) {
-            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(MSP_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, datamapper.getAction().getMspActionId().toString())));
+            log.error(e.getMessage(),e);
+            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(MSP_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER,
+                    ( datamapper.getAction() != null ? datamapper.getAction().getMspActionId().toString() : StringUtils.EMPTY))));
         }
         return mapper;
     }
@@ -107,8 +119,7 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
 
     @Override
     public DataMapper findDataMapperById(UUID id) {
-        DataMapper dataMapper = dataMapperRepository.findById(id).orElseThrow(() -> new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString()))));
-        return dataMapper;
+        return dataMapperRepository.findById(id).orElseThrow(() -> new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString()))));
     }
 
     /**

@@ -26,22 +26,22 @@ public class DataMapper implements Serializable {
 	@Column(name = "data_mapper_id", unique = true, nullable = false)
 	private UUID dataMapperId;
 
-	@Column(name = "champ_interne",length=30)
+	@Column(name = "champ_interne",length=150)
 	private String champInterne;
 
-	@Column(name = "access_token",length=150)
+	@Column(name = "champ_externe",length=150)
 	private String champExterne;
 
 	@Column(name = "is_array")
 	private Integer isArray;
 
-	@Column(name = "format",length=25)
+	@Column(name = "format")
 	private String format;
 
 	@Column(name = "timezone",length=50)
 	private String timezone;
 
-	@Column(name = "contained_value",length=30)
+	@Column(name = "contained_value",length=150)
 	private String containedValue;
 
 	@Column(name = "default_value",length = 200)

@@ -1,58 +1,74 @@
 package com.gateway.database.service.impl;
 
+import com.gateway.commonapi.exception.ConflictException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.database.model.MspStandard;
-import com.gateway.database.repository.MSPActionsRepository;
+import com.gateway.database.model.StandardPK;
 import com.gateway.database.repository.MspStandardRepository;
 import com.gateway.database.service.MspStandardDatabaseService;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.gateway.database.util.constant.DataMessageDict.*;
 
 
 @Service
+@AllArgsConstructor
+@NoArgsConstructor
 public class MspStandardDatabaseServiceImpl implements MspStandardDatabaseService {
 
     @Autowired
     MspStandardRepository mspStandardRepository;
 
     @Autowired
-    MSPActionsRepository mspActionsRepositoty;
+    MSPActionsDatabaseServiceImpl mspActionsDatabaseService;
+
+    @Autowired
+    MspMetaDatabaseServiceImpl mspMetaDatabaseService;
+
+    @Autowired
+    AdaptersDatabaseServiceImpl adaptersDatabaseService;
+
 
     @Autowired
     private ErrorMessages errorMessages;
 
-    public MspStandardDatabaseServiceImpl(MspStandardRepository mspStandardRepository,
-                                          MSPActionsRepository mspActionsRepositoty) {
-        super();
-        this.mspStandardRepository = mspStandardRepository;
-        this.mspActionsRepositoty = mspActionsRepositoty;
-    }
-
-    public MspStandardDatabaseServiceImpl() {
-    }
 
     /**
      * Add a new MspStandard
      *
      * @param standard MspStandard object
-     * @return MspStandard informations for the MspStandard added
+     * @return MspStandard information for the MspStandard added
      */
 
     @Override
     public MspStandard addMspStandard(MspStandard standard) {
-        try {
-            standard.setMspStandardId(UUID.randomUUID());
-            return mspStandardRepository.save(standard);
-        } catch (Exception e) {
-            throw new NotFoundException(MessageFormat.format(MSP_STANDARD_WITH_MSP_META_ID_MSP_ACTIONS_ID_IS_NOT_FOUND, standard.getId().getMsp().getMspId().toString(), standard.getId().getAction().getMspActionId().toString()));
+        if (this.findMspStandardByPK(standard.getId()).isPresent()) {
+            throw new ConflictException(CommonUtils.placeholderFormat(THERE_IS_ALREADY_MSP_STANDARD_FOUND,
+                    FIRST_PLACEHOLDER, String.valueOf(standard.getId().getMsp().getMspId()),
+                    SECOND_PLACEHOLDER, String.valueOf(standard.getId().getAction().getMspActionId()),
+                    THIRD_PLACEHOLDER, standard.getId().getVersionDataMapping(),
+                    FOURTH_PLACEHOLDER, standard.getId().getVersionStandard()));
+        } else {
+            //Check if datas exist in db, will throw a NotFoundException with corresponding error if not
+            try {
+                mspMetaDatabaseService.findMspMetaById(standard.getId().getMsp().getMspId());
+                mspActionsDatabaseService.findMspActionById(standard.getId().getAction().getMspActionId());
+                adaptersDatabaseService.findAdapterById(standard.getAdapter().getAdapterId());
+                standard.setMspStandardId(UUID.randomUUID());
+                return mspStandardRepository.save(standard);
+            } catch (Exception e) {
+                throw new NotFoundException(e.getMessage());
+            }
         }
     }
 
@@ -68,11 +84,11 @@ public class MspStandardDatabaseServiceImpl implements MspStandardDatabaseServic
 
 
     /**
-     * Update all the MspStandard informations
+     * Update all the MspStandard information
      *
      * @param id       Identifier of the MspStandard
      * @param standard MspStandard object
-     * @return MspStandard informations for the MspStandard puted
+     * @return MspStandard information for the MspStandard put
      */
     @Override
     public MspStandard updateMspStandard(UUID id, MspStandard standard) {
@@ -98,14 +114,14 @@ public class MspStandardDatabaseServiceImpl implements MspStandardDatabaseServic
         if (mspStandardFound == null) {
             throw new NotFoundException(MessageFormat.format(errorMessages.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(MSP_STANDARD_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
         }
-        this.mspStandardRepository.deleteById(mspStandardFound.getId());
+        mspStandardRepository.deleteById(mspStandardFound.getId());
     }
 
     /**
-     * Retrieve a MspStandard informations.
+     * Retrieve a MspStandard information.
      *
      * @param id Identifier of the MspStandard
-     * @return MspStandard informations for the MspStandard
+     * @return MspStandard information for the MspStandard
      */
     @Override
     public MspStandard findMspStandardById(UUID id) {
@@ -118,23 +134,40 @@ public class MspStandardDatabaseServiceImpl implements MspStandardDatabaseServic
     }
 
     /**
+     * Find by PK
+     *
+     * @param standardPK PK
+     * @return Optional empty if not found or Optional MspStandard if found
+     */
+    @Override
+    public Optional<MspStandard> findMspStandardByPK(StandardPK standardPK) {
+        return mspStandardRepository.findById(standardPK);
+    }
+
+    /**
      * Get MspStandard from MspMeta id And MspActions id VersionStandard VersionDatamapping
      *
-     * @param mspMetaId
-     * @param mspActionsId
-     * @param versionStandard
-     * @param versionDatamapping
+     * @param mspMetaId          MSP ID
+     * @param mspActionsName     Action Name
+     * @param versionStandard    Standard Version
+     * @param versionDatamapping Datamapping version
      * @return liste of MspStandard
      */
     @Override
-    public List<MspStandard> getByCriteria(UUID mspMetaId, UUID mspActionsId, String versionStandard, String versionDatamapping) {
-        List<MspStandard> mspStandards = mspStandardRepository.findByKeyPrimary(mspMetaId, mspActionsId, versionStandard, versionDatamapping);
+    public List<MspStandard> getByCriteria(UUID mspMetaId, UUID mspActionsId, String mspActionsName, String
+            versionStandard, String versionDatamapping, Boolean isActive) {
+        List<MspStandard> mspStandards = mspStandardRepository.findByKeyPrimary(mspMetaId, mspActionsId, mspActionsName, versionStandard, versionDatamapping, isActive);
         if (mspStandards == null || mspStandards.isEmpty()) {
             String mspMetaIdValue = mspMetaId != null ? mspMetaId.toString() : null;
             String mspActionsIdValue = mspActionsId != null ? mspActionsId.toString() : null;
-            throw new NotFoundException(MessageFormat.format(MSP_STANDARD_WITH_CRITERIA_NOT_FOUND, mspMetaIdValue, mspActionsIdValue, versionStandard, versionDatamapping));
+            throw new NotFoundException(MessageFormat.format(MSP_STANDARD_WITH_CRITERIA_NOT_FOUND, mspMetaIdValue, mspActionsIdValue, mspActionsName, versionStandard, versionDatamapping, isActive));
         }
         return mspStandards;
+    }
+
+    @Override
+    public List<MspStandard> findAllByAdapterId(UUID adapterId){
+        return mspStandardRepository.findByAdapterId(adapterId);
     }
 
 }

@@ -34,7 +34,7 @@
         <org.projectlombok.version>1.18.22</org.projectlombok.version>
         <org.projectlombok.mapstruct.binding>0.2.0</org.projectlombok.mapstruct.binding>
 
-        <sonar.projectName>Gateway : global </sonar.projectName>
+        <sonar.projectName>Gateway : global</sonar.projectName>
         <sonar.host.url>https://sonarqube-dev.cicd.moncomptemobilite.fr</sonar.host.url>
         <!--SONAR PROPERTIES-->
         <sonar.exclusions>src/it/**, src/test/**</sonar.exclusions>
@@ -45,17 +45,23 @@
             **/*Filter.java,
             **/*DTO.java,
             **/dto/**/*.java,
+            **/cache/**/*.java,
             **/model/**/*.java,
             **/it/**/*.*,
             **/repository/*.java,
             **/test/**/*.*,
             **/exception/*.java,
             msp-meta/**/*.*,
-            routing-api/**/*.*,
             **/properties/*.java,
             **/util/constant/*.java,
             **/utils/constant/*.java,
-            **/util/enums/*.java
+            **/util/enums/*.java,
+            **/utils/enums/*.java,
+            **/utils/JsonUtils.java,
+            **/utils/ControllerMessageDict.java,
+            **/constant/GatewayApiPathDict.java,
+            **/constant/GatewayMessageDict.java,
+            adapters/custom-adapter/**/*.java
         </sonar.coverage.exclusions>
         <!-- JACOCO -->
         <jacoco-maven-plugin.version>0.8.6</jacoco-maven-plugin.version>
@@ -70,6 +76,28 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>NEXUS Releases Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>NEXUS Snapshots Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <repositories>
+        <repository>
+            <id>maven-snapshots</id>
+            <name>NEXUS Snapshots Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -101,7 +129,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -134,13 +162,25 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
-		<dependency>
-			<groupId>org.springframework.hateoas</groupId>
-			<artifactId>spring-hateoas</artifactId>
-			<version>0.25.1.RELEASE</version>
-			<scope>compile</scope>
-			<optional>true</optional>
-		</dependency>
+        <dependency>
+            <groupId>org.springframework.hateoas</groupId>
+            <artifactId>spring-hateoas</artifactId>
+            <version>0.25.1.RELEASE</version>
+            <scope>compile</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.gateway</groupId>
+            <artifactId>common-api</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -192,12 +232,12 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.boot.maven.plugin.version}</version>
                 <configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
                 </configuration>
             </plugin>
 

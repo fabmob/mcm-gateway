@@ -50,7 +50,6 @@ public class MSPActionsDatabaseServiceImpl implements MSPActionsDatabaseService 
      */
     @Override
     public MSPActions addMspAction(MSPActions action) {
-        MSPActions mspAction = new MSPActions();
         if (null != action) {
             if (action.getSelector() != null && action.getSelector().getSelectorId() != null) {
                 throw new NotFoundException(MessageFormat.format(errorMessages.getTechnicalNotProvidedDescription(), CommonUtils.placeholderFormat(SELECTOR_WITH_ID_SHOULD_NOT_BE_PROVIDED, FIRST_PLACEHOLDER, String.valueOf(action.getSelector().getSelectorId()))));

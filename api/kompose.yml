@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  api:
+     image: ${API_IMAGE_NAME}
+     build:
+       context: .
+       dockerfile: ./api-dockerfile.yml
+       args:
+         MAVEN_IMAGE_NAME: ${BASE_API_IMAGE_NAME}
+     ports:
+       - '8080'
+     labels:
+       - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+       - 'kompose.service.type=clusterip'
+     environment:
+       - SERVICE_BASE_PATH=${API_FQDN}
+       - DATA_API_HOST=data-api.${KUBERNETES_DATA_API_NAMESPACE}.svc.cluster.local
+       - ROUTING_API_HOST=routing-api.${KUBERNETES_ROUTING_API_NAMESPACE}.svc.cluster.local
+
+# web network pour cloisonner une application
+#networks:
+#  web-nw:

@@ -1,0 +1,487 @@
+[
+    {
+      "mspId": "00000000-0000-0000-0000-000000000001",
+      "assetId": "velo1",
+      "assetType": "string",
+      "isReserved": false,
+      "isReservedFrom": null,
+      "isReservedTo": null,
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "lastReported": 1609866109,
+      "overriddenProperties": {
+        "name": "string",
+        "operator": "neotaxi",
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 1.445068462764611,
+            "lat": 43.60452753807565,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    },
+    {
+      "mspId": "00000000-0000-0000-0000-000000000001",
+      "assetId": "velo2",
+      "assetType": "string",
+      "isReserved": false,
+      "isReservedFrom": null,
+      "isReservedTo": null,
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "lastReported": 1609866109,
+      "overriddenProperties": {
+        "name": "string",
+        "operator": "neotaxi",
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 1.444209,
+            "lat": 43.604652,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    },
+    {
+      "mspId": "00000000-0000-0000-0000-000000000001",
+      "assetId": "velo3",
+      "assetType": "string",
+      "isReserved": false,
+      "isReservedFrom": null,
+      "isReservedTo": null,
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "lastReported": 1609866109,
+      "overriddenProperties": {
+        "name": "string",
+        "operator": "neotaxi",
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 1.433683759988139,
+            "lat": 43.583255053354726,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    },
+    {
+      "mspId": "00000000-0000-0000-0000-000000000001",
+      "assetId": "velo4",
+      "assetType": "string",
+      "isReserved": false,
+      "isReservedFrom": null,
+      "isReservedTo": null,
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "lastReported": 1609866109,
+      "overriddenProperties": {
+        "name": "string",
+        "operator": "neotaxi",
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 1.4060024596318215,
+            "lat": 43.58929812004516,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    },
+    {
+      "mspId": "00000000-0000-0000-0000-000000000001",
+      "assetId": "velo5",
+      "assetType": "string",
+      "isReserved": false,
+      "isReservedFrom": null,
+      "isReservedTo": null,
+      "isDisabled": true,
+      "mileage": 0,
+      "licensePlate": "string",
+      "lastReported": 1609866109,
+      "overriddenProperties": {
+        "name": "string",
+        "operator": "neotaxi",
+        "location": {
+          "name": "string",
+          "stopReference": [
+            {
+              "type": "GTFS_STOP_ID",
+              "id": "string",
+              "country": "NL"
+            }
+          ],
+          "stationId": "string",
+          "crowflyDistance": null,
+          "coordinates": {
+            "lng": 1.4386885641144793,
+            "lat": 43.59947709857374,
+            "alt": 0
+          },
+          "physicalAddress": {
+            "full": "40, rue du Louvre, 75001, Paris, France",
+            "houseNumber": "40",
+            "street": "rue du Louvre",
+            "city": "Paris",
+            "postCode": "75001",
+            "country": "France"
+          },
+          "extraInfo": {
+            "additionalProp1": {},
+            "additionalProp2": {},
+            "additionalProp3": {}
+          }
+        },
+        "fuel": "NONE",
+        "energyLabel": "A",
+        "co2PerKm": 0,
+        "brand": "string",
+        "model": "string",
+        "buildingYear": 0,
+        "travelAbroad": true,
+        "airConditioning": true,
+        "cabrio": true,
+        "colour": "string",
+        "cargo": "string",
+        "easyAccessibility": "LIFT",
+        "gears": 0,
+        "gearbox": "MANUAL",
+        "image": "https://files.fietsersbond.nl/app/uploads/2014/10/30151126/ST2_Men_Side_CityKit-Stromer.jpg",
+        "infantSeat": true,
+        "persons": 1,
+        "pets": true,
+        "propulsion": "MUSCLE",
+        "smoking": true,
+        "stateOfCharge": 100,
+        "towingHook": true,
+        "undergroundParking": true,
+        "winterTires": true,
+        "maxSpeed": 0,
+        "helmetRequired": true,
+        "other": "string",
+        "nrOfDoors": 0,
+        "meta": {
+          "additionalProp1": {},
+          "additionalProp2": {},
+          "additionalProp3": {}
+        },
+        "accessMethods": [
+          "DEEPLINK"
+        ],
+        "ancillaries": [
+          {
+            "source": "string",
+            "category": "string",
+            "number": "st",
+            "type": "string",
+            "memo": "string",
+            "variableNumber": 0,
+            "applicable-days": [
+              "MO"
+            ]
+          }
+        ]
+      },
+      "useDeeplink": null,
+      "bookDeeplink": null
+    }
+  ]

@@ -3,22 +3,25 @@
     "assetTypeId": "assetType1",
     "mspId": "b814c97e-df56-4651-ac50-11525537964f",
     "type": "VELO",
-    "stationId": "string",
+    "stationId": "station Id",
     "nrAvailable": 0,
     "assets": [
       {
-        "mspId": "b814c97e-df56-4651-ac50-11525537964f",
-        "assetId": "Bike1111",
-        "assetType": "bike",
+        "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+        "assetId": "string",
+        "assetType": "string",
         "isReserved": true,
-        "isReservedFrom": "2022-03-01T10:35:49.196Z",
-        "isReservedTo": "2022-03-01T10:36:49.196Z",
-        "isDisabled": false,
-        "mileage": 1000,
-        "licensePlate": "BK 1111",
+        "isReservedFrom": null,
+        "isReservedTo": null,
+        "isDisabled": true,
+        "mileage": 0,
+        "licensePlate": "string",
+        "homeStationId": "sta0001",
+        "lastReported": "1970-01-19T15:11:06.109+0000",
+        "planId": "plan3",
         "overriddenProperties": {
           "name": "string",
-          "operator": "G7",
+          "operator": null,
           "location": {
             "name": "string",
             "stopReference": [
@@ -29,7 +32,7 @@
               }
             ],
             "stationId": "string",
-            "crowflyDistance": "50",
+            "crowflyDistance": null,
             "coordinates": {
               "lng": 6.169639,
               "lat": 0,
@@ -73,6 +76,7 @@
           "towingHook": true,
           "undergroundParking": true,
           "winterTires": true,
+          "snowChains": true,
           "maxSpeed": 0,
           "helmetRequired": true,
           "other": "string",
@@ -99,8 +103,11 @@
             }
           ]
         },
-        "bookDeeplink": "https://book/Bike1111",
-        "useDeeplink": "https://use/Bike1111"
+        "rentalAndroidUrl": "http://...",
+        "rentalIosUrl": "http://...",
+        "rentalWebUrl": "http://...",
+        "useDeeplink": null,
+        "bookDeeplink": null
       }
     ],
     "assetClass": "AIR",
@@ -162,6 +169,7 @@
       "towingHook": true,
       "undergroundParking": true,
       "winterTires": true,
+      "snowChains": true,
       "maxSpeed": 0,
       "helmetRequired": true,
       "other": "string",

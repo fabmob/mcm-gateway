@@ -1,0 +1,8 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: routing-api-inflightreq-middleware
+spec:
+  inFlightReq:
+    amount: 100
+# protection aux attaques DDOS

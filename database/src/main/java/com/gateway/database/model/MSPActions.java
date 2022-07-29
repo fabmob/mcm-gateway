@@ -26,7 +26,7 @@ public class MSPActions implements java.io.Serializable {
     private String action;
 
     @Column(name = "is_authentication")
-    private Integer isAuthentication;
+    private boolean isAuthentication;
 
     @Column(name = "is_refresh_authentication")
     private Integer isRefreshAuth;

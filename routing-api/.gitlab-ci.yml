@@ -1,0 +1,80 @@
+.routing-api-base:
+  variables:
+    MODULE_NAME: routing-api
+    MODULE_PATH: ${MODULE_NAME}
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/adoptopenjdk:11-jre-hotspot
+
+.routing_api_init_vars: &routing_api_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export ROUTING_API_IMAGE_NAME=${REGISTRY_BASE_NAME}/routing-api:${IMAGE_TAG_NAME}
+  export BASE_ROUTING_API_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+
+.routing-api-build: &routing-api-build |
+  echo "VERSION=$VERSION"
+  envsubst < settings.xml
+  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  cd routing-api
+  cat pom.xml | egrep "version"
+  envsubst < ../settings.xml
+  mvn clean install --batch-mode -s ../settings.xml -DskipTests
+
+routing_api_build:
+  extends:
+    - .routing-api-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  script:
+    - *routing_api_init_vars
+    - *routing-api-build
+  artifacts:
+    paths:
+      - routing-api/target
+  needs: [ "deploy-nexus" ]
+
+routing_api_image_build:
+  extends:
+    - .routing-api-base
+    - .image-job
+  script:
+    - *routing_api_init_vars
+    - |
+      cd routing-api
+      image
+  needs: [ "routing_api_build" ]
+
+
+routing_api_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .routing-api-base
+  script:
+    - *routing_api_init_vars
+    - |
+      wait_pod default-adapter
+      wait_pod custom-adapter
+      wait_pod data-api
+      set -x
+      KUBERNETES_DATA_API_NAMESPACE=$(pod_namespace data-api)
+      KUBERNETES_DEFAULT_ADAPTER_NAMESPACE=$(pod_namespace default-adapter)
+      KUBERNETES_CUSTOM_ADAPTER_NAMESPACE=$(pod_namespace custom-adapter)
+      export KUBERNETES_DATA_API_NAMESPACE
+      export KUBERNETES_DEFAULT_ADAPTER_NAMESPACE
+      export KUBERNETES_CUSTOM_ADAPTER_NAMESPACE
+      deploy
+  needs: [ "routing_api_image_build"]
+  environment:
+    on_stop: routing_api_preview_cleanup
+
+
+routing_api_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .routing-api-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

@@ -36,6 +36,7 @@ class MspActionsControllerTest extends DataApiITCase {
     public static final String IT_RESOURCES_PATH = "./src/it/resources/";
     public static final String MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_OK_JSON = "mspActions/expected/getMspActions_ok.json";
     public static final String MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_BY_ID_OK_JSON = "mspActions/expected/getMspActions_by_id_ok.json";
+    public static final String MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_BY_MSP_ID_OK_JSON = "mspActions/expected/getMspActions_by_MspMeta_id_ok.json";
     public static final String MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_BY_ID_NOT_FOUND_JSON = "mspActions/expected/getMspActions_by_id_not_found.json";
     public static final String MSP_ACTIONS_REQUEST_POST_MSP_ACTIONS_OK_JSON = "mspActions/request/postMspActions_ok.json";
     public static final String MSP_ACTIONS_EXPECTED_POST_MSP_ACTIONS_OK_JSON = "mspActions/expected/postMspActions_ok.json";
@@ -91,6 +92,22 @@ class MspActionsControllerTest extends DataApiITCase {
         testHttpRequestWithExpectedResult(CommonUtils.placeholderFormat(DataApiPathDict.MSP_ACTIONS_BASE_PATH + DataApiPathDict.MSP_ACTION_PATH, ID, mspActionId), HttpMethod.GET,
                 HttpStatus.OK, null, MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_BY_ID_OK_JSON,
                 JsonResponseTypeEnum.JSON_OBJECT, "Test GET /msp-actions by id", false, false, null);
+    }
+    /**
+     * test GET MspActions with MspMetaId
+     *
+     * @throws Exception
+     */
+    @Test
+    @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
+    void testGetMspActionsByMspMetaId() throws Exception {
+        MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+        parameters.add("mspMetaId", "b814c97e-df56-4651-ac50-11525537964f");
+
+        testHttpRequestWithExpectedResult(CommonUtils.placeholderFormat(DataApiPathDict.MSP_ACTIONS_BASE_PATH), HttpMethod.GET, HttpStatus.OK, null,
+                MSP_ACTIONS_EXPECTED_GET_MSP_ACTIONS_BY_MSP_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
+                "Test get  msp-actions by MspMetaID", true, false, parameters);
     }
 
     /**

@@ -27,7 +27,7 @@ public class BodyDTO {
 
 	@Schema(name = "template",
 			description = "the body template",
-			example = "{\"Email\": \"example@gmail.com\",\"Password\": \"pwd\"}",
+			example = "{\"bike\":\"${VEHICULE_ID}\"}",
 			required = true)
 	@JsonProperty("template")
 	private String template;

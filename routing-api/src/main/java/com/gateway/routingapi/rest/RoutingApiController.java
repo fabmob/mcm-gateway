@@ -1,7 +1,6 @@
 package com.gateway.routingapi.rest;
 
 
-import com.gateway.commonapi.dto.adapter.GenericResponse;
 import com.gateway.commonapi.dto.exceptions.*;
 import com.gateway.routingapi.service.RoutingService;
 import com.gateway.routingapi.util.constant.RoutingDict;
@@ -16,46 +15,47 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.ServletContext;
+import static com.gateway.routingapi.util.constant.RoutingDict.PARAMS;
+import static com.gateway.routingapi.util.constant.RoutingMessageDict.*;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("/v1")
 public class RoutingApiController {
 
-    public static final String ROUTING_TAG = "Routing";
-    @Autowired
-    ServletContext context;
     @Autowired
     private RoutingService adapterRouterService;
 
     @Operation(summary = "Forward Get operation", description = "", tags = ROUTING_TAG)
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Réponse OK"),
-            @ApiResponse(responseCode = "400", description = "Requête mal formée ou non valide", content = @Content(schema = @Schema(implementation = BadRequest.class))),
-            @ApiResponse(responseCode = "401", description = "Requête non autorisée (jeton oauth2 KO ou absent)", content = @Content(schema = @Schema(implementation = Unauthorized.class))),
-            @ApiResponse(responseCode = "404", description = "Donnée non trouvée", content = @Content(schema = @Schema(implementation = NotFound.class))),
-            @ApiResponse(responseCode = "500", description = "Erreur interne", content = @Content(schema = @Schema(implementation = GenericError.class))),
-            @ApiResponse(responseCode = "502", description = "Le serveur distant est indisponible", content = @Content(schema = @Schema(implementation = BadGateway.class)))})
-    @GetMapping(value = RoutingDict.ADAPTER_PATH,
+            @ApiResponse(responseCode = "200", description = REPONSE_OK),
+            @ApiResponse(responseCode = "400", description = REQUETE_MAL_FORMEE_OU_NON_VALIDE, content = @Content(schema = @Schema(implementation = BadRequest.class))),
+            @ApiResponse(responseCode = "401", description = REQUETE_NON_AUTORISEE_JETON_OAUTH_2_KO_OU_ABSENT, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
+            @ApiResponse(responseCode = "404", description = DONNEE_NON_TROUVEE, content = @Content(schema = @Schema(implementation = NotFound.class))),
+            @ApiResponse(responseCode = "500", description = ERREUR_INTERNE, content = @Content(schema = @Schema(implementation = GenericError.class))),
+            @ApiResponse(responseCode = "502", description = LE_SERVEUR_DISTANT_EST_INDISPONIBLE, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
+    @PostMapping(value = RoutingDict.ROUTE_PATH,
+            consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<GenericResponse> routeGetOperation(@RequestParam @NotNull UUID mspId, @RequestParam @NotNull String actionName, @RequestParam(required = false) Map<String, String> params) throws IOException, InterruptedException {
+    public ResponseEntity<Object> routeOperation(@RequestParam @NotNull UUID mspId, @RequestParam @NotNull String actionName, @RequestBody Optional<Map<String, Object>> body, @RequestParam(required = false) Map<String, String> params) throws IOException, InterruptedException {
         log.info("Call of service routeGetOperation");
-
-        log.debug(String.format("mspId param found %s", params.get("mspId")));
         if (log.isDebugEnabled()) {
-            params.forEach((key, value) -> log.debug(String.format("param [%s]=%s", key, value)));
+            params.forEach((key, value) -> log.debug(String.format(PARAMS, key, value)));
         }
-        return new ResponseEntity<>(adapterRouterService.routeGetOperation(params, mspId, actionName), HttpStatus.OK);
+        Object response = adapterRouterService.routeOperation(params, mspId, actionName, body);
+        if (response != null) {
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
+        return new ResponseEntity<>(null,null, HttpStatus.OK);
     }
 }

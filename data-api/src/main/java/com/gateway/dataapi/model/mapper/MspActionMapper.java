@@ -11,12 +11,13 @@ import com.gateway.database.model.MSPActions;
 
 @Mapper
 public interface MspActionMapper {
-	
+
 	MspActionDTO mapEntityToDto(MSPActions source);
 
 	List<MspActionDTO> mapEntityToDto(List<MSPActions> source);
 
 	List<MSPActions> mapDtoToEntity(List<MspActionDTO> source);
+
 	MSPActions mapDtoToEntity(MspActionDTO source);
 
 }

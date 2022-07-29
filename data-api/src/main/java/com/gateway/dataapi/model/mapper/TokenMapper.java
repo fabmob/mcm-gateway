@@ -10,13 +10,13 @@ import com.gateway.database.model.Token;
 
 @Mapper
 public interface TokenMapper {
-	@Mapping(target = "mspMetaId", source = "msp.mspId")
+	@Mapping(target = "mspId", source = "msp.mspId")
 	TokenDTO mapEntityToDto(Token source);
 
 	List<TokenDTO> mapEntityToDto(List<Token> source);
 
 	List<Token> mapDtoToEntity(List<TokenDTO> source);
 
-	@Mapping(target = "msp.mspId", source = "mspMetaId")
+	@Mapping(target = "msp.mspId", source = "mspId")
 	Token mapDtoToEntity(TokenDTO source);
 }

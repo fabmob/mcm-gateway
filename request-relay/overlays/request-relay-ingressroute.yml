@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: request-relay
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${REQUEST_RELAY_FQDN}`)
+#      middlewares:
+#        - name: api-headers-middleware
+#        - name: api-ratelimit-middleware
+#        - name: api-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: request-relay
+          port: 8083
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

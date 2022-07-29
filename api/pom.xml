@@ -16,12 +16,6 @@
     <name>Gateway : api</name>
 
     <dependencies>
-
-        <dependency>
-            <groupId>com.gateway</groupId>
-            <artifactId>common-api</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
-        </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

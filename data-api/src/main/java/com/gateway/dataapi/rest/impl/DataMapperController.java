@@ -1,5 +1,6 @@
 package com.gateway.dataapi.rest.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,10 +65,13 @@ public class DataMapperController {
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @PostMapping(value = DATA_MAPPERS_PATH, produces = {MediaType.APPLICATION_JSON_VALUE}, consumes = {
             MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<DataMapperDTO> addDataMapper(@RequestBody DataMapperDTO mapperDTO) {
+    public ResponseEntity<List<DataMapperDTO>> addDataMapper(@RequestBody List<DataMapperDTO> mapperListDTO) {
         log.info(ADD_NEW_DATAMAPPER);
-        DataMapperDTO mapper = dataMapperService.addDataMapper(mapperDTO);
-        return new ResponseEntity<>(mapper, HttpStatus.CREATED);
+        List<DataMapperDTO> mapperList = new ArrayList<>();
+        for (DataMapperDTO mapperDTO: mapperListDTO) {
+            mapperList.add(dataMapperService.addDataMapper(mapperDTO));
+        }
+        return new ResponseEntity<>(mapperList, HttpStatus.CREATED);
     }
 
     @Operation(summary = "Get the specified Data Mapper", description = "Description Get the specified Data Mapper", tags = {

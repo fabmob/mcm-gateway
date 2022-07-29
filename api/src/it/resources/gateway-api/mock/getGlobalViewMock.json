@@ -4,6 +4,7 @@
       "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "stationId": "400",
       "name": "Trocadero",
+      "shortName": "Island Central",
       "coordinates": {
         "lng": 6.169639,
         "lat": 0,
@@ -23,11 +24,20 @@
         "country": "France"
       },
       "crossStreet": "Cross street",
+      "contactPhone": "+33102030405",
       "regionId": "XX",
       "rentalMethods": [
         "CREDITCARD",
         "ACCOUNTNUMBER"
-      ]
+      ],
+      "isVirtualStation": true,
+      "stationArea": null,
+      "isParkingLot": true,
+      "isStreetParking": true,
+      "isUnderground": true,
+      "isSidewalkParking": true,
+      "isParkingHoop": true,
+      "capacity": 50
     }
   ],
   "stationsStatus": [
@@ -35,10 +45,9 @@
       "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "stationId": "400",
       "numAssetsAvailable": 12,
-      "numAssetsAvailableType": {
-        "mechanical": 8,
-        "electric": 4
-      },
+      "numAssetsAvailableType":null,
+      "vehicleTypeId": "mechanical",
+      "count": 8,
       "numAssetsDisabled": 0,
       "numDocksAvailable": 10,
       "numDocksDisabled": 0,
@@ -54,8 +63,8 @@
           "url": "string"
         }
       ],
-      "bookDeeplink": null,
-      "useDeeplink": null,
+      "bookDeeplink": "string",
+      "useDeeplink": "string",
       "lastReported": 0
     }
   ],
@@ -65,11 +74,14 @@
       "assetId": "string",
       "assetType": "string",
       "isReserved": true,
-      "isReservedFrom": "2022-03-08T15:41:01.268Z",
-      "isReservedTo": "2022-03-08T15:41:01.268Z",
+      "isReservedFrom": null,
+      "isReservedTo": null,
       "isDisabled": true,
       "mileage": 0,
       "licensePlate": "string",
+      "homeStationId": "sta0001",
+      "lastReported": "1970-01-19T15:11:06.109+0000",
+      "planId": "plan3",
       "overriddenProperties": {
         "name": "string",
         "operator": null,
@@ -127,6 +139,7 @@
         "towingHook": true,
         "undergroundParking": true,
         "winterTires": true,
+        "snowChains": true,
         "maxSpeed": 0,
         "helmetRequired": true,
         "other": "string",
@@ -153,6 +166,9 @@
           }
         ]
       },
+      "rentalAndroidUrl": "http://...",
+      "rentalIosUrl": "http://...",
+      "rentalWebUrl": "http://...",
       "useDeeplink": null,
       "bookDeeplink": null
     }

@@ -1,0 +1,8 @@
+{
+  "mspId": "28784eb7-de79-434d-a1b6-819ebfd50860",
+  "actionType": "VEHICULE_SEARCH",
+  "softTTL": 1000,
+  "cacheParamId": "885a4c3d-b459-41d6-b1c1-e30a82ea777b",
+  "hardTTL": 2000,
+  "refreshCacheDelay": 3000
+}

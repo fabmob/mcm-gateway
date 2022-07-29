@@ -151,6 +151,9 @@ public class WsTestUtil {
             case METHOD_NOT_ALLOWED:
                 mockResultMatcher = MockMvcResultMatchers.status().isMethodNotAllowed();
                 break;
+            case CONFLICT:
+                mockResultMatcher = MockMvcResultMatchers.status().isConflict();
+                break;
             default:
                 break;
         }

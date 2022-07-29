@@ -26,8 +26,8 @@ public class SelectorDTO {
 	private UUID selectorId;
 
 	@Schema(name = "key",
-			description = "key",
-			example = "Data")
+			description = "key of the searched field in the response",
+			example = "stations")
 	@JsonProperty("key")
 	private String key;
 

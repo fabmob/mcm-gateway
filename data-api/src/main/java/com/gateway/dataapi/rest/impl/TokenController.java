@@ -95,7 +95,7 @@ public class TokenController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = TOKENS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenDTO> getAllTokens(@RequestParam(name = "mspMetaId", required = false) UUID mspMetaId) {
+    public ResponseEntity<TokenDTO> getAllTokens(@RequestParam(name = "mspMetaId", required = true) UUID mspMetaId) {
         log.info(GET_ALL_TOKEN_OR_BY_MSP_META_ID);
         TokenDTO token = tokenService.getByMspMetaId(mspMetaId);
         return new ResponseEntity<>(token, HttpStatus.OK);

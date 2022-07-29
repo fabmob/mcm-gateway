@@ -3,11 +3,9 @@
     "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
     "stationId": "400",
     "numAssetsAvailable": 12,
-    "numAssetsAvailableType": {
-      "mechanical": 8,
-      "electric": 4
-    },
+    "numAssetsAvailableType": null,
     "numAssetsDisabled": 0,
+    "assetsDocksAvailable": null,
     "numDocksAvailable": 10,
     "numDocksDisabled": 0,
     "isInstalled": true,
@@ -24,6 +22,6 @@
     ],
     "bookDeeplink": "string",
     "useDeeplink": "string",
-    "lastReported": 0
+    "lastReported": "1970-01-01T00:00:00.000+0000"
   }
 ]

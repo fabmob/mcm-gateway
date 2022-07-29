@@ -133,6 +133,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             errorBody.setDescription(exception.getMessage());
         }
         errorBody.setLabel(this.errorMessages.getTechnicalMessageNotReadableLabel());
+        log.error(exception.getMessage(),exception);
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
 

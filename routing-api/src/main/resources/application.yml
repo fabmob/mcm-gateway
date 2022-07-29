@@ -12,6 +12,8 @@ springdoc:
 
 logging:
   level:
+    com:
+      gateway: DEBUG
     org:
       springframework: INFO
       springframework.security: INFO
@@ -31,6 +33,22 @@ spring:
     rest:
       basePath: #/api
       detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:defaultEnv-}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+
+appli:
+  use:
+    cache: false
 
 ---
 
@@ -52,6 +70,10 @@ security:
 gateway:
   service:
     dataapi:
-      baseUrl: "http://localhost:8081/v1"
+      url: "http://${DATA_API_HOST:localhost}:8081/v1"
     adapter:
-      path: "http://localhost:8084"
+      default-adapter:
+        baseUrl: "${ADAPTER_PROTOCOL:http}://${GENERIC_ADAPTER_FQDN:localhost:8090}"
+      custom-adapter:
+        baseUrl: "${ADAPTER_PROTOCOL:http}://${GENERIC_ADAPTER_FQDN:localhost:8091}"
+#      path: "http://${DEFAULT_ADAPTER_HOST:localhost}:8090"

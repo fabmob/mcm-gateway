@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -137,7 +136,7 @@ class DataMapperControllerTest extends DataApiITCase {
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testPostDataMapper() throws Exception {
         testHttpRequestWithExpectedResult(DataApiPathDict.DATA_MAPPER_BASE_PATH + DataApiPathDict.DATA_MAPPERS_PATH, HttpMethod.POST, HttpStatus.CREATED,
-                DATA_MAPPER_REQUEST_POST_DATA_MAPPER_OK_JSON, DATA_MAPPER_EXPECTED_POST_DATA_MAPPER_OK_JSON, JsonResponseTypeEnum.JSON_OBJECT,
+                DATA_MAPPER_REQUEST_POST_DATA_MAPPER_OK_JSON, DATA_MAPPER_EXPECTED_POST_DATA_MAPPER_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
                 "Test to create dataMapper", true, false, null);
 
     }

@@ -207,3 +207,33 @@ Exemple de levée d'une exception avec un objet complet.
 | Codes statut HTTP- Succès     | Utiliser les codes retours adaptés.                            |
 | Codes statut HTTP- Erreurs    | Spécifier les cas d’erreurs notamment le 400 Bad Request qui permet à l’utilisateur de comprendre pourquoi sa requête n’est pas bonne.  <br/>Les cas d’erreurs fonctionnels identifiés doivent apparaître dans la réponse et des exemples doivent apparaitre dans la doc. <br/>L’erreur 500 Server Error doit toujours être spécifié et retourner un format standard d’erreur.                            |
 | Commentaires                  | Chaque URI doit avoir une description.<br/>Chaque URI doit avoir un exemple de réponse visible. <br/>Chaque paramètre doit avoir une description.                            |
+
+### Cache Redis
+
+Prérequis local
+
+- Couper votre redis installé sous windows s'il n'est pas en vers 6.2 ou supérieure. Pour cela aller dans service en tant d'admin, chercher redis et désactiver le service et son lancement auto au redémarrage. 
+- Installation de WSL2
+- Lancer ubuntu for windows
+- Installation de portainer.io en tant qu'image docker sur le ubuntu de WSL
+  <pre>docker pull portainer/portainer-ce:2.11.0
+  docker run -d --privileged -p 9010:9000 --name portainer --restart=always -v ///mnt/wsl/shared-docker/docker.sock:/var/run/docker.sock -v portainer_data:/data portainer/portainer-ce:2.11.0
+  </pre>
+
+- aller sur http://localhost:9010/ avec un navigateur web. Lors de la première connection vous aurez à definir un mot de passe pour admin.
+- Charger l'image redis dans portainer et lancer son run
+
+Sous Ubuntu, lancer les commandes : 
+docker pull redis:6.2-alpine
+docker run -d --name redis-gateway -p 6379:6379 redis:6.2-alpine
+
+Dans portainer.io:
+
+Aller dans Images > Vérifier que l'image existe
+
+![image redis](docs/assets/portainer-image-redis.png)
+
+Une fois l'image chargée, aller dans Container et vérifier que le container a bien été rajouté
+
+![run container](docs/assets/portainer-container-run.png)
+

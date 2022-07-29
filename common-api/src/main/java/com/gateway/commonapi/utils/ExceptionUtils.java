@@ -8,6 +8,10 @@ import org.springframework.web.client.HttpClientErrorException;
 @Slf4j
 public class ExceptionUtils {
 
+    private ExceptionUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     /**
      * Convert HttpClientErrorException to a gateway runtime exception that will be catched by ControllerAdvice @{@link com.gateway.commonapi.exception.handler.RestResponseEntityExceptionHandler}
      * @param httpClientErrorException Client exception thrown executing a request to a web service

@@ -9,6 +9,7 @@ import com.gateway.database.repository.BodyParamsRepository;
 import com.gateway.database.repository.BodyRepository;
 import com.gateway.database.repository.MSPCallsRepository;
 import com.gateway.database.service.MSPCallsDatabaseService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +19,7 @@ import java.util.*;
 
 import static com.gateway.database.util.constant.DataMessageDict.*;
 
-
+@Slf4j
 @Service
 public class MSPCallsDatabaseServiceImpl implements MSPCallsDatabaseService {
 
@@ -33,6 +34,7 @@ public class MSPCallsDatabaseServiceImpl implements MSPCallsDatabaseService {
 
     @Autowired
     private ErrorMessages errorMessages;
+
 
 
     public MSPCallsDatabaseServiceImpl(MSPCallsRepository callRepo, BodyRepository bodyRepo,
@@ -87,6 +89,7 @@ public class MSPCallsDatabaseServiceImpl implements MSPCallsDatabaseService {
         try {
             return callRepository.save(call);
         } catch (Exception e) {
+            log.error(e.getMessage(),e);
             throw new NotFoundException(CommonUtils.placeholderFormat(MSP_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, call.getAction().getMspActionId().toString()));
         }
     }

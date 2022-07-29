@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.gateway.adapter.AdapterITTestCase;
+import com.gateway.adapter.service.AuthenticationService;
 import com.gateway.adapter.utils.constant.AdapterPathDict;
 import com.gateway.adapter.service.impl.DefaultAdapterServiceImpl;
 import com.gateway.commonapi.tests.WsTestUtil;
@@ -52,6 +53,9 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
 
     @MockBean
     DefaultAdapterServiceImpl defaultAdapterService;
+
+    @MockBean
+    AuthenticationService authenticationService;
 
     @Autowired
     private WebApplicationContext webApplicationContext;

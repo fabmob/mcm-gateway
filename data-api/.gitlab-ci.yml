@@ -1,0 +1,80 @@
+.data-api-base:
+  variables:
+    MODULE_NAME: data-api
+    MODULE_PATH: ${MODULE_NAME}
+    NEXUS_POSTGRES_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/postgres:13.6
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/library/adoptopenjdk:11-jre-hotspot
+    DATABASE_NAME: gateway
+    DATABASE_USER_NAME: ${POSTGRES_SERVICE_USER}
+    DATABASE_USER_PWD: ${POSTGRES_SERVICE_PASSWORD}
+    KUBERNETES_GATEWAY_DB_NAMESPACE: ${KUBERNETES_GATEWAY_DB_NAMESPACE}
+
+.data_api_init_vars: &data_api_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export POSTGRES_IMAGE_NAME=${REGISTRY_BASE_NAME}/postgres:${IMAGE_TAG_NAME}
+  export BASE_POSTGRES_IMAGE_NAME=${NEXUS_POSTGRES_IMAGE_NAME}
+  export DATA_API_IMAGE_NAME=${REGISTRY_BASE_NAME}/data-api:${IMAGE_TAG_NAME}
+  export BASE_DATA_API_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  export MODULE_PATH=$MODULE_PATH
+  export VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+
+.data-api-build: &data-api-build |
+  set -x
+  envsubst < settings.xml
+  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  mvn clean install -s settings.xml -DskipTests
+
+data_api_build:
+  extends:
+    - .data-api-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  script:
+    - *data_api_init_vars
+    - *data-api-build
+  artifacts:
+    paths:
+      - data-api/target
+  needs: [ "deploy-nexus" ]
+
+data_api_image_build:
+  extends:
+    - .image-job
+    - .data-api-base
+  script:
+    - *data_api_init_vars
+    - |
+      image
+  needs: [ "data_api_build" ]
+
+
+data_api_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .data-api-base
+  script:
+    - *data_api_init_vars
+    - |
+      KUBERNETES_GATEWAY_DB_NAMESPACE=$(pod_namespace postgresgateway)
+      export KUBERNETES_GATEWAY_DB_NAMESPACE
+      KUBERNETES_GATEWAY_REDIS_NAMESPACE=$(pod_namespace redis)
+      export KUBERNETES_GATEWAY_REDIS_NAMESPACE
+      MAAS_API_CACHE_KEYS_PREFIX="preview-"
+      export MAAS_API_CACHE_KEYS_PREFIX
+      deploy
+  needs: [ "data_api_image_build" ]
+  environment:
+    on_stop: data_api_preview_cleanup
+
+
+data_api_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .data-api-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

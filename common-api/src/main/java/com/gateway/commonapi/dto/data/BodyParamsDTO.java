@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
 @Schema(name="BodyParamsDTO",description =  "Information about BodyParams")
 public class BodyParamsDTO {
 
-	@Schema(name = "bodyParamsId;",
+	@Schema(name = "bodyParamsId",
 			description = "Body Params identifier",
 			example = "b814c97e-df56-4651-ac50-11525537964f"
 			,required = true)
@@ -31,7 +31,7 @@ public class BodyParamsDTO {
 	private String keyMapper;
 
 	@Schema(name = "key",
-			description = "the name of param field",
+			description = "the name of param field in the original body",
 			example = "CityID")
 	@JsonProperty("key")
 	private String key;
@@ -49,7 +49,7 @@ public class BodyParamsDTO {
 	private String value;
 
 	@Schema(name = "precision",
-			description = "the precision that will be applied to parameter according to the number of calls",
+			description = "Enlarge the search time (in minutes)",
 			example = "-15")
 	@JsonProperty("precision")
 	private String precision;

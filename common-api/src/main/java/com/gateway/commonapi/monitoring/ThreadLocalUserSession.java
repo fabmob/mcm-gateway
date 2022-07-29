@@ -15,7 +15,7 @@ public class ThreadLocalUserSession implements Runnable {
         if (session == null) {
             UserContext userContext = new UserContext(UUID.randomUUID().toString());
             local.set(userContext);
-            log.info("User is not authenticated");
+            log.debug("User is not authenticated");
         }
         return local.get();
     }
@@ -34,9 +34,14 @@ public class ThreadLocalUserSession implements Runnable {
         getAndRemoveContext();
     }
     public void saveContext() {
-        UserContext userContext = new UserContext(Thread.currentThread().getName());
-        local.set(userContext); // each thread saves a context to the shared ThreadLocal
-        log.debug("save to thread name: {}" , Thread.currentThread().getName());
+        UserContext userContext;
+        if(local.get() == null) {
+            userContext = new UserContext(Thread.currentThread().getName());
+            local.set(userContext); // each thread saves a context to the shared ThreadLocal
+            log.debug("save {} to thread name: {}" , local.get().getContextId(), Thread.currentThread().getName());
+        } else {
+            log.debug("userContext already present {} on thead name: {}", local.get().getContextId(), Thread.currentThread().getName());
+        }
     }
 
     public void getAndRemoveContext() {

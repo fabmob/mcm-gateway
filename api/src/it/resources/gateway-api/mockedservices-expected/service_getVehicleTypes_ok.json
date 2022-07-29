@@ -1,0 +1,40 @@
+[
+  {
+    "vehicleTypeId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "formFactor": "car",
+    "riderCapacity": 12,
+    "cargoVolumeCapacity": 0,
+    "cargoLoadCapacity": 0,
+    "propulsionType": "human",
+    "ecoLabel": [
+      {
+        "countryCode": 0,
+        "ecoSticker": 0
+      }
+    ],
+    "maxRangeMeters": "string",
+    "name": "string",
+    "vehicleAccessories": [
+      {}
+    ],
+    "gCo2Km": 0,
+    "vehicleImage": "string",
+    "make": "string",
+    "model": "string",
+    "color": "string",
+    "wheelCount": 0,
+    "maxPermittedSpeed": 0,
+    "ratedPower": 0,
+    "defaultReserveTime": 0,
+    "returnConstraint": "free_floating",
+    "vehicleAssets": {
+      "iconUrl": "string",
+      "iconUrlDark": "string",
+      "iconLastModified": null
+    },
+    "defaultPricingPlanId": "string",
+    "pricingPlanIds": [
+      "string"
+    ]
+  }
+]

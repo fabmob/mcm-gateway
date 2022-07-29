@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  postgresgateway:
+    image: ${POSTGRES_IMAGE_NAME}
+    build:
+      context: .
+      dockerfile: ./postgres-dockerfile.yml
+      args:
+        BASE_POSTGRES_IMAGE_NAME: ${BASE_POSTGRES_IMAGE_NAME}
+    environment:
+      - POSTGRES_USER=${DATABASE_USER_NAME}
+      - POSTGRES_PASSWORD=${DATABASE_USER_PWD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_SERVICE_USER=${DB_SERVICE_USER}
+      - POSTGRES_SERVICE_PASSWORD=${DB_SERVICE_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      -  postgres_volume:/var/lib/postgresql/data
+    ports:
+      - '5432'
+    labels:
+      - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+      - 'kompose.service.type=clusterip'
+
+volumes:
+  postgres_volume:

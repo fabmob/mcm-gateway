@@ -1,0 +1,9 @@
+ARG MAVEN_IMAGE_NAME
+
+FROM ${MAVEN_IMAGE_NAME}
+
+COPY target/request-relay*.jar /request-relay.jar
+
+EXPOSE 8083
+
+CMD java -jar request-relay.jar

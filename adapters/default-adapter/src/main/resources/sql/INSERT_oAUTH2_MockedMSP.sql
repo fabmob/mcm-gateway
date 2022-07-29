@@ -11,9 +11,15 @@
 
 	/* msp_actions */
 	INSERT INTO msp.msp_actions (msp_action_id,"action",is_authentication,is_pagination,is_refresh_authentication,name,selector_id) VALUES
-    	 ('e333f848-0f53-46fd-97fa-6b1f9f3db222',NULL,1,0,0,'MockedMSP',NULL),
+    	 ('e333f848-0f53-46fd-97fa-6b1f9f3db222',NULL,true,0,0,'MockedMSP',NULL),
 
-    	 ('e444f848-0f53-46fd-97fa-6b1f9f3db333','MOCKED_ACTION',0,0,0,'MockedMSP',NULL);
+    	 ('e444f848-0f53-46fd-97fa-6b1f9f3db333','ASSET_SEARCH',false,0,0,'MockedMSP',NULL);
+
+    /* data_mapper  */
+          INSERT INTO msp.data_mapper  (data_mapper_id,champ_externe, champ_interne,contained_value,default_value,format,is_array,timezone,action_id) VALUES
+                ('331866de-4e4f-4ab7-948b-372ce1acaef1','access_token','accessToken', NULL, NULL, NULL, 0, NULL,'e333f848-0f53-46fd-97fa-6b1f9f3db222'),
+                ('331866de-4e4f-4ab7-948b-372ce1acaef2','msg','assetId', NULL, NULL, NULL, 0, NULL,'e444f848-0f53-46fd-97fa-6b1f9f3db333');
+
 
 
     /* body */
@@ -40,12 +46,14 @@
 	/* msp calls */
 	INSERT INTO msp.msp_calls (msp_call_id,is_mocked,"method",nb_calls,execution_order,url,action_id,body_id) VALUES
     	  ('abc126d5-d17c-4957-b1b0-e037e2dad9de',0,'POST',1,1, 'http://demo7362099.mockable.io/mockedmsp/oauth2/token','e333f848-0f53-46fd-97fa-6b1f9f3db222','8304fa40-1549-4fb9-bb89-d89bc58b1eed'),
-
     	  ('def126d5-d17c-4957-b1b0-e037e2dad9de',0,'POST',1,1, 'http://demo7362099.mockable.io/mockedmsp/postrequest','e444f848-0f53-46fd-97fa-6b1f9f3db333','7204fa40-1549-4fb9-bb89-d89bc58b1eed');
+
+ /* adapters */
+        INSERT INTO msp.adapters (adapter_id,adapter_name) VALUES
+           ('40142f60-9694-479f-a6cd-28b199b5e241', 'default-adapter');
 
 
     /* msp-standard */
-    INSERT INTO msp.msp_standard (msp_standard_id,is_active,standard_name ,version_datamapping ,version_standard ,msp_action_id,msp_id) VALUES
-        ('a7082f2f-317b-4e4c-ba77-54ce2f0dbaaa', TRUE, 'FNMS', 'V1.0', 'V1.1', 'e333f848-0f53-46fd-97fa-6b1f9f3db222', 'a714c97e-df56-4651-ac50-11525537963b'),
-
-        ('b6082f2f-317b-4e4c-ba77-54ce2f0dbaaa', TRUE, 'FNMS', 'V1.0', 'V1.1', 'e444f848-0f53-46fd-97fa-6b1f9f3db333', 'a714c97e-df56-4651-ac50-11525537963b');
+    INSERT INTO msp.msp_standard (msp_standard_id,is_active,standard_name ,version_datamapping ,version_standard ,msp_action_id,msp_id,adapter_id) VALUES
+        ('a7082f2f-317b-4e4c-ba77-54ce2f0dbaaa', TRUE, 'FNMS', 'V1.0', 'V1.1', 'e333f848-0f53-46fd-97fa-6b1f9f3db222', 'a714c97e-df56-4651-ac50-11525537963b','40142f60-9694-479f-a6cd-28b199b5e241'),
+        ('b6082f2f-317b-4e4c-ba77-54ce2f0dbaaa', TRUE, 'FNMS', 'V1.0', 'V1.1', 'e444f848-0f53-46fd-97fa-6b1f9f3db333', 'a714c97e-df56-4651-ac50-11525537963b','40142f60-9694-479f-a6cd-28b199b5e241');

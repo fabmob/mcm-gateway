@@ -1,12 +1,20 @@
 package com.gateway.routingapi.service;
 
-import com.gateway.commonapi.dto.adapter.GenericResponse;
-
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 
 public interface RoutingService {
-    GenericResponse routeGetOperation(Map<String, String> params, UUID mspId, String actionName);
+    
+	/**
+     * Forward the request to Adapters (default/Custom) and return the response 
+     * @param params
+     * @param mspId
+     * @param actionName
+     * @param originalBody
+     * @return
+     */
+    Object routeOperation(Map<String, String> params, UUID mspId, String actionName, Optional<Map<String, Object>> originalBody);
 }
 

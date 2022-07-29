@@ -30,7 +30,7 @@ spring:
       poolName: PerimGabaritHikariCP
       maxLifetime: 2000000
     initialization-mode: always
-    url: jdbc:postgresql://localhost:5432/gateway
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:5432/gateway
     password: ${DATABASE_PASSWORD:@gateway.database.password@}
     username: ${DATABASE_USERNAME:@gateway.database.username@}
 

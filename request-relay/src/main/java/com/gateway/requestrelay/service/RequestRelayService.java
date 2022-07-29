@@ -29,7 +29,6 @@ public interface RequestRelayService {
     HttpHeaders assignHeaders(MspCallsFinalDTO callInfos) ;
 
 
-
     /**
      * Make the HTTP call.
      *
@@ -39,5 +38,4 @@ public interface RequestRelayService {
      *
      */
     ResponseEntity<String> makeCall(@SuppressWarnings("rawtypes") HttpEntity requestEntity, MspCallsFinalDTO callInfos) throws BadGatewayException, UnavailableException;
-
 }

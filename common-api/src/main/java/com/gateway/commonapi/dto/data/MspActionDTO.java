@@ -30,7 +30,7 @@ public class MspActionDTO {
 
 	@Schema(name = "name",
 			description = "name of MspMeta",
-			example = "Kapten")
+			example = "jcdecaux")
 	@JsonProperty("name")
 	private String name;
 
@@ -42,9 +42,9 @@ public class MspActionDTO {
 
 	@Schema(name = "isAuthentication",
 			description = "check if the action is an authentication action",
-			example = "0")
+			example = "true")
 	@JsonProperty("isAuthentication")
-	private Integer isAuthentication;
+	private boolean isAuthentication ;
 
 	@Schema(name = "isRefreshAuthentication",
 			description = "isRefreshAuthentication",
@@ -62,5 +62,6 @@ public class MspActionDTO {
 			description = "selector")
 	@JsonProperty("selector")
 	private SelectorDTO selector;
+
 
 }

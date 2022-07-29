@@ -12,26 +12,25 @@ public interface MspStandardService {
      * Add a new MspStandardDto
      *
      * @param standardDTO MspStandardDTO object
-     * @return MspStandardDTO informations for the MspStandardDTO added
+     * @return MspStandardDTO information for the MspStandardDTO added
      */
-    public MspStandardDTO addMspStandard(MspStandardDTO standardDTO) throws NotFoundException;
+    MspStandardDTO addMspStandard(MspStandardDTO standardDTO) throws NotFoundException;
 
     /**
      * Retrieve a list of MspStandard transported into MspStandardDto
      *
      * @return List of MspStandardDTO
      */
-    public List<MspStandardDTO> getAllMspStandards();
+    List<MspStandardDTO> getAllMspStandards();
 
 
     /**
-     * Update all the MspStandard informations
+     * Update all the MspStandard information
      *
      * @param id          Identifier of the MspStandardDTO
      * @param standardDTO MspStandardDTO object
-     * @return MspStandardDTO informations for the MspStandardDTO puted
      */
-    public MspStandardDTO updateMspStandard(UUID id, MspStandardDTO standardDTO);
+    void updateMspStandard(UUID id, MspStandardDTO standardDTO);
 
     /**
      * Delete a MspStandardDTO
@@ -39,26 +38,27 @@ public interface MspStandardService {
      * @param id Identifier of the MspStandardDTO
      */
 
-    public void deleteMspStandard(UUID id);
+    void deleteMspStandard(UUID id);
 
     /**
-     * Retrieve a MspStandardDto informations.
+     * Retrieve a MspStandardDto information.
      *
      * @param id Identifier of the MspStandardDto
-     * @return MspStandardDto informations for the MspStandardDto
+     * @return MspStandardDto information for the MspStandardDto
      * @throws NotFoundException not found object
      */
-    public MspStandardDTO getMspStandardFromId(UUID id) throws NotFoundException;
+    MspStandardDTO getMspStandardFromId(UUID id) throws NotFoundException;
 
     /**
-     * Get MspStandardDto from MspActions id and MspMeta id VersionStandard VersionStandard
+     * Get MspStandardDto from MspActions id and MspMeta id VersionStandard
      *
-     * @param mspMetaId
-     * @param mspActionsId
-     * @param versionStandard
-     * @param versionDatamapping
+     * @param mspMetaId MSP ID
+     * @param mspActionsId Action ID
+     * @param mspActionsName Action Name
+     * @param versionStandard Standard version
+     * @param versionDatamapping Datamapping version
      * @return MspStandardDto
-     * @throws NotFoundException
+     * @throws NotFoundException not found
      */
-    public List<MspStandardDTO> getByCriteria(UUID mspMetaId, UUID mspActionsId, String versionStandard, String versionDatamapping) throws NotFoundException;
+    List<MspStandardDTO> getByCriteria(UUID mspMetaId, UUID mspActionsId, String mspActionsName, String versionStandard, String versionDatamapping, Boolean isActive) throws NotFoundException;
 }

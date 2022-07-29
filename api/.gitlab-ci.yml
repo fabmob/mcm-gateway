@@ -1,0 +1,84 @@
+.api-base:
+  variables:
+    MODULE_NAME: api
+    MODULE_PATH: ${MODULE_NAME}
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/library/adoptopenjdk:11-jre-hotspot
+
+.api_init_vars: &api_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export POSTGRES_IMAGE_NAME=${REGISTRY_BASE_NAME}/postgres:${IMAGE_TAG_NAME}
+  export BASE_POSTGRES_IMAGE_NAME=${NEXUS_POSTGRES_IMAGE_NAME}
+  export API_IMAGE_NAME=${REGISTRY_BASE_NAME}/api:${IMAGE_TAG_NAME}
+  export BASE_API_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  export MODULE_PATH=$MODULE_PATH
+  echo "REQUEST_RELAY_FQDN=$REQUEST_RELAY_FQDN"
+  VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+
+.api-build: &api-build |
+  set -x
+  echo "VERSION=$VERSION"
+  envsubst < settings.xml
+  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  cd api
+  echo "MODULE_PATH=$MODULE_PATH"
+  echo "MODULE_NAME=$MODULE_NAME"
+  ls
+  envsubst < ../settings.xml
+  mvn clean install --batch-mode -q -s ../settings.xml -DskipTests
+  echo "listage des elements dans `pwd`target" 
+  ls target
+
+api_build:
+  extends:
+    - .api-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  script:
+    - *api_init_vars
+    - *api-build
+  artifacts:
+    paths:
+      - api/target
+  needs: [ "deploy-nexus" ]
+
+api_image_build:
+  extends:
+    - .image-job
+    - .api-base
+  script:
+    - *api_init_vars
+    - |
+      image
+  needs: [ "api_build" ]
+
+
+api_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .api-base
+  script:
+    - *api_init_vars
+    - |
+      wait_pod data-api
+      wait_pod routing-api
+      KUBERNETES_DATA_API_NAMESPACE=$(pod_namespace data-api)
+      KUBERNETES_ROUTING_API_NAMESPACE=$(pod_namespace routing-api)
+      export KUBERNETES_DATA_API_NAMESPACE
+      export KUBERNETES_ROUTING_API_NAMESPACE
+      deploy
+  needs: [ "api_image_build" ]
+  environment:
+    on_stop: api_preview_cleanup
+
+
+api_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .api-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

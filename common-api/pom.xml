@@ -4,6 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
+
     <groupId>com.gateway</groupId>
     <artifactId>common-api</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -22,6 +23,19 @@
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>maven-releases</id>
+            <name>NEXUS Releases Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>maven-snapshots</id>
+            <name>NEXUS Snapshots Maven Repository</name>
+            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <dependencies>
         <dependency>
@@ -59,7 +73,7 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>RELEASE</version>
+            <version>5.8.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -124,6 +138,44 @@
             <artifactId>commons-text</artifactId>
             <version>1.9</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-annotations</artifactId>
+            <version>1.5.20</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.5</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-commons</artifactId>
+            <version>2.5.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.1.6.RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>2.10.2</version>
+        </dependency>
+        <!-- dependencies for logback.xml conditions -->
+          <dependency>
+              <groupId>org.codehaus.janino</groupId>
+              <artifactId>commons-compiler</artifactId>
+              <version>3.0.8</version>
+            </dependency> <dependency>
+              <groupId>org.codehaus.janino</groupId>
+              <artifactId>janino</artifactId>
+              <version>3.0.6</version>
+            </dependency>
     </dependencies>
 
     <build>

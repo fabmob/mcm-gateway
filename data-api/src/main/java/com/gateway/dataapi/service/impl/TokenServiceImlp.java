@@ -1,22 +1,19 @@
 package com.gateway.dataapi.service.impl;
 
-import static com.gateway.database.util.constant.DataMessageDict.TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND;
-
-import java.util.UUID;
-
-import com.sun.source.tree.TryTree;
-import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.gateway.commonapi.dto.data.TokenDTO;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.dataapi.model.mapper.TokenMapper;
 import com.gateway.dataapi.service.TokenService;
 import com.gateway.database.model.Token;
 import com.gateway.database.service.TokenDatabaseService;
-
 import lombok.extern.slf4j.Slf4j;
+import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.UUID;
+
+import static com.gateway.database.util.constant.DataMessageDict.TOKEN_WITH_PARTNER_META_ID_IS_NOT_FOUND;
 
 @Service
 @Slf4j
@@ -26,9 +23,7 @@ public class TokenServiceImlp implements TokenService {
     private TokenDatabaseService serviceToken;
 
     private final TokenMapper mapper = Mappers.getMapper(TokenMapper.class);
-    private static final String TOKEN_ID_NOT_FOUND = "Token ID not found";
-    private static final String MSP_ID_NOT_FOUND = "MSP ID not found";
-    private static final String TOKEN_NOT_CREATED_YET = "No token associated to this MSP, creation of a new token...";
+
 
     /**
      * Add a new TokenDto
@@ -39,7 +34,7 @@ public class TokenServiceImlp implements TokenService {
 
     @Override
     public TokenDTO addToken(TokenDTO tokenDTO) {
-        Token token = serviceToken.findByMspMetaId(tokenDTO.getMspId());
+        Token token = serviceToken.findByPartnerMetaId(tokenDTO.getPartnerId());
         if (token != null) {
             serviceToken.deleteToken(token.getTokenId());
         }
@@ -72,21 +67,20 @@ public class TokenServiceImlp implements TokenService {
     }
 
     /**
-     * Get TokenDto from MspMeta id
+     * Get TokenDto from PartnerMeta id
      *
-     * @param id Identifier of the MspMetaDto
+     * @param id Identifier of the PartnerMetaDto
      * @return TokenDto
      */
 
     @Override
-    public TokenDTO getByMspMetaId(UUID id) throws NotFoundException {
-        Token token = new Token();
+    public TokenDTO getByPartnerMetaId(UUID id) {
+        Token token;
         try {
-            token = serviceToken.findByMspMetaId(id);
+            token = serviceToken.findByPartnerMetaId(id);
         } catch (Exception e) {
-            token = null;
-            log.error("TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND");
-            throw new NotFoundException(String.format(TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND, id));
+            log.error("TOKEN_WITH_PARTNER_META_ID_IS_NOT_FOUND");
+            throw new NotFoundException(String.format(TOKEN_WITH_PARTNER_META_ID_IS_NOT_FOUND, id));
         }
         return mapper.mapEntityToDto(token);
     }

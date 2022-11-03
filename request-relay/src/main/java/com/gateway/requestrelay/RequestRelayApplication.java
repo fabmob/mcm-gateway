@@ -17,10 +17,10 @@ import org.springframework.context.annotation.PropertySource;
 @OpenAPIDefinition(info = @Info(
         title = "Request Relay",
         version = "2.0",
-        description = "Swagger for the webservice relaying requests to MSPs"),
+        description = "Swagger for the webservice relaying requests to Partners"),
         servers = {
-                @Server(url = "https://${SERVICE_BASE_PATH:localhost:8083}${server.servlet.context-path}"),
-                @Server(url = "http://${SERVICE_BASE_PATH:localhost:8083}${server.servlet.context-path}")
+                @Server(url = "https://${SERVICE_BASE_PATH:localhost:8085}${server.servlet.context-path}"),
+                @Server(url = "http://${SERVICE_BASE_PATH:localhost:8085}${server.servlet.context-path}")
         }
 )
 public class RequestRelayApplication {

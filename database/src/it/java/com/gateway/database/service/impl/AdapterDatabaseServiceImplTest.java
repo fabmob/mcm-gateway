@@ -1,17 +1,12 @@
 package com.gateway.database.service.impl;
 
-import com.gateway.commonapi.exception.ConflictException;
-import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.database.model.Adapters;
 import com.gateway.database.repository.AdaptersRepository;
-import com.gateway.database.repository.MspStandardRepository;
+import com.gateway.database.repository.PartnerStandardRepository;
 import com.gateway.database.service.AdaptersDatabaseService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.internal.matchers.Not;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +19,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 
@@ -42,7 +36,7 @@ public class AdapterDatabaseServiceImplTest {
     private AdaptersRepository adaptersRepository;
 
     @MockBean
-    private MspStandardRepository mspStandardRepository;
+    private PartnerStandardRepository partnerStandardRepository;
 
     @MockBean
     private ErrorMessages errorMessage;

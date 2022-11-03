@@ -1,0 +1,22 @@
+[
+  {
+    "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+    "stationId": "sta1",
+    "name": "station1",
+    "coordinates": null,
+    "physicalAddress": null,
+    "crossStreet": null,
+    "regionId": null,
+    "rentalMethods": null
+  },
+  {
+    "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+    "stationId": "sta2",
+    "name": "station2",
+    "coordinates": null,
+    "physicalAddress": null,
+    "crossStreet": null,
+    "regionId": null,
+    "rentalMethods": null
+  }
+]

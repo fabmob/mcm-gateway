@@ -17,8 +17,8 @@ public interface CacheParamRepository extends CrudRepository<CacheParam, CachePa
 
     @Query(value = "SELECT param FROM CacheParam param " +
             "WHERE ((:actionType IS NULL OR param.cacheParamPK.actionType = :actionType))" +
-            "   AND ((:mspId) IS NULL OR CAST(param.cacheParamPK.msp.mspId as org.hibernate.type.UUIDCharType) IN (:mspId))"
+            "   AND ((:partnerId) IS NULL OR CAST(param.cacheParamPK.partner.partnerId as org.hibernate.type.UUIDCharType) IN (:partnerId))"
     )
     List<CacheParam> findByCriteria(@Param("actionType") String actionType,
-                                           @Param("mspId") UUID mspId);
+                                           @Param("partnerId") UUID partnerId);
 }

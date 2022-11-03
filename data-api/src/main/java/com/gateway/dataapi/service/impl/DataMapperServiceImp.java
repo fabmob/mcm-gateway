@@ -1,18 +1,17 @@
 package com.gateway.dataapi.service.impl;
 
-import java.util.List;
-import java.util.UUID;
-
-import org.mapstruct.factory.Mappers;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.gateway.commonapi.dto.data.DataMapperDTO;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.dataapi.model.mapper.DataMapperMapper;
 import com.gateway.dataapi.service.DataMapperService;
 import com.gateway.database.model.DataMapper;
 import com.gateway.database.service.DataMapperDatabaseService;
+import org.mapstruct.factory.Mappers;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
 
 @Service
 public class DataMapperServiceImp implements DataMapperService {
@@ -82,15 +81,15 @@ public class DataMapperServiceImp implements DataMapperService {
     }
 
     /**
-     * Get DataMapper from MspActions id
+     * Get DataMapper from PartnerActions id
      *
-     * @param id Identifier of the MspActionsDto
+     * @param id Identifier of the PartnerActionsDto
      * @return DataMapperDto
-     * @throws NotFoundException MspAction Not Found
+     * @throws NotFoundException PartnerAction Not Found
      */
     @Override
-    public List<DataMapperDTO> getByMspActionId(UUID id) throws NotFoundException {
-        List<DataMapper> dataMappers = dataMapperService.findByActionMspActionId(id);
+    public List<DataMapperDTO> getByPartnerActionId(UUID id) throws NotFoundException {
+        List<DataMapper> dataMappers = dataMapperService.findByActionPartnerActionId(id);
         return mapper.mapEntityToDto(dataMappers);
     }
 

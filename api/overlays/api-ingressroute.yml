@@ -26,4 +26,4 @@ spec:
   #         - '*.testing.${BASE_DOMAIN}'
 
 
-#exposition des services par association d'un fqdn et ip Custom ressource definition
+# services exposition by association of a fqdn and ip Custom resource definition

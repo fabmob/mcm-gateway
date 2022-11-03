@@ -3,6 +3,8 @@ server:
   shutdown: "graceful"
   servlet:
     context-path: /v1
+  error:
+    whitelabel.enabled: false
 
 springdoc:
   api-docs:
@@ -35,20 +37,17 @@ spring:
       detection-strategy: all
   redis:
     ssl: ${MAAS_API_CACHE_SSL:false}
-    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    password: ${MAAS_API_CACHE_PASSWORD:}
     host: ${MAAS_API_CACHE_HOST:localhost}
     port: ${MAAS_API_CACHE_PORT:6379}
     connection-timeout: 30
     keys:
-      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:defaultEnv-}
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
     repositories:
       enabled: 'false'
   cache:
     type: redis
 
-appli:
-  use:
-    cache: false
 
 ---
 
@@ -70,10 +69,10 @@ security:
 gateway:
   service:
     dataapi:
-      url: "http://${DATA_API_HOST:localhost}:8081/v1"
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
     adapter:
       default-adapter:
-        baseUrl: "${ADAPTER_PROTOCOL:http}://${GENERIC_ADAPTER_FQDN:localhost:8090}"
+        baseUrl: "http://${GENERIC_ADAPTER_HOST:localhost}:8090"
       custom-adapter:
-        baseUrl: "${ADAPTER_PROTOCOL:http}://${GENERIC_ADAPTER_FQDN:localhost:8091}"
+        baseUrl: "http://${GENERIC_ADAPTER_HOST:localhost}:8091"
 #      path: "http://${DEFAULT_ADAPTER_HOST:localhost}:8090"

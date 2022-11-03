@@ -7,6 +7,9 @@ import java.util.Map;
 
 public final class MdcRetention {
 
+    private MdcRetention() {
+    }
+
     public static Runnable wrap(final Runnable delegate) {
         return new MdcRetainingRunnable() {
             @Override
@@ -16,16 +19,16 @@ public final class MdcRetention {
         };
     }
 
-    private static abstract class MdcRetentionSupport {
+    private abstract static class MdcRetentionSupport {
         protected final Map<String, String> originalMdc;
 
         protected MdcRetentionSupport() {
-            Map<String, String> originalMdc = MDC.getCopyOfContextMap();
-            this.originalMdc = originalMdc == null ? Collections.emptyMap() : originalMdc;
+            Map<String, String> origineMdc = MDC.getCopyOfContextMap();
+            this.originalMdc = origineMdc == null ? Collections.emptyMap() : origineMdc;
         }
     }
 
-    public static abstract class MdcRetainingRunnable extends MdcRetentionSupport implements Runnable {
+    public abstract static class MdcRetainingRunnable extends MdcRetentionSupport implements Runnable {
 
         @Override
         public final void run() {
@@ -38,5 +41,6 @@ public final class MdcRetention {
             }
         }
 
-        abstract protected void runInContext();
-    }}
+        protected abstract void runInContext();
+    }
+}

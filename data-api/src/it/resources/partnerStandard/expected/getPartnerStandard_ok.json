@@ -1,0 +1,24 @@
+[
+  {
+    "partnerStandardId": "f7082f2f-317b-4e4c-ba77-54ce2f0dbfff",
+    "standardName": "FNMS",
+    "isActive": false,
+    "versionStandard": "V1.1",
+    "versionDataMapping": "V1.0",
+    "partnerId": "b814c97e-df56-4651-ac50-11525537964f",
+    "partnerActionsId": "7c8f8780-a6fa-495d-8b36-24a20539adca",
+    "adaptersId": "40142f60-9694-479f-a6cd-28b199b5e240"
+
+  },
+  {
+    "partnerStandardId": "921d8cf9-18e7-423e-83be-26a6cd4281e9",
+    "standardName": "FNMS",
+    "isActive": true,
+    "versionStandard": "V2.1",
+    "versionDataMapping": "V2.0",
+    "partnerId": "6c317901-749f-4d7d-82bb-afdc737b26b3",
+    "partnerActionsId": "2c1a2210-4916-4aaa-8287-7a4d50e93518",
+    "adaptersId": "40142f60-9694-479f-a6cd-28b199b5e240"
+
+  }
+]

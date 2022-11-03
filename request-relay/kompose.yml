@@ -9,9 +9,13 @@ services:
        args:
          MAVEN_IMAGE_NAME: ${BASE_REQUEST_RELAY_IMAGE_NAME}
      ports:
-       - '8083'
+       - '8085'
      environment:
        - SERVICE_BASE_PATH=${REQUEST_RELAY_FQDN}
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_PORT=6379
+       - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
      labels:
        - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
        - 'kompose.service.type=clusterip'

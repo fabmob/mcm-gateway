@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: mock-api
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${MOCK_API_FQDN}`)
+      middlewares:
+        - name: mock-api-headers-middleware
+        - name: mock-api-ratelimit-middleware
+        - name: mock-api-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: mock-api
+          port: 8084
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

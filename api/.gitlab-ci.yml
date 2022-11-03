@@ -1,3 +1,6 @@
+include:
+  - local: "api/.gitlab-ci/helm.yml"
+
 .api-base:
   variables:
     MODULE_NAME: api
@@ -18,13 +21,18 @@
 .api-build: &api-build |
   set -x
   echo "VERSION=$VERSION"
-  envsubst < settings.xml
-  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  #envsubst < settings.xml
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
   cd api
   echo "MODULE_PATH=$MODULE_PATH"
   echo "MODULE_NAME=$MODULE_NAME"
-  ls
-  envsubst < ../settings.xml
+  #ls
+  #envsubst < ../settings.xml
+  #echo "---------"
+  #cat ../settings.xml
   mvn clean install --batch-mode -q -s ../settings.xml -DskipTests
   echo "listage des elements dans `pwd`target" 
   ls target
@@ -35,40 +43,39 @@ api_build:
     - .build-job
     - .no-needs
     - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/api
   script:
     - *api_init_vars
     - *api-build
   artifacts:
     paths:
       - api/target
-  needs: [ "deploy-nexus" ]
+  needs: [ "deploy-nexus", "check-if-release-version" ]
 
 api_image_build:
   extends:
     - .image-job
     - .api-base
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/api
   script:
     - *api_init_vars
     - |
       image
-  needs: [ "api_build" ]
-
+  needs: [ "api_build", "check-if-release-version" ]
 
 api_preview_deploy:
   extends:
     - .preview-deploy-job
     - .api-base
+    - .deactivate
   script:
     - *api_init_vars
     - |
-      wait_pod data-api
-      wait_pod routing-api
-      KUBERNETES_DATA_API_NAMESPACE=$(pod_namespace data-api)
-      KUBERNETES_ROUTING_API_NAMESPACE=$(pod_namespace routing-api)
-      export KUBERNETES_DATA_API_NAMESPACE
-      export KUBERNETES_ROUTING_API_NAMESPACE
+      export MAAS_API_CACHE_KEYS_PREFIX="preview"
       deploy
-  needs: [ "api_image_build" ]
+  needs: [ "api_image_build", "check-if-release-version" ]
   environment:
     on_stop: api_preview_cleanup
 

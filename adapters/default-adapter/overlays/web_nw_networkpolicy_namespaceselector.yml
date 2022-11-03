@@ -7,4 +7,4 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          com.capgemini.mcm-maas.ingress: "true"
+          com.mcm.maas.ingress: "true"

@@ -20,16 +20,10 @@ import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -40,8 +34,8 @@ import java.util.*;
 
 import static com.gateway.adapter.utils.CustomUtils.*;
 import static com.gateway.adapter.utils.constant.AdapterMessageDict.HIDDEN_TEXT;
+import static com.gateway.commonapi.utils.enums.ActionsEnum.AVAILABLE_ASSET_SEARCH;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -49,12 +43,11 @@ import static org.mockito.Mockito.lenient;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
-
-class DefaultAdapterServiceImplTest {
+public class DefaultAdapterServiceImplTest {
     public static final String IT_RESOURCES_PATH = "./src/it/resources/";
     public static final String DEFAULT_ADAPTER_MOCK_ADAPT_GET_OK_JSON = "default-adapter/mock/adaptGetMock.json";
     public static final String MOCK_TOKEN_RESPONSE_OK_JSON = "default-adapter/mock/mock_token_response.json";
-    public static final String TEST_WITH_SELECTOR_ONE_OBJECT = "default-adapter/mock/test_with_selector_msp_one_object.json";
+    public static final String TEST_WITH_SELECTOR_ONE_OBJECT = "default-adapter/mock/test_with_selector_partner_one_object.json";
     public static final String TEST_WITH_SELECTOR_NO_MAPPING = "default-adapter/mock/test_no_data_mapper.json";
     public static final String TEST_WITH_SELECTOR_DEFAULT_VALUE_SIMPLE_ELEMENTS = "default-adapter/mock/test_default_value.json";
     public static final String TEST_WITH_SELECTOR_ELEMENTS_SIMPLE = "default-adapter/mock/test_elements_simple.json";
@@ -77,7 +70,7 @@ class DefaultAdapterServiceImplTest {
     @Value("${gateway.service.requestRelay.url}")
     private String uri;
 
-    @Value("${gateway.service.dataapi.url}")
+    @Value("${gateway.service.dataapi.baseUrl}")
     private String dataApiUri;
     @Value("${gateway.service.requestRelay.isMocked}")
     private Boolean isRequestRelayMocked;
@@ -90,62 +83,57 @@ class DefaultAdapterServiceImplTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    @Test
-    public void restTemplate() {
-        assertNotNull(defaultAdapterServiceImpl.restTemplate());
+    private PartnerActionDTO createMockPartnerAction() {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        PartnerActionDTO partnerActionDTO = new PartnerActionDTO();
+        partnerActionDTO.setPartnerActionId(partnerActionId);
+        partnerActionDTO.setAction(AVAILABLE_ASSET_SEARCH);
+        return partnerActionDTO;
     }
 
-    private MspActionDTO createMockMspAction() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
-        MspActionDTO mspActionDTO = new MspActionDTO();
-        mspActionDTO.setMspActionId(mspActionId);
-        mspActionDTO.setAction("AVAILABLE_ASSET_SEARCH");
-        return mspActionDTO;
+    private PartnerActionDTO createMockAuthenticationAction() {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        PartnerActionDTO partnerActionDTO = new PartnerActionDTO();
+        partnerActionDTO.setPartnerActionId(partnerActionId);
+        partnerActionDTO.setAction(AVAILABLE_ASSET_SEARCH);
+        partnerActionDTO.setAuthentication(true);
+        return partnerActionDTO;
     }
 
-    private MspActionDTO createMockAuthenticationAction() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        MspActionDTO mspActionDTO = new MspActionDTO();
-        mspActionDTO.setMspActionId(mspActionId);
-        mspActionDTO.setAction("");
-        mspActionDTO.setAuthentication(true);
-        return mspActionDTO;
-    }
-
-    private MspActionDTO createMockMspActionWithSelector() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
-        MspActionDTO mspActionDTO = new MspActionDTO();
-        mspActionDTO.setMspActionId(mspActionId);
+    private PartnerActionDTO createMockPartnerActionWithSelector() {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        PartnerActionDTO partnerActionDTO = new PartnerActionDTO();
+        partnerActionDTO.setPartnerActionId(partnerActionId);
         SelectorDTO selectorDTO = new SelectorDTO();
         selectorDTO.setSelectorId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f865"));
         selectorDTO.setKey("assetsType");
-        mspActionDTO.setSelector(selectorDTO);
-        mspActionDTO.setAction("AVAILABLE_ASSET_SEARCH");
-        return mspActionDTO;
+        partnerActionDTO.setSelector(selectorDTO);
+        partnerActionDTO.setAction(AVAILABLE_ASSET_SEARCH);
+        return partnerActionDTO;
     }
 
-    private MspStandardDTO[] createMockMspStandard() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
-        MspStandardDTO mspStandardDTO = new MspStandardDTO();
-        mspStandardDTO.setMspActionsId(mspActionId);
-        mspStandardDTO.setMspId(mspId);
-        return new MspStandardDTO[]{mspStandardDTO};
+    private PartnerStandardDTO[] createMockPartnerStandard() {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        PartnerStandardDTO partnerStandardDTO = new PartnerStandardDTO();
+        partnerStandardDTO.setPartnerActionsId(partnerActionId);
+        partnerStandardDTO.setPartnerId(partnerId);
+        return new PartnerStandardDTO[]{partnerStandardDTO};
     }
 
-    private MspCallsDTO[] createMockMspCallsDTOWithoutBody() {
-        List<MspCallsDTO> mspCallsDTOlist = new ArrayList<MspCallsDTO>();
+    private PartnerCallsDTO[] createMockPartnerCallsDTOWithoutBody() {
+        List<PartnerCallsDTO> partnerCallsDTOlist = new ArrayList<PartnerCallsDTO>();
 
-        MspCallsDTO callDTOMultiCalls = new MspCallsDTO();
-        callDTOMultiCalls.setMspCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f886"));
-        callDTOMultiCalls.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        PartnerCallsDTO callDTOMultiCalls = new PartnerCallsDTO();
+        callDTOMultiCalls.setPartnerCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f886"));
+        callDTOMultiCalls.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         callDTOMultiCalls.setMethod("POST");
 
-        MspCallsDTO callDTO = new MspCallsDTO();
-        callDTO.setMspCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
-        callDTO.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        PartnerCallsDTO callDTO = new PartnerCallsDTO();
+        callDTO.setPartnerCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
+        callDTO.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         callDTO.setMethod("POST");
 
         Set<HeadersDTO> headers = new HashSet<>();
@@ -183,21 +171,21 @@ class DefaultAdapterServiceImplTest {
         paramsDTOSet.add(paramsDTO);
 
         callDTO.setParams(paramsDTOSet);
-        callDTO.setUrl("https://api.jcdecaux.com/vls/v1/stations");
+        callDTO.setUrl("");
         callDTOMultiCalls.setParams(paramsDTOSet);
-        callDTOMultiCalls.setUrl("http://demo7362099.mockable.io/mockedmsp/postrequest");
+        callDTOMultiCalls.setUrl("");
 
-        mspCallsDTOlist.add(callDTO);
-        mspCallsDTOlist.add(callDTOMultiCalls);
-        return mspCallsDTOlist.toArray(MspCallsDTO[]::new);
+        partnerCallsDTOlist.add(callDTO);
+        partnerCallsDTOlist.add(callDTOMultiCalls);
+        return partnerCallsDTOlist.toArray(PartnerCallsDTO[]::new);
     }
 
 
-    private MspCallsDTO[] createMockMspCallsDTOWithBody() {
-        List<MspCallsDTO> mspCallsDTOlist = new ArrayList<MspCallsDTO>();
-        MspCallsDTO callDTO = new MspCallsDTO();
-        callDTO.setMspCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
-        callDTO.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888"));
+    private PartnerCallsDTO[] createMockPartnerCallsDTOWithBody() {
+        List<PartnerCallsDTO> partnerCallsDTOlist = new ArrayList<PartnerCallsDTO>();
+        PartnerCallsDTO callDTO = new PartnerCallsDTO();
+        callDTO.setPartnerCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
+        callDTO.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888"));
         callDTO.setMethod("POST");
 
         Set<HeadersDTO> headers = new HashSet<>();
@@ -231,7 +219,7 @@ class DefaultAdapterServiceImplTest {
         paramsDTOSet.add(paramsDTO2);
 
         callDTO.setParams(paramsDTOSet);
-        callDTO.setUrl("https://api.jcdecaux.com/vls/v1/stations");
+        callDTO.setUrl("");
 
         BodyParamsDTO bodyParamsDTO = new BodyParamsDTO(null, "TEST", null, 0, "test", null, null, null);
         BodyParamsDTO bodyParams2DTO = new BodyParamsDTO(null, "STATION_ID", "stationId", 0, null, null, null, null);
@@ -246,8 +234,8 @@ class DefaultAdapterServiceImplTest {
 
         callDTO.setBody(body);
 
-        mspCallsDTOlist.add(callDTO);
-        return mspCallsDTOlist.toArray(MspCallsDTO[]::new);
+        partnerCallsDTOlist.add(callDTO);
+        return partnerCallsDTOlist.toArray(PartnerCallsDTO[]::new);
     }
 
     private DataMapperDTO[] createMockDataMapperDTO() {
@@ -256,20 +244,20 @@ class DefaultAdapterServiceImplTest {
         //datamapper with '.'
         DataMapperDTO dataMapper = new DataMapperDTO();
         dataMapper.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef2"));
-        dataMapper.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         dataMapper.setDefaultValue("default");
-        dataMapper.setChampExterne("vehicules");
-        dataMapper.setChampInterne("assets.assetId");
-        dataMapper.setContainedValue("data.vehiculeId");
+        dataMapper.setExternalField("vehicles");
+        dataMapper.setInternalField("assets.assetId");
+        dataMapper.setContainedValue("data.vehicleId");
         dataMapper.setIsArray(1);
         dataMapperList.add(dataMapper);
 
         //datamapper converting array of string to boolean
         DataMapperDTO dataMapper2 = new DataMapperDTO();
         dataMapper2.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef3"));
-        dataMapper2.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
-        dataMapper2.setChampExterne("vehicules");
-        dataMapper2.setChampInterne("assets.overriddenProperties.travelAbroad");
+        dataMapper2.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper2.setExternalField("vehicles");
+        dataMapper2.setInternalField("assets.overriddenProperties.travelAbroad");
         dataMapper2.setContainedValue("data.characteristics.travelAbroad");
         dataMapper2.setIsArray(1);
         dataMapperList.add(dataMapper2);
@@ -277,9 +265,9 @@ class DefaultAdapterServiceImplTest {
         //datamapper with default value given
         DataMapperDTO dataMapper3 = new DataMapperDTO();
         dataMapper3.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef4"));
-        dataMapper3.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
-        dataMapper3.setChampExterne("vehicules");
-        dataMapper3.setChampInterne("assets.assetType");
+        dataMapper3.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper3.setExternalField("vehicles");
+        dataMapper3.setInternalField("assets.assetType");
         dataMapper3.setDefaultValue("TAXI");
         dataMapper3.setIsArray(1);
         dataMapperList.add(dataMapper3);
@@ -292,10 +280,10 @@ class DefaultAdapterServiceImplTest {
         List<DataMapperDTO> dataMapperList = new ArrayList<DataMapperDTO>();
         DataMapperDTO dataMapper = new DataMapperDTO();
         dataMapper.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef2"));
-        dataMapper.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         dataMapper.setDefaultValue("public bus");
-        dataMapper.setChampExterne(null);
-        dataMapper.setChampInterne("assetSubClass");
+        dataMapper.setExternalField(null);
+        dataMapper.setInternalField("assetSubClass");
         dataMapperList.add(dataMapper);
         return dataMapperList.toArray(DataMapperDTO[]::new);
     }
@@ -304,10 +292,10 @@ class DefaultAdapterServiceImplTest {
         List<DataMapperDTO> dataMapperList = new ArrayList<DataMapperDTO>();
         DataMapperDTO dataMapper = new DataMapperDTO();
         dataMapper.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef2"));
-        dataMapper.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         dataMapper.setDefaultValue("Place de la République");
-        dataMapper.setChampExterne(null);
-        dataMapper.setChampInterne("sharedProperties.name");
+        dataMapper.setExternalField(null);
+        dataMapper.setInternalField("sharedProperties.name");
         dataMapperList.add(dataMapper);
         return dataMapperList.toArray(DataMapperDTO[]::new);
     }
@@ -317,19 +305,19 @@ class DefaultAdapterServiceImplTest {
         List<DataMapperDTO> dataMapperList = new ArrayList<DataMapperDTO>();
         DataMapperDTO dataMapper = new DataMapperDTO();
         dataMapper.setDataMapperId(UUID.fromString("231866de-4e4f-4ab7-948b-372ce1acaef2"));
-        dataMapper.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
-        dataMapper.setChampExterne("vehiculeId");
-        dataMapper.setChampInterne("assetTypeId");
+        dataMapper.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+        dataMapper.setExternalField("vehicleId");
+        dataMapper.setInternalField("assetTypeId");
         dataMapperList.add(dataMapper);
         return dataMapperList.toArray(DataMapperDTO[]::new);
     }
 
 
-    private MspCallsDTO[] createMockMspCallsDTOWhenSecurityFlagIsNotNull() {
-        List<MspCallsDTO> mspCallsDTOlist = new ArrayList<>();
-        MspCallsDTO callDTO = new MspCallsDTO();
-        callDTO.setMspCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
-        callDTO.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+    private PartnerCallsDTO[] createMockPartnerCallsDTOWhenSecurityFlagIsNotNull() {
+        List<PartnerCallsDTO> partnerCallsDTOlist = new ArrayList<>();
+        PartnerCallsDTO callDTO = new PartnerCallsDTO();
+        callDTO.setPartnerCallId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880"));
+        callDTO.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         callDTO.setMethod("POST");
 
         Set<HeadersDTO> headers = new HashSet<>();
@@ -357,11 +345,11 @@ class DefaultAdapterServiceImplTest {
         paramsDTOSet.add(paramsDTO);
 
         callDTO.setParams(paramsDTOSet);
-        callDTO.setUrl("https://api.jcdecaux.com/vls/v1/stations");
+        callDTO.setUrl("");
 
-        mspCallsDTOlist.add(callDTO);
-        MspCallsDTO[] mspCallsDTO = mspCallsDTOlist.toArray(MspCallsDTO[]::new);
-        return mspCallsDTO;
+        partnerCallsDTOlist.add(callDTO);
+        PartnerCallsDTO[] partnerCallsDTO = partnerCallsDTOlist.toArray(PartnerCallsDTO[]::new);
+        return partnerCallsDTO;
     }
 
     private String createMockResponse() throws IOException {
@@ -405,56 +393,57 @@ class DefaultAdapterServiceImplTest {
     private TokenDTO createMockTokenDTO() {
         TokenDTO tokenDTO = new TokenDTO();
         tokenDTO.setTokenId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f000"));
+        tokenDTO.setAccessToken("MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3");
         return tokenDTO;
     }
 
-    private MspMetaDTO createMockMspMeta() {
-        MspMetaDTO mspMetaDTO = new MspMetaDTO();
-        mspMetaDTO.setMspId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866"));
-        return mspMetaDTO;
+    private PartnerMetaDTO createMockPartnerMeta() {
+        PartnerMetaDTO partnerMetaDTO = new PartnerMetaDTO();
+        partnerMetaDTO.setPartnerId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866"));
+        return partnerMetaDTO;
     }
 
-    private MspActionDTO[] createMockAuthenticationActionsOfMsp(){
-        List<MspActionDTO> actions = new ArrayList<MspActionDTO>();
-        MspActionDTO authenticationAction = new MspActionDTO();
-        authenticationAction.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+    private PartnerActionDTO[] createMockAuthenticationActionsOfPartner() {
+        List<PartnerActionDTO> actions = new ArrayList<PartnerActionDTO>();
+        PartnerActionDTO authenticationAction = new PartnerActionDTO();
+        authenticationAction.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         authenticationAction.setAuthentication(true);
         actions.add(authenticationAction);
-        return actions.toArray(MspActionDTO[]::new);
+        return actions.toArray(PartnerActionDTO[]::new);
     }
 
-    private MspActionDTO[] createMockActionsOfMsp(){
-        List<MspActionDTO> actions = new ArrayList<MspActionDTO>();
-        MspActionDTO actionDTO = new MspActionDTO();
-        actionDTO.setMspActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
+    private PartnerActionDTO[] createMockActionsOfPartner() {
+        List<PartnerActionDTO> actions = new ArrayList<PartnerActionDTO>();
+        PartnerActionDTO actionDTO = new PartnerActionDTO();
+        actionDTO.setPartnerActionId(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801"));
         actions.add(actionDTO);
-        return actions.toArray(MspActionDTO[]::new);
+        return actions.toArray(PartnerActionDTO[]::new);
     }
 
     @Test
-    void testAdaptGetOperation() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperation() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -463,24 +452,24 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         //List<AssetType> list = (List<AssetType>) response.get(0);
         AssetType list = (AssetType) response.get(0);
         System.out.println(list);
@@ -489,50 +478,50 @@ class DefaultAdapterServiceImplTest {
         // some test of exceptions
         lenient().when(errorMessage.getTechnicalRestHttpClientError()).thenReturn("500");
 
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),ArgumentMatchers.eq(HttpMethod.GET),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"), ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenThrow(HttpClientErrorException.NotFound.class);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenThrow(HttpClientErrorException.NotFound.class);
 
-        assertThrows(NullPointerException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null));
+        assertThrows(NullPointerException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null));
 
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),ArgumentMatchers.eq(HttpMethod.GET),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"), ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenThrow(RestClientException.class);
-        assertThrows(BadGatewayException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null));
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenThrow(RestClientException.class);
+        assertThrows(BadGatewayException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null));
 
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),ArgumentMatchers.eq(HttpMethod.GET),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"), ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenThrow(NullPointerException.class);
-        assertThrows(UnavailableException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null));
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenThrow(NullPointerException.class);
+        assertThrows(UnavailableException.class, () -> defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null));
 
 
     }
 
 
     @Test
-    void testAuthenticationAction () throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAuthenticationAction() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> tokenObjectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -541,40 +530,40 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(tokenObjectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
         ResponseEntity<TokenDTO> tokenResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenResponse);
 
-        ResponseEntity<String> tokenSavedInDatabase = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
+        ResponseEntity<TokenDTO> tokenSavedInDatabase = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens"),
                 ArgumentMatchers.eq(HttpMethod.POST),
                 any(),
-                ArgumentMatchers.eq(String.class))).thenReturn(tokenSavedInDatabase);
+                ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenSavedInDatabase);
 
-        Mockito.when(authenticationService.needAuthentication( List.of(actionsByMspId.getBody()))).thenReturn(true);
+        Mockito.when(authenticationService.needAuthentication(List.of(actionsBypartnerId.getBody()))).thenReturn(true);
 
-        Mockito.when( authenticationService.needAuthenticationAction( List.of(actionsByMspId.getBody()))).thenReturn(mspActionDTOResponse.getBody());
+        Mockito.when(authenticationService.needAuthenticationAction(List.of(actionsBypartnerId.getBody()))).thenReturn(partnerActionDTOResponse.getBody());
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
 
         TokenDTO list = (TokenDTO) response.get(0);
         assertEquals("MTQ0NjJkZmQ5OTM2NDE1ZTZjNGZmZjI3", list.getAccessToken());
@@ -582,32 +571,30 @@ class DefaultAdapterServiceImplTest {
     }
 
 
-
-
     @Test
-    void testAuthenticationException () throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAuthenticationException() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> tokenObjectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -616,30 +603,30 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(tokenObjectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
         ResponseEntity<TokenDTO> tokenResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenResponse);
 
-        HttpClientErrorException.NotFound adapterException = (HttpClientErrorException.NotFound) HttpClientErrorException.create(HttpStatus.NOT_FOUND,"exception",null,null,null);
+        HttpClientErrorException.NotFound adapterException = (HttpClientErrorException.NotFound) HttpClientErrorException.create(HttpStatus.NOT_FOUND, "exception", null, null, null);
 
         ResponseEntity<String> tokenSavedInDatabase = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens"),
@@ -647,43 +634,43 @@ class DefaultAdapterServiceImplTest {
                 any(),
                 ArgumentMatchers.eq(String.class))).thenThrow(adapterException);
 
-        Mockito.when(authenticationService.needAuthentication( List.of(actionsByMspId.getBody()))).thenReturn(true);
+        Mockito.when(authenticationService.needAuthentication(List.of(actionsBypartnerId.getBody()))).thenReturn(true);
 
-        Mockito.when( authenticationService.needAuthenticationAction( List.of(actionsByMspId.getBody()))).thenReturn(mspActionDTOResponse.getBody());
+        Mockito.when(authenticationService.needAuthenticationAction(List.of(actionsBypartnerId.getBody()))).thenReturn(partnerActionDTOResponse.getBody());
 
         lenient().when(errorMessage.getTechnicalRestHttpClientError()).thenReturn("exception");
 
         assertThrows(NotFoundException.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
 
     }
 
 
     @Test
-    void testAuthenticationExceptionRestClient () throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAuthenticationExceptionRestClient() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> tokenObjectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -692,74 +679,73 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(tokenObjectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
         ResponseEntity<TokenDTO> tokenResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenResponse);
 
         RestClientException adapterException = new RestClientException("exception");
 
-        ResponseEntity<String> tokenSavedInDatabase = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens"),
                 ArgumentMatchers.eq(HttpMethod.POST),
                 any(),
-                ArgumentMatchers.eq(String.class))).thenThrow(adapterException);
+                ArgumentMatchers.eq(TokenDTO.class))).thenThrow(adapterException);
 
-        Mockito.when(authenticationService.needAuthentication( List.of(actionsByMspId.getBody()))).thenReturn(true);
+        Mockito.when(authenticationService.needAuthentication(List.of(actionsBypartnerId.getBody()))).thenReturn(true);
 
-        Mockito.when( authenticationService.needAuthenticationAction( List.of(actionsByMspId.getBody()))).thenReturn(mspActionDTOResponse.getBody());
+        Mockito.when(authenticationService.needAuthenticationAction(List.of(actionsBypartnerId.getBody()))).thenReturn(partnerActionDTOResponse.getBody());
 
         lenient().when(errorMessage.getTechnicalRestHttpClientError()).thenReturn("exception");
 
-        assertThrows(BadGatewayException.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        assertThrows(NotFoundException.class, () -> {
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
 
     }
 
 
     @Test
-    void testAuthenticationExceptionAny () throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAuthenticationExceptionAny() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> tokenObjectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -768,79 +754,78 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(tokenObjectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockAuthenticationActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
         ResponseEntity<TokenDTO> tokenResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenResponse);
 
         InternalException adapterException = new InternalException("exception");
-        ResponseEntity<String> tokenSavedInDatabase = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens"),
                 ArgumentMatchers.eq(HttpMethod.POST),
                 any(),
-                ArgumentMatchers.eq(String.class))).thenThrow(adapterException);
+                ArgumentMatchers.eq(TokenDTO.class))).thenThrow(adapterException);
 
-        Mockito.when(authenticationService.needAuthentication( List.of(actionsByMspId.getBody()))).thenReturn(true);
+        Mockito.when(authenticationService.needAuthentication(List.of(actionsBypartnerId.getBody()))).thenReturn(true);
 
-        Mockito.when( authenticationService.needAuthenticationAction( List.of(actionsByMspId.getBody()))).thenReturn(mspActionDTOResponse.getBody());
+        Mockito.when(authenticationService.needAuthenticationAction(List.of(actionsBypartnerId.getBody()))).thenReturn(partnerActionDTOResponse.getBody());
 
         lenient().when(errorMessage.getTechnicalRestHttpClientError()).thenReturn("exception");
 
-        assertThrows(UnavailableException.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        assertThrows(NotFoundException.class, () -> {
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
 
     }
 
 
     @Test
-    void testAdaptGetOperationUnspecifiedSelectorException() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperationUnspecifiedSelectorException() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseSelectorOneObject());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -849,18 +834,18 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals(null, list.getAssets());
 
@@ -868,35 +853,35 @@ class DefaultAdapterServiceImplTest {
 
 
     @Test
-    void testAdaptGetOperationDataMapperNull() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperationDataMapperNull() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockAsset());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -905,47 +890,47 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(null);
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("asset1", list.getAssets().get(0).getAssetId());
 
     }
 
     @Test
-    void testAdaptGetOperationResponseNullException() throws JSONException, IOException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperationResponseNullException() throws JSONException, IOException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(null);
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -954,48 +939,48 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
         assertThrows(Exception.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
 
 
     }
 
     @Test
-    void testWithSelectorMspReturnedObject() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testWithSelectorPartnerReturnedObject() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspActionWithSelector());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerActionWithSelector());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseSelectorOneObject());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1004,53 +989,53 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("f457579d-02f8-4479-b97b-ffb678e3f899", list.getAssets().get(0).getAssetId());
     }
 
 
     @Test
-    void testWithSelectorMspReturnedArray() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testWithSelectorPartnerReturnedArray() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspActionWithSelector());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerActionWithSelector());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseWithSelector());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1059,59 +1044,59 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("f457579d-02f8-4479-b97b-ffb678e3f899", list.getAssets().get(0).getAssetId());
     }
 
     @Test
-    void testAdaptGetOperationWhenSecurityFlagIsNotNull() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperationWhenSecurityFlagIsNotNull() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
 
         ResponseEntity<TokenDTO> tokenResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockTokenDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/tokens?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(TokenDTO.class))).thenReturn(tokenResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWhenSecurityFlagIsNotNull());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWhenSecurityFlagIsNotNull());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1120,48 +1105,48 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
-      AssetType list = (AssetType) response.get(0);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
+        AssetType list = (AssetType) response.get(0);
         assertEquals("f457579d-02f8-4479-b97b-ffb678e3f899", list.getAssets().get(0).getAssetId());
     }
 
     @Test
     public void testAdaptGetOperationExceptionsWhenActionIsNull() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
 
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(null);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(null);
 
         Exception exception = assertThrows(Exception.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
         String actualMessage = exception.getMessage();
         assertEquals(null, actualMessage);
     }
 
     @Test
-    void testAdaptPostOperation() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptPostOperation() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
         String requestBodyString = WsTestUtil.readJsonFromFilePath(IT_RESOURCES_PATH + REQUEST_BODY_OK_JSON);
         ObjectMapper mapper = new ObjectMapper();
@@ -1169,24 +1154,24 @@ class DefaultAdapterServiceImplTest {
         });
         Map<String, Object> requestBody = objectReader.readValue(requestBodyString);
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f888"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f888"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f888"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f888"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1196,35 +1181,35 @@ class DefaultAdapterServiceImplTest {
         objectResponse.getBody();
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, (Map<String, Object>) requestBody);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, (Map<String, Object>) requestBody);
         AssetType list = (AssetType) response.get(0);
         assertEquals("f457579d-02f8-4479-b97b-ffb678e3f899", list.getAssets().get(0).getAssetId());
     }
 
 
     @Test
-    void testAdaptPostOperationException() throws IOException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptPostOperationException() throws IOException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
         String requestBodyString = WsTestUtil.readJsonFromFilePath(IT_RESOURCES_PATH + REQUEST_BODY_EXCEPTION_JSON);
         ObjectMapper mapper = new ObjectMapper();
@@ -1232,29 +1217,29 @@ class DefaultAdapterServiceImplTest {
         });
         Map<String, Object> requestBody = objectReader.readValue(requestBodyString);
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f888"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f888"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f888"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f888"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-calls?f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponse());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1264,43 +1249,43 @@ class DefaultAdapterServiceImplTest {
         objectResponse.getBody();
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTO());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
         assertThrows(NullPointerException.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, requestBody);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, requestBody);
         });
     }
 
     @Test
     public void testAdaptGetOperationExceptionsWhenCallsAreNull() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
 
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(null);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(null);
 
         Exception exception = assertThrows(NullPointerException.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
         String actualMessage = exception.getMessage();
         assertEquals(null, actualMessage);
@@ -1308,23 +1293,23 @@ class DefaultAdapterServiceImplTest {
 
     @Test
     public void testAdaptGetOperationExceptionsWhenResponseRequestRelayIsNull() {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
 
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
                 ArgumentMatchers.eq(HttpMethod.POST),
@@ -1332,14 +1317,14 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(Object[].class))).thenReturn(null);
 
         Exception exception = assertThrows(Exception.class, () -> {
-            defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+            defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         });
         String actualMessage = exception.getMessage();
         assertEquals(null, actualMessage);
     }
 
     @Test
-    void testFormatDateTime() throws IllegalFormatException {
+    public void testFormatDateTime() throws IllegalFormatException {
 
         //TimeZones to test
         String timeZoneTokyo = "Asia/Tokyo"; //No summer/winter hours UTC+9
@@ -1375,7 +1360,7 @@ class DefaultAdapterServiceImplTest {
     }
 
     @Test
-    void testAssignPrecision() {
+    public void testAssignPrecision() {
         String exampleOffsetDateTime = "1977-04-22T01:00-01:00"; //Visual example of OffsetDateTime format passed as argument
         OffsetDateTime odt = OffsetDateTime.parse(exampleOffsetDateTime);
 
@@ -1396,7 +1381,7 @@ class DefaultAdapterServiceImplTest {
     }
 
     @Test
-    void testCensoredBodyParam() {
+    public void testCensoredBodyParam() {
         String censoredValue = "MotDePasse!";
         String unCensoredValue = "STATION_SEARCH";
         assertEquals(HIDDEN_TEXT, censoredParam(1, censoredValue));
@@ -1404,35 +1389,35 @@ class DefaultAdapterServiceImplTest {
     }
 
     @Test
-    void testAdaptGetOperationObjectDataMapperNull() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testAdaptGetOperationObjectDataMapperNull() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspActionWithSelector());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerActionWithSelector());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseSelectorOneObjectWithoutDataMapping());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1441,18 +1426,18 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(null);
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         //List<AssetType> list = (List<AssetType>) response.get(0);
         AssetType list = (AssetType) response.get(0);
         System.out.println(list);
@@ -1461,35 +1446,35 @@ class DefaultAdapterServiceImplTest {
     }
 
     @Test
-    void testWithDefaultValue() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testWithDefaultValue() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspActionWithSelector());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerActionWithSelector());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseDefaultValue());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1498,52 +1483,52 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTODefaultValue());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("Place de la République", list.getSharedProperties().getName());
     }
 
     @Test
-    void testWithDefaultValueSimpleElements() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testWithDefaultValueSimpleElements() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspActionWithSelector());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerActionWithSelector());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseDefaultValue());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1552,53 +1537,53 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTODefaultValueSimple());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("public bus", list.getAssetSubClass());
     }
 
 
     @Test
-    void testSimpleElements() throws IOException, JSONException {
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
+    public void testSimpleElements() throws IOException, JSONException {
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f801");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f866");
         Map<String, String> params = new HashMap<>();
-        params.put("mspId", "f457579d-02f8-4479-b97b-ffb678e3f880");
+        params.put("partnerId", "f457579d-02f8-4479-b97b-ffb678e3f880");
 
-        ResponseEntity<MspActionDTO> mspActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspAction());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerActionDTO> partnerActionDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerAction());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions/f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO.class))).thenReturn(mspActionDTOResponse);
+                ArgumentMatchers.eq(PartnerActionDTO.class))).thenReturn(partnerActionDTOResponse);
 
-        ResponseEntity<MspMetaDTO> mspMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspMeta());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerMetaDTO> partnerMetaResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerMeta());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-metas/f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspMetaDTO.class))).thenReturn(mspMetaResponse);
+                ArgumentMatchers.eq(PartnerMetaDTO.class))).thenReturn(partnerMetaResponse);
 
-        ResponseEntity<MspStandardDTO[]> mspStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspStandard());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-standards?mspActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerStandardDTO[]> partnerStandardDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerStandard());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-standards?partnerActionsId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspStandardDTO[].class))).thenReturn(mspStandardDTOResponse);
+                ArgumentMatchers.eq(PartnerStandardDTO[].class))).thenReturn(partnerStandardDTOResponse);
 
-        ResponseEntity<MspCallsDTO[]> mspCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockMspCallsDTOWithoutBody());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-calls?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        ResponseEntity<PartnerCallsDTO[]> partnerCallsDTOResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockPartnerCallsDTOWithoutBody());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("partner-calls?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspCallsDTO[].class))).thenReturn(mspCallsDTOResponse);
+                ArgumentMatchers.eq(PartnerCallsDTO[].class))).thenReturn(partnerCallsDTOResponse);
 
         ResponseEntity<String> objectResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockResponseElementsSimple());
         lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("?protocol=REST"),
@@ -1607,18 +1592,18 @@ class DefaultAdapterServiceImplTest {
                 ArgumentMatchers.eq(String.class))).thenReturn(objectResponse);
 
         ResponseEntity<DataMapperDTO[]> dataMapperResponse = ResponseEntity.status(HttpStatus.OK).body(this.createMockDataMapperDTOSimpleElements());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?mspActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/data-mappers?partnerActionId=f457579d-02f8-4479-b97b-ffb678e3f801"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
                 ArgumentMatchers.eq(DataMapperDTO[].class))).thenReturn(dataMapperResponse);
 
-        ResponseEntity<MspActionDTO[]> actionsByMspId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfMsp());
-        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/msp-actions?mspMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
+        ResponseEntity<PartnerActionDTO[]> actionsBypartnerId = ResponseEntity.status(HttpStatus.OK).body(this.createMockActionsOfPartner());
+        lenient().when(restTemplate.exchange(ArgumentMatchers.endsWith("/partner-actions?partnerMetaId=f457579d-02f8-4479-b97b-ffb678e3f866"),
                 ArgumentMatchers.eq(HttpMethod.GET),
                 any(),
-                ArgumentMatchers.eq(MspActionDTO[].class))).thenReturn(actionsByMspId);
+                ArgumentMatchers.eq(PartnerActionDTO[].class))).thenReturn(actionsBypartnerId);
 
-        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, mspActionId, mspId, null);
+        List<Object> response = defaultAdapterServiceImpl.adaptOperation(params, partnerActionId, partnerId, null);
         AssetType list = (AssetType) response.get(0);
         assertEquals("505", list.getAssetTypeId());
     }

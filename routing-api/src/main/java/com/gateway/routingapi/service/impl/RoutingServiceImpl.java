@@ -2,21 +2,25 @@ package com.gateway.routingapi.service.impl;
 
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.data.AdaptersDTO;
-import com.gateway.commonapi.dto.data.MspStandardDTO;
+import com.gateway.commonapi.dto.data.PartnerStandardDTO;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.BadGatewayException;
 import com.gateway.commonapi.exception.InternalException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import com.gateway.routingapi.service.RoutingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -35,9 +39,8 @@ import static com.gateway.routingapi.util.constant.RoutingMessageDict.*;
 public class RoutingServiceImpl implements RoutingService {
 
 
-    @Autowired
-    RestTemplate restTemplate;
-    @Value("${gateway.service.dataapi.url}")
+    RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    @Value("${gateway.service.dataapi.baseUrl}")
     private String dataApiUri;
     @Value("${gateway.service.adapter.default-adapter.baseUrl}")
     private String defaultAdapterUri;
@@ -46,27 +49,22 @@ public class RoutingServiceImpl implements RoutingService {
     @Autowired
     private ErrorMessages errorMessages;
 
-    @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    private final String correlationId = String.valueOf(CommonUtils.setHeader().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
-
+    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+    private static final String SEPARATOR = ": ";
 
     @Override
-    public Object routeOperation(Map<String, String> params, UUID mspId, String actionName, Optional<Map<String, Object>> body) {
+    public Object routeOperation(Map<String, String> params, UUID partnerId, String actionName, Optional<Map<String, Object>> body) {
         // need to call the standard table to get versions and actions which is active for the msp
-        MspStandardDTO standard = this.activeVersionSearch(mspId, actionName);
+        PartnerStandardDTO standard = this.activeVersionSearch(partnerId, actionName);
         Object response = null;
         if (standard != null) {
-            UUID actionId = standard.getMspActionsId();
+            UUID actionId = standard.getPartnerActionsId();
             // create the uri
-            String uriCall = this.creatURI(standard);
+            String uriCall = this.createURI(standard);
             // forward the request
-            response = forwardRequest(uriCall, mspId, actionId, body, params);
+            response = forwardRequest(uriCall, partnerId, actionId, body, params);
         } else {
-            log.debug(NO_ACTIVE_ACTION_FOUND, actionName, mspId);
+            log.debug(NO_ACTIVE_ACTION_FOUND, actionName, partnerId);
         }
         return response;
     }
@@ -74,30 +72,34 @@ public class RoutingServiceImpl implements RoutingService {
     /**
      * Return Active Version
      *
-     * @param mspId
+     * @param partnerId
      * @param actionName
-     * @return MspStandardDTO
+     * @return PartnerStandardDTO
      */
-    private MspStandardDTO activeVersionSearch(UUID mspId, String actionName) {
-        MspStandardDTO mspBusinessVersion;
+    private PartnerStandardDTO activeVersionSearch(UUID partnerId, String actionName) {
+        String outputStandard = CallUtils.getOutputStandardFromCallThread();
+        CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
+
+        PartnerStandardDTO mspBusinessVersion;
         String urlGetVersion;
-        String mspMetaIdValue = mspId != null ? mspId.toString() : null;
-        urlGetVersion = dataApiUri + CommonUtils.placeholderFormat(GET_VERSION_PATH + GET_BY_ACTIONS_NAME_PATH, MSP_ACTIONS_NAME, actionName
+        String mspMetaIdValue = partnerId != null ? partnerId.toString() : null;
+        urlGetVersion = dataApiUri + CommonUtils.placeholderFormat(GET_VERSION_PATH + GET_BY_ACTIONS_NAME_PATH, PARTNER_ACTIONS_NAME, actionName
                 + GET_BY_MSP_META_ID_PATH, MSP_ID_PARAM, mspMetaIdValue + GET_IS_ACTIVE_TRUE_PATH);
         log.debug(ROUTING_SERVICE_CALL_URL, urlGetVersion);
         try {
-            ResponseEntity<MspStandardDTO[]> mspStandardDTO = restTemplate.exchange
-                    (urlGetVersion, HttpMethod.GET, CommonUtils.setHeader(), MspStandardDTO[].class);
+            ResponseEntity<PartnerStandardDTO[]> mspStandardDTO = restTemplate.exchange(urlGetVersion, HttpMethod.GET, CommonUtils.setHeaders(), PartnerStandardDTO[].class);
             mspBusinessVersion = Objects.requireNonNull(mspStandardDTO.getBody())[0];
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
-            return null;
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            throw new NotFoundException(CommonUtils.placeholderFormat(NO_ACTIVE_ACTION_FOUND, PARTNER_ACTIONS_NAME, actionName, PARTNER_ID, (partnerId != null ? partnerId.toString() : StringUtils.EMPTY)));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetVersion));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetVersion));
+        } finally {
+            CallUtils.saveOutputStandardInCallThread(outputStandard);
         }
         return mspBusinessVersion;
 
@@ -110,21 +112,26 @@ public class RoutingServiceImpl implements RoutingService {
      * @return Adapter Name
      */
     private String getAdaptersName(UUID adaptersId) {
+        String outputStandard = CallUtils.getOutputStandardFromCallThread();
+        CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
+
         String adapterName;
         String urlGetAdapterWithId = dataApiUri + CommonUtils.placeholderFormat(GET_ADAPTERS_BY_ID_PATH, ADAPTERS_ID_PARAM, adaptersId.toString());
         try {
-            ResponseEntity<AdaptersDTO> mspActionDTO = restTemplate.exchange(urlGetAdapterWithId, HttpMethod.GET, CommonUtils.setHeader(), AdaptersDTO.class);
+            ResponseEntity<AdaptersDTO> mspActionDTO = restTemplate.exchange(urlGetAdapterWithId, HttpMethod.GET, CommonUtils.setHeaders(), AdaptersDTO.class);
             AdaptersDTO mspBusinessAdapters = Objects.requireNonNull(mspActionDTO.getBody());
             adapterName = mspBusinessAdapters.getAdapterName();
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
             return null;
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetAdapterWithId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetAdapterWithId));
+        } finally {
+            CallUtils.saveOutputStandardInCallThread(outputStandard);
         }
         return adapterName;
     }
@@ -135,7 +142,7 @@ public class RoutingServiceImpl implements RoutingService {
      * @param standard
      * @return Uri
      */
-    private String creatURI(MspStandardDTO standard) {
+    private String createURI(PartnerStandardDTO standard) {
         //Version Standard
         String versionStandard = standard.getVersionStandard().toLowerCase(Locale.ROOT);
 
@@ -157,42 +164,63 @@ public class RoutingServiceImpl implements RoutingService {
      * Forward Request to Adapters
      *
      * @param uriCall
-     * @param mspId
+     * @param partnerId
      * @param actionId
      * @param body
      * @return
      */
 
-    private Object forwardRequest(String uriCall, UUID mspId, UUID actionId, Optional<Map<String, Object>> body, Map<String, String> params) {
+    private Object forwardRequest(String uriCall, UUID partnerId, UUID actionId, Optional<Map<String, Object>> body, Map<String, String> params) {
         String mspActionsIdValue = actionId != null ? actionId.toString() : null;
-        String mspMetaIdValue = mspId != null ? mspId.toString() : null;
+        String mspMetaIdValue = partnerId != null ? partnerId.toString() : null;
         String urlCallAdapters;
         Object mspBusinessResponse;
         urlCallAdapters = uriCall + CommonUtils.placeholderFormat(GET_BY_MSP_ACTIONS_ID_PATH, ACTION_ID_PARAM, mspActionsIdValue
                 + GET_BY_MSP_META_ID_PATH, MSP_ID_PARAM, mspMetaIdValue);
 
         String urlTemplate = CommonUtils.constructUrlTemplate(urlCallAdapters, params);
-
+        HttpEntity<Optional<Map<String, Object>>> entity = new HttpEntity<>(body, CommonUtils.setHeaders().getHeaders());
         log.debug(ROUTING_SERVICE_CALL_URL, urlTemplate);
 
+        boolean preserveOriginalErrors = false;
+        String outputStandard = CallUtils.getOutputStandardFromCallThread();
+        if (StringUtils.isNotBlank(outputStandard)) {
+            preserveOriginalErrors = CommonUtils.shouldPreserveResponseStatus(outputStandard);
+        }
+
         try {
-            ResponseEntity<Object> response = restTemplate.postForEntity(urlTemplate, body, Object.class);
+            ResponseEntity<Object> response = restTemplate.exchange(urlTemplate, HttpMethod.POST, entity, Object.class);
             mspBusinessResponse = Objects.requireNonNull(response.getBody());
         } catch (HttpClientErrorException e) {
             log.error(FAIL_CONTACTING_URL_WITH_MESSAGE, urlTemplate, e.getMessage(), e);
-            GenericError error = new GenericError(e.getResponseBodyAsString());
-            throw new NotFoundException(error.getDescription());
+            if (preserveOriginalErrors) {
+                throw e;
+            } else {
+                GenericError error = new GenericError(e.getResponseBodyAsString());
+                throw new NotFoundException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + error.getDescription());
+            }
         } catch (HttpServerErrorException e) {
             log.error(FAIL_CONTACTING_URL_WITH_MESSAGE, urlTemplate, e.getMessage(), e);
-            GenericError error = new GenericError(e.getResponseBodyAsString());
-            throw new InternalException(error.getDescription());
-
+            if (preserveOriginalErrors) {
+                throw e;
+            } else {
+                GenericError error = new GenericError(e.getResponseBodyAsString());
+                throw new InternalException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + error.getDescription());
+            }
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
-            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters));
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            if (preserveOriginalErrors) {
+                throw e;
+            } else {
+                throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + e.getMessage());
+            }
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
-            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters));
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            if (preserveOriginalErrors) {
+                throw e;
+            } else {
+                throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + e.getMessage());
+            }
         }
         return mspBusinessResponse;
     }

@@ -1,0 +1,16 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: apim-internal-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: apim3
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: apim3
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: elasticsearch

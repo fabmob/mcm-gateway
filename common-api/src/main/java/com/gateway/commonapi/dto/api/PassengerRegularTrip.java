@@ -18,7 +18,7 @@ import java.util.List;
         , "driverDepartureLng", "driverArrivalLat","driverArrivalLng" ,"driverDepartureLng",
         "driverDepartureAddress", "driverArrivalAddress",  "duration",
         "journeyPolyline", "preferences", "webUrl", "passenger", "schedules"})
-@Schema(allOf = PassengerTrip.class)
+//@Schema(allOf = PassengerTrip.class)
 public class PassengerRegularTrip extends PassengerTrip {
     @Schema(name = "schedules")
     @JsonProperty("schedules")

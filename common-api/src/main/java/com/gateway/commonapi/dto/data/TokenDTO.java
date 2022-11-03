@@ -1,17 +1,15 @@
 package com.gateway.commonapi.dto.data;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
-
-import org.springframework.boot.jackson.JsonComponent;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.jackson.JsonComponent;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 @JsonComponent
 @Data
@@ -40,9 +38,9 @@ public class TokenDTO {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
 	private LocalDateTime expireAt;
 
-	@Schema(name = "mspId",
-			description = "mspMeta Id",
+	@Schema(name = "partnerId",
+			description = "partnerMeta Id",
 			example = "b814c97e-df56-4651-ac50-11525537964f")
-	@JsonProperty("mspId")
-	private UUID mspId;
+	@JsonProperty("partnerId")
+	private UUID partnerId;
 }

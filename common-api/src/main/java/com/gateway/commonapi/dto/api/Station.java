@@ -25,21 +25,21 @@ import java.util.UUID;
 @AllArgsConstructor
 @Validated
 @Schema(description = "Static information about a station")
-@JsonPropertyOrder({"mspId", "stationId", "name", "shortName", "coordinates", "physicalAddress", "crossStreet", "contactPhone", "regionId", "rentalMethods", "isVirtualStation", "stationArea", "isParkingLot", "isStreetParking", "isUnderground", "isSidewalkParking", "isParkingHoop", "isParkingHoop", "vehicleCapacity", "vehicleTypeCapacity", "isValet", "isChargingStation", "rentalAndroidUrl", "rentalIosUrl", "rentalWebUrl", "_links"})
+@JsonPropertyOrder({"partnerId", "stationId", "name", "shortName", "coordinates", "physicalAddress", "crossStreet", "contactPhone", "regionId", "rentalMethods", "isVirtualStation", "stationArea", "isParkingLot", "isStreetParking", "isUnderground", "isSidewalkParking", "isParkingHoop", "isParkingHoop", "vehicleCapacity", "vehicleTypeCapacity", "isValet", "isChargingStation", "rentalAndroidUrl", "rentalIosUrl", "rentalWebUrl", "_links"})
 public class Station implements Serializable {
 
 
     /**
-     * MSP identifier.
+     * partner identifier.
      */
     @Schema(
-            name = "mspId",
+            name = "partnerId",
             example = "b814c97e-df56-4651-ac50-11525537964f",
-            description = "Identifier of the MSP",
+            description = "Identifier of the partner",
             required = true)
-    @JsonProperty("mspId")
+    @JsonProperty("partnerId")
     @NotNull
-    private UUID mspId;
+    private UUID partnerId;
 
     /**
      * Station identifier.
@@ -290,8 +290,8 @@ public class Station implements Serializable {
     private String rentalWebUrl;
 
 
-    public Station(UUID mspId, String stationId, String name) {
-        this.mspId = mspId;
+    public Station(UUID partnerId, String stationId, String name) {
+        this.partnerId = partnerId;
         this.stationId = stationId;
         this.name = name;
     }

@@ -2,16 +2,14 @@ package com.gateway.commonapi.dto.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.io.Serializable;
 
 @Validated
-public class Preferences {
+public class Preferences implements Serializable {
     /**
      * If driver journey, specifies if the driver allows smoking in the car.
      */
@@ -49,11 +47,11 @@ public class Preferences {
     public Boolean isTalker = null;
 
     /**
-     * If driver journey, specifies the size of allowed luggages. From very small (1) to very big (5). (min:1, max:5).
+     * If driver journey, specifies the size of allowed luggage. From very small (1) to very big (5). (min:1, max:5).
      */
     @Schema(name = "luggageSize",
             example = "3",
-            description = "If driver journey, specifies the size of allowed luggages. From very small (1) to very big (5). (min:1, max:5)")
+            description = "If driver journey, specifies the size of allowed luggage. From very small (1) to very big (5). (min:1, max:5)")
     @JsonProperty("luggageSize")
     @Min(1)
     @Max(5)

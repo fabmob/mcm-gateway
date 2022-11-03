@@ -1,7 +1,6 @@
 package com.gateway.adapter.service.impl;
 
-import com.gateway.commonapi.dto.data.MspActionDTO;
-import com.gateway.commonapi.dto.data.MspMetaDTO;
+import com.gateway.commonapi.dto.data.PartnerActionDTO;
 import com.gateway.commonapi.properties.ErrorMessages;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,22 +28,22 @@ class AuthenticationServiceImplTest {
 
     @Test
     void testNeedAuthenticationAction() {
-        List<MspActionDTO> actions = new ArrayList<>();
-        MspActionDTO actionDTO = new MspActionDTO();
+        List<PartnerActionDTO> actions = new ArrayList<>();
+        PartnerActionDTO actionDTO = new PartnerActionDTO();
         actionDTO.setAuthentication(true);
         actions.add(actionDTO);
-        MspActionDTO authenticationAction = authenticationService.needAuthenticationAction( actions);
-        assertEquals(authenticationAction.isAuthentication(), true);
+        PartnerActionDTO authenticationAction = authenticationService.needAuthenticationAction(actions);
+        assertTrue(authenticationAction.isAuthentication());
 
     }
 
     @Test
     void testNeedAuthentication() {
-        List<MspActionDTO> actions = new ArrayList<>();
-        MspActionDTO actionDTO = new MspActionDTO();
+        List<PartnerActionDTO> actions = new ArrayList<>();
+        PartnerActionDTO actionDTO = new PartnerActionDTO();
         actionDTO.setAuthentication(true);
         actions.add(actionDTO);
-        Boolean isAuthentication = authenticationService.needAuthentication( actions);
-        assertEquals(isAuthentication, true);
+        Boolean isAuthentication = authenticationService.needAuthentication(actions);
+        assertEquals(true, isAuthentication);
     }
 }

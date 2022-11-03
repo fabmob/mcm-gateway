@@ -18,7 +18,7 @@ import java.io.IOException;
 public class Slf4jFilter extends OncePerRequestFilter {
 
     private static final String CORRELATION_ID_HEADER_NAME = GlobalConstants.CORRELATION_ID_HEADER;
-    private static final String CORRELATION_ID_LOG_VAR_NAME = "correlationId";
+    private static final String CORRELATION_ID_LOG_VAR_NAME = "CORRELATION_ID";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -26,14 +26,14 @@ public class Slf4jFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         try {
             //get the correlation id either from http header or current user context
-            if(StringUtils.isNotBlank(request.getHeader(CORRELATION_ID_HEADER_NAME))) {
+            if (StringUtils.isNotBlank(request.getHeader(CORRELATION_ID_HEADER_NAME))) {
                 MDC.put(CORRELATION_ID_LOG_VAR_NAME, request.getHeader(CORRELATION_ID_HEADER_NAME));
             } else {
                 MDC.put(CORRELATION_ID_LOG_VAR_NAME, new ThreadLocalUserSession().get().getContextId());
             }
 
             chain.doFilter(request, response);
-        }finally {
+        } finally {
             removeCorrelationId();
         }
     }

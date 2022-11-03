@@ -35,6 +35,7 @@ public class CacheConfiguration {
 		jedisClientConfigurationBuilder.connectTimeout(Duration.ofSeconds(connectionTimeout));
 		if (useSSL) {
 			jedisClientConfigurationBuilder.useSsl();
+			configuration.setPassword(redisPassword);
 		}
 		JedisClientConfiguration jedisClientConfiguration = jedisClientConfigurationBuilder.build();
 		JedisConnectionFactory factory = new JedisConnectionFactory(configuration, jedisClientConfiguration);
@@ -52,6 +53,7 @@ public class CacheConfiguration {
 		redisTemplate.setValueSerializer(new StringRedisSerializer());
 		redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 		redisTemplate.afterPropertiesSet();
+
 		return redisTemplate;
 	}
 }

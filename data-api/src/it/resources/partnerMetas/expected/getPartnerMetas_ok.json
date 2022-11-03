@@ -1,0 +1,317 @@
+[
+  {
+    "hasCarpoolingBookingPost": null,
+    "hasAroundMe": null,
+    "hasPricingPlan": null,
+    "hasCarpoolingMessages": null,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "CARPOOLING",
+    "operator": "Dott",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "FAKE_UUID",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "hasVehicleTypes": null,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasOperatingZone": false,
+    "hasCarpoolingDriverJourney": null,
+    "hasParking": false,
+    "hasPing": null,
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "hasCarpoolingBookingGet": null,
+    "hasCarpoolingBookingEvent": null,
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "hasCarpoolingBookingPatch": null,
+    "hasCarpoolingPassengerJourney": null,
+    "hasCarpoolingPassengerTrip": null,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasCarpoolingStatus": null,
+    "partnerId": "FAKE_UUID",
+    "partnerType": "MSP",
+    "hasSpeedLimitZone": false,
+    "hasCarpoolingDriverTrip": null,
+    "hasHold": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasCarpoolingBookingPost": null,
+    "hasAroundMe": null,
+    "hasPricingPlan": null,
+    "hasCarpoolingMessages": null,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "CARPOOLING",
+    "operator": "Dott",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "FAKE_UUID",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "hasVehicleTypes": null,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasOperatingZone": false,
+    "hasCarpoolingDriverJourney": null,
+    "hasParking": false,
+    "hasPing": null,
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "hasCarpoolingBookingGet": null,
+    "hasCarpoolingBookingEvent": null,
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "hasCarpoolingBookingPatch": null,
+    "hasCarpoolingPassengerJourney": null,
+    "hasCarpoolingPassengerTrip": null,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasCarpoolingStatus": null,
+    "partnerId": "FAKE_UUID",
+    "partnerType": "MSP",
+    "hasSpeedLimitZone": false,
+    "hasCarpoolingDriverTrip": null,
+    "hasHold": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasCarpoolingBookingPost": null,
+    "hasAroundMe": null,
+    "hasPricingPlan": null,
+    "hasCarpoolingMessages": null,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "CARPOOLING",
+    "operator": "Dott",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "FAKE_UUID",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "hasVehicleTypes": null,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasOperatingZone": false,
+    "hasCarpoolingDriverJourney": null,
+    "hasParking": false,
+    "hasPing": null,
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "hasCarpoolingBookingGet": null,
+    "hasCarpoolingBookingEvent": null,
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "hasCarpoolingBookingPatch": null,
+    "hasCarpoolingPassengerJourney": null,
+    "hasCarpoolingPassengerTrip": null,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasCarpoolingStatus": null,
+    "partnerId": "FAKE_UUID",
+    "partnerType": "MSP",
+    "hasSpeedLimitZone": false,
+    "hasCarpoolingDriverTrip": null,
+    "hasHold": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasCarpoolingBookingPost": null,
+    "hasPricingPlan": null,
+    "hasAroundMe": null,
+    "hasCarpoolingMessages": null,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "CARPOOLING",
+    "operator": "Dott",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "FAKE_UUID",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "hasVehicleTypes": null,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasOperatingZone": false,
+    "hasCarpoolingDriverJourney": null,
+    "hasParking": false,
+    "hasPing": null,
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "hasCarpoolingBookingGet": null,
+    "hasCarpoolingBookingEvent": null,
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "hasCarpoolingBookingPatch": null,
+    "hasCarpoolingPassengerJourney": null,
+    "hasCarpoolingPassengerTrip": null,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasCarpoolingStatus": null,
+    "partnerId": "FAKE_UUID",
+    "partnerType": "MSP",
+    "hasSpeedLimitZone": false,
+    "hasCarpoolingDriverTrip": null,
+    "hasHold": false,
+    "secondaryColor": "#0054BB"
+  },
+  {
+    "hasCarpoolingBookingPost": null,
+    "hasAroundMe": null,
+    "hasPricingPlan": null,
+    "hasCarpoolingMessages": null,
+    "hasStationStatus": true,
+    "primaryColor": "#0054BB",
+    "type": "CARPOOLING",
+    "operator": "Dott",
+    "priceList": {
+      "duration": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "parkingForbiddenFee": 3,
+      "distance": [
+        {
+          "unit": 5,
+          "fixedFare": 6,
+          "farePerUnit": 7,
+          "priceListItemId": "FAKE_UUID",
+          "lowerPriceLimit": 4,
+          "upperPriceLimit": 9
+        }
+      ],
+      "priceListId": "FAKE_UUID",
+      "outOfBoundFee": 5,
+      "comment": ""
+    },
+    "hasVehicleTypes": null,
+    "logoFormat": "PNG",
+    "hasNoParkingZone": false,
+    "hasOperatingZone": false,
+    "hasCarpoolingDriverJourney": null,
+    "hasParking": false,
+    "hasPing": null,
+    "url": "https:\/\/www.cityscoot.eu\/paris\/",
+    "logoUrl": "@MAAS_API_DIRECTORY_ICON@\/icon_cityscoot@3x.png",
+    "hasCarpoolingBookingGet": null,
+    "hasCarpoolingBookingEvent": null,
+    "hasVehicle": null,
+    "hasStation": false,
+    "hasPrefParkingZone": false,
+    "urlWebview": false,
+    "hasCarpoolingBookingPatch": null,
+    "hasCarpoolingPassengerJourney": null,
+    "hasCarpoolingPassengerTrip": null,
+    "isEnabled": null,
+    "name": "Dott",
+    "hasCarpoolingStatus": null,
+    "partnerId": "FAKE_UUID",
+    "partnerType": "MSP",
+    "hasSpeedLimitZone": false,
+    "hasCarpoolingDriverTrip": null,
+    "hasHold": false,
+    "secondaryColor": "#0054BB"
+  }
+]

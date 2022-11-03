@@ -10,11 +10,11 @@ public interface RoutingService {
 	/**
      * Forward the request to Adapters (default/Custom) and return the response 
      * @param params
-     * @param mspId
+     * @param partnerId
      * @param actionName
      * @param originalBody
      * @return
      */
-    Object routeOperation(Map<String, String> params, UUID mspId, String actionName, Optional<Map<String, Object>> originalBody);
+    Object routeOperation(Map<String, String> params, UUID partnerId, String actionName, Optional<Map<String, Object>> originalBody);
 }
 

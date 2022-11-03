@@ -1,8 +1,10 @@
 server:
-  port: 8080 
+  port: 8080
   shutdown: "graceful"
   servlet:
     context-path: /v1
+  error:
+    whitelabel.enabled: false
 
 springdoc:
   api-docs:
@@ -33,20 +35,23 @@ spring:
       detection-strategy: all
   redis:
     ssl: ${MAAS_API_CACHE_SSL:false}
-    password: ${MAAS_API_CACHE_PASSWORD:IWsEcFGJA0acrgHQjhnSxzZsyjnKepwFIj+UCS0ZP8I=}
+    password: ${MAAS_API_CACHE_PASSWORD:}
     host: ${MAAS_API_CACHE_HOST:localhost}
     port: ${MAAS_API_CACHE_PORT:6379}
     connection-timeout: 30
     keys:
-      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:dev-}
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
     repositories:
       enabled: 'false'
   cache:
     type: redis
+  main:
+    # To be removed if circular dependencies can be resolved in this project's services
+    allow-circular-references: true
 
 appli:
   use:
-    cache: true
+    cache: ${USE_CACHE:true}
 ---
 
 spring:
@@ -60,7 +65,6 @@ spring:
   profiles: prod
 security:
   disabled: false
-
 
 ---
 

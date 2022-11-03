@@ -2,31 +2,32 @@ package com.gateway.api;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.servers.Server;
-
-import io.swagger.v3.oas.models.OpenAPI;
-import org.springframework.beans.factory.annotation.Value;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
+@EnableScheduling
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ComponentScan(basePackages = {"com.gateway.api", "com.gateway.commonapi"})
 @PropertySource("classpath:errors.properties")
 @OpenAPIDefinition(info = @Info(
-        title = "Gateway MaaS API",
+        title = "Gateway API",
         version = "2.0",
         description = "Swagger for the Gateway API"),
         tags = {@Tag(
-                name = "MSPs Information",
-                description = "MSPs information and useful links"),
+                name = "Partners Information",
+                description = "Partners information and useful links"),
+                @Tag(
+                        name = "Partners Status"),
                 @Tag(
                         name = "Traveler Information"),
+                @Tag(
+                        name = "Booking"),
                 @Tag(
                         name = "Carpooling")},
         servers = {

@@ -1,12 +1,13 @@
 package com.gateway.commonapi.dto.api.geojson;
 
 
-import java.io.Serializable;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
+
+import java.io.Serializable;
 
 /**
  * Class for a GeoJSON polygon.

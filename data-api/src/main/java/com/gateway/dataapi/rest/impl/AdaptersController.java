@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import static com.gateway.commonapi.utils.ControllerMessageDict.*;
-import static com.gateway.dataapi.util.constant.DataApiPathDict.*;
+import static com.gateway.commonapi.constants.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.DataApiPathDict.*;
 
 @RequestMapping(ADAPTERS_BASE_PATH)
 @RestController
@@ -62,8 +62,8 @@ public class AdaptersController {
     @GetMapping(value = ADAPTER_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<AdaptersDTO> geAdapterFromId(@PathVariable("id") UUID id) {
         log.info(GET_ADAPTER_BY_ID);
-        AdaptersDTO Adapter = adaptersService.getAdaptersFromId(id);
-        return ResponseEntity.ok(Adapter);
+        AdaptersDTO adapter = adaptersService.getAdaptersFromId(id);
+        return ResponseEntity.ok(adapter);
     }
 
     @Operation(summary = "Remove specified Adapter", description = "Description delete the specified Adapter", tags = {
@@ -82,7 +82,7 @@ public class AdaptersController {
     }
 
 
-    @Operation(summary = "Get all Adapters", description = "Description the liste of Adapter", tags = {
+    @Operation(summary = "Get all Adapters", description = "Returns the list of Adapters", tags = {
             ADAPTERS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -91,7 +91,7 @@ public class AdaptersController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = ADAPTERS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<AdaptersDTO>> getAlladapters() {
+    public ResponseEntity<List<AdaptersDTO>> getAllAdapters() {
         log.info(GET_ALL_ADAPTERS);
         List<AdaptersDTO> adapters = adaptersService.getAllAdapters();
         return new ResponseEntity<>(adapters, HttpStatus.OK);

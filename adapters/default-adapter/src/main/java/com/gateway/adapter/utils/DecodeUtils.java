@@ -7,10 +7,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import java.util.List;
 import java.util.Map;
 
-import static com.gateway.adapter.utils.constant.AdapterMessageDict.*;
+import static com.gateway.adapter.utils.constant.AdapterMessageDict.FIRST_PLACEHOLDER;
+import static com.gateway.adapter.utils.constant.AdapterMessageDict.MISSING_EXTERNAL_FIELD;
 
 /**
  * class to process all decoding operations and transformation of the response of msp
@@ -34,22 +36,22 @@ public class DecodeUtils {
      * @return Vehicle object filled by the method.
      */
     public static JSONObject decodeDataResponse(JSONObject dataResponse, List<DataMapperDTO> dataMappers) throws JSONException {
-        String champExterne = "";
-        String champInterne = "";
-        String champInterneRoot = "";
+        String externalField;
+        String internalField;
+        String internalFieldRoot = "";
         for (DataMapperDTO mapperDTO : dataMappers) {
-            champExterne = mapperDTO.getChampExterne();
-            champInterne = mapperDTO.getChampInterne();
+            externalField = mapperDTO.getExternalField();
+            internalField = mapperDTO.getInternalField();
 
 
             //decode according if it is an Array or not
             if ((mapperDTO.getIsArray() != null) && (mapperDTO.getIsArray() != 0)) {
-                decodeArrayElements(mapperDTO, dataResponse, champInterneRoot, champInterne, champExterne);
+                decodeArrayElements(mapperDTO, dataResponse, internalFieldRoot, internalField, externalField);
 
             } else {
-                //verify that champExterne is in MSP response, else pass to next data_mapper
-                if(Boolean.TRUE.equals(verifyChampExterneValid(dataResponse,champExterne))){
-                    decodingFields(mapperDTO, champExterne, champInterne, dataResponse);
+                //verify that externalField is in MSP response, else pass to next data_mapper
+                if (Boolean.TRUE.equals(verifyExternalFieldValid(dataResponse, externalField))) {
+                    decodingFields(mapperDTO, externalField, internalField, dataResponse);
                 }
 
             }
@@ -60,27 +62,28 @@ public class DecodeUtils {
     }
 
     /**
-     * Verify if champExterne is in MSP response
+     * Verify if externalField is in MSP response
+     *
      * @param dataResponse
-     * @param champExterne
+     * @param externalField
      * @return
      */
-    private static Boolean verifyChampExterneValid (JSONObject dataResponse, String champExterne)  {
+    private static Boolean verifyExternalFieldValid(JSONObject dataResponse, String externalField) {
 
         boolean valid = false;
-        if (StringUtils.isNotBlank(champExterne)) {
-            if (champExterne.contains(".")) {
-                String[] champExternetab = champExterne.split("\\.");
-                if (!dataResponse.isNull(champExternetab[0])) {
+        if (StringUtils.isNotBlank(externalField)) {
+            if (externalField.contains(".")) {
+                String[] externalFieldTab = externalField.split("\\.");
+                if (!dataResponse.isNull(externalFieldTab[0])) {
                     valid = true;
                 }
             } else {
-                if (!dataResponse.isNull(champExterne)) {
-                    valid =  true;
+                if (!dataResponse.isNull(externalField)) {
+                    valid = true;
                 }
             }
         } else {
-            valid =  true;
+            valid = true;
         }
 
         return valid;
@@ -89,29 +92,30 @@ public class DecodeUtils {
     }
 
 
-
-        /** Select array field to loop on in response
-         * @param mapperDTO
-         * @param champInterne
-         * @param dataResponse
-         * @return
-         * @throws JSONException
-         */
-    private static Object defineElementTOLoopOn(DataMapperDTO mapperDTO, String champInterne, JSONObject dataResponse) throws JSONException {
-        String champInterneRoot = null;
-        if(champInterne.contains(".")){
-            champInterneRoot = champInterne.substring(0, champInterne.indexOf('.'));
+    /**
+     * Select array field to loop on in response
+     *
+     * @param mapperDTO
+     * @param internalField
+     * @param dataResponse
+     * @return
+     * @throws JSONException
+     */
+    private static Object defineElementTOLoopOn(DataMapperDTO mapperDTO, String internalField, JSONObject dataResponse) throws JSONException {
+        String internalFieldRoot;
+        if (internalField.contains(".")) {
+            internalFieldRoot = internalField.substring(0, internalField.indexOf('.'));
         } else {
-            champInterneRoot = champInterne;
+            internalFieldRoot = internalField;
         }
 
         Object jsonArray = null;
 
-        if (dataResponse.has(mapperDTO.getChampExterne())) {
-            jsonArray = dataResponse.get(mapperDTO.getChampExterne());
+        if (dataResponse.has(mapperDTO.getExternalField())) {
+            jsonArray = dataResponse.get(mapperDTO.getExternalField());
         }
-        if (dataResponse.has(champInterneRoot)) {
-            jsonArray = dataResponse.get(champInterneRoot);
+        if (dataResponse.has(internalFieldRoot)) {
+            jsonArray = dataResponse.get(internalFieldRoot);
         }
         if (jsonArray instanceof JSONArray) {
             return jsonArray;
@@ -125,27 +129,27 @@ public class DecodeUtils {
      *
      * @param mapperDTO
      * @param dataResponse
-     * @param champInterneRoot
-     * @param champInterne
-     * @param champExterne
+     * @param internalFieldRoot
+     * @param internalField
+     * @param externalField
      * @throws JSONException
      */
 
-    private static void decodeArrayElements(DataMapperDTO mapperDTO, JSONObject dataResponse, String champInterneRoot, String champInterne, String champExterne) throws JSONException {
-        String champInterneSub = "";
-        Object jsonArrayResonse = defineElementTOLoopOn(mapperDTO, champInterne, dataResponse);
+    private static void decodeArrayElements(DataMapperDTO mapperDTO, JSONObject dataResponse, String internalFieldRoot, String internalField, String externalField) throws JSONException {
+        String internalFieldSub = "";
+        Object jsonArrayResponse = defineElementTOLoopOn(mapperDTO, internalField, dataResponse);
 
         //decode array with object elements
-        if (jsonArrayResonse instanceof JSONArray && ((JSONArray) jsonArrayResonse).get(0) instanceof JSONObject) {
-            if (champInterne.contains(".")) {
-                champInterneSub = champInterne.substring(champInterne.indexOf('.') + 1, champInterne.length());
+        if (jsonArrayResponse instanceof JSONArray && ((JSONArray) jsonArrayResponse).get(0) instanceof JSONObject) {
+            if (internalField.contains(".")) {
+                internalFieldSub = internalField.substring(internalField.indexOf('.') + 1, internalField.length());
                 //decode subObject Arrays
-                champInterneRoot = decodingSubObjectsInterne(champExterne, champInterne, dataResponse);
+                internalFieldRoot = decodingSubObjectsIntern(externalField, internalField, dataResponse);
             }
 
-            //verify that champExterne is in MSP response, else pass to next data_mapper
-            if(Boolean.TRUE.equals(verifyChampExterneValid(dataResponse,champInterneRoot))){
-                decodeDataResponseArray(mapperDTO, dataResponse, champInterneRoot, champInterneSub, mapperDTO.getContainedValue());
+            //verify that externalField is in MSP response, else pass to next data_mapper
+            if (Boolean.TRUE.equals(verifyExternalFieldValid(dataResponse, internalFieldRoot))) {
+                decodeDataResponseArray(mapperDTO, dataResponse, internalFieldRoot, internalFieldSub, mapperDTO.getContainedValue());
             }
 
 
@@ -154,9 +158,9 @@ public class DecodeUtils {
         //decode array of String to boolean
         else {
 
-            //verify that champExterne is in MSP response, else pass to next data_mapper
-            if(Boolean.TRUE.equals(verifyChampExterneValid(dataResponse,champExterne))){
-                decodeStringArraysToBoolean(mapperDTO, dataResponse, champInterne, champExterne, null);
+            //verify that externalField is in MSP response, else pass to next data_mapper
+            if (Boolean.TRUE.equals(verifyExternalFieldValid(dataResponse, externalField))) {
+                decodeStringArraysToBoolean(mapperDTO, dataResponse, internalField, externalField, null);
             }
 
         }
@@ -167,40 +171,40 @@ public class DecodeUtils {
      *
      * @param mapperDTO
      * @param dataResponse
-     * @param champInterneRoot
-     * @param champInterneSub
+     * @param internalFieldRoot
+     * @param internalFieldSub
      * @return
      * @throws JSONException
      */
-    private static JSONObject decodeDataResponseArray(DataMapperDTO mapperDTO, JSONObject dataResponse, String champInterneRoot, String champInterneSub, String containedValue) throws JSONException {
+    private static JSONObject decodeDataResponseArray(DataMapperDTO mapperDTO, JSONObject dataResponse, String internalFieldRoot, String internalFieldSub, String containedValue) throws JSONException {
 
-        JSONArray responseArray = dataResponse.getJSONArray(champInterneRoot);
-        if (dataResponse.get(champInterneRoot) != null && (containedValue != null || mapperDTO.getDefaultValue() != null)) {
+        JSONArray responseArray = dataResponse.getJSONArray(internalFieldRoot);
+        if (dataResponse.get(internalFieldRoot) != null && (containedValue != null || mapperDTO.getDefaultValue() != null)) {
 
             //loop on the array's elements
             for (int i = 0; i < responseArray.length(); i++) {
-                JSONObject dataObjet = dataResponse.getJSONArray(champInterneRoot).getJSONObject(i);
+                JSONObject dataObjet = dataResponse.getJSONArray(internalFieldRoot).getJSONObject(i);
 
                 //if ContainedValue != null we select the corresponding field
-                if(StringUtils.isNotBlank(containedValue)) {
+                if (StringUtils.isNotBlank(containedValue)) {
                     for (int j = 0; j < dataObjet.names().length(); j++) {
-                        String containedValueRoot = "";
-                        if(containedValue.contains(".")){
+                        String containedValueRoot;
+                        if (containedValue.contains(".")) {
                             containedValueRoot = containedValue.substring(0, containedValue.indexOf('.'));
                         } else {
                             containedValueRoot = containedValue;
                         }
 
                         if (containedValueRoot.equals(dataObjet.names().getString(j))) {
-                            // select the value of field containedValue and assign it to new champInterne
-                            decodingFields(mapperDTO, containedValue, champInterneSub, dataObjet);
+                            // select the value of field containedValue and assign it to new internalField
+                            decodingFields(mapperDTO, containedValue, internalFieldSub, dataObjet);
                         }
                     }
 
-                //if ContainedValue == null we decode fields considering extern field null
+                    //if ContainedValue == null we decode fields considering extern field null
                 } else {
-                    // select the defaultValue and assign it to new champInterne
-                    decodingFields(mapperDTO, null, champInterneSub, dataObjet);
+                    // select the defaultValue and assign it to new internalField
+                    decodingFields(mapperDTO, null, internalFieldSub, dataObjet);
                 }
 
             }
@@ -209,37 +213,36 @@ public class DecodeUtils {
     }
 
 
-
     /**
      * Decode array of String to boolean
      *
      * @param mapperDTO
      * @param dataResponse
-     * @param champInterne
-     * @param champExterne
+     * @param internalField
+     * @param externalField
      * @throws JSONException
      */
-    private static void decodeStringArraysToBoolean(DataMapperDTO mapperDTO, JSONObject dataResponse, String champInterne, String champExterne, String DeductedContainedValue) throws JSONException {
+    private static void decodeStringArraysToBoolean(DataMapperDTO mapperDTO, JSONObject dataResponse, String internalField, String externalField, String deductedContainedValue) throws JSONException {
         //get the value to assign
         String value = String.valueOf(false);
         JSONArray array = null;
-        String containedValue = DeductedContainedValue != null ? DeductedContainedValue : mapperDTO.getContainedValue();
+        String containedValue = deductedContainedValue != null ? deductedContainedValue : mapperDTO.getContainedValue();
 
         // get the array of string in response
-        if (champExterne.contains(".")) {
-            String[] champExternetab = champExterne.split("\\.");
-            JSONObject object = (JSONObject) dataResponse.get(champExternetab[0]);
-            for (int i = 1; i < champExternetab.length; i++) {
-                if (i == champExternetab.length - 1) {
-                    array = object.getJSONArray(champExternetab[i]);
+        if (externalField.contains(".")) {
+            String[] externalFieldTab = externalField.split("\\.");
+            JSONObject object = (JSONObject) dataResponse.get(externalFieldTab[0]);
+            for (int i = 1; i < externalFieldTab.length; i++) {
+                if (i == externalFieldTab.length - 1) {
+                    array = object.getJSONArray(externalFieldTab[i]);
                 } else {
-                    object = (JSONObject) object.get(champExternetab[i]);
+                    object = (JSONObject) object.get(externalFieldTab[i]);
                 }
 
             }
 
         } else {
-            array = dataResponse.getJSONArray(champExterne);
+            array = dataResponse.getJSONArray(externalField);
         }
 
         // decode boolean value from array's data
@@ -253,195 +256,191 @@ public class DecodeUtils {
 
         }
 
-        //creation of the corresponding boolean field "champInterne"
-        assignChampInterne(mapperDTO, champInterne, dataResponse, value);
+        //creation of the corresponding boolean field "internalField"
+        assignInternalField(internalField, dataResponse, value);
 
     }
 
 
-
-
-
     /**
-     * Decoding SubObjects Interne
+     * Decoding SubObjects Intern
      *
-     * @param champExterne
-     * @param champInterne
+     * @param externalField
+     * @param internalField
      * @param dataResponse
      * @return
      * @throws JSONException
      */
 
-    private static String decodingSubObjectsInterne(String champExterne, String champInterne, JSONObject dataResponse) throws JSONException {
-        String champInterneRoot = "";
-        if (champInterne.contains(".")) {
-            champInterneRoot = champInterne.substring(0, champInterne.indexOf('.'));
-            dataResponse.putOpt(champInterneRoot, dataResponse.remove(champExterne));
+    private static String decodingSubObjectsIntern(String externalField, String internalField, JSONObject dataResponse) throws JSONException {
+        String internalFieldRoot = "";
+        if (internalField.contains(".")) {
+            internalFieldRoot = internalField.substring(0, internalField.indexOf('.'));
+            dataResponse.putOpt(internalFieldRoot, dataResponse.remove(externalField));
         }
-        return champInterneRoot;
+        return internalFieldRoot;
     }
 
 
-
     /**
-     * Looks for the value of the field in MSP response (champExterne) and assign it to corresponding champInterne
+     * Looks for the value of the field in MSP response (externalField) and assign it to corresponding internalField
+     *
      * @param mapperDTO
-     * @param champExterne
-     * @param champInterne
+     * @param externalField
+     * @param internalField
      * @param dataResponse
      * @throws JSONException
      */
-    private static void decodingFields(DataMapperDTO mapperDTO, String champExterne, String champInterne, JSONObject dataResponse) throws JSONException {
+    private static void decodingFields(DataMapperDTO mapperDTO, String externalField, String internalField, JSONObject dataResponse) throws JSONException {
         boolean isNestedArray = false;
 
         //get the value to assign
         Object value = null;
-        if (StringUtils.isBlank(champExterne) && StringUtils.isNotBlank(mapperDTO.getDefaultValue())) {
+        if (StringUtils.isBlank(externalField) && StringUtils.isNotBlank(mapperDTO.getDefaultValue())) {
 
             value = mapperDTO.getDefaultValue();
 
-        } else if (StringUtils.isNotBlank(champExterne)) {
-            if (champExterne.contains(".")) {
-                String[] champExternetab = champExterne.split("\\.");
-                JSONObject object = (JSONObject) dataResponse.get(champExternetab[0]);
-                for (int i = 1; i < champExternetab.length; i++) {
-                    if (i == champExternetab.length - 1) {
-                        value = object.get(champExternetab[i]);
+        } else if (StringUtils.isNotBlank(externalField)) {
+            if (externalField.contains(".")) {
+                String[] externalFieldTab = externalField.split("\\.");
+                JSONObject object = (JSONObject) dataResponse.get(externalFieldTab[0]);
+                for (int i = 1; i < externalFieldTab.length; i++) {
+                    if (i == externalFieldTab.length - 1) {
+                        value = object.get(externalFieldTab[i]);
                     } else {
                         //case object = array of String
-                        if(i == champExternetab.length - 2 && object.get(champExternetab[i]) instanceof JSONArray) {
-                            if(((JSONArray) object.get(champExternetab[i])).get(0) instanceof String){
-                                String subChampExterne = champExterne.replace("."+champExternetab[i+1], "");
-                                decodeStringArraysToBoolean(mapperDTO, dataResponse, champInterne, subChampExterne, champExternetab[i+1]);
+                        if (i == externalFieldTab.length - 2 && object.get(externalFieldTab[i]) instanceof JSONArray) {
+                            if (((JSONArray) object.get(externalFieldTab[i])).get(0) instanceof String) {
+                                String subExternalField = externalField.replace("." + externalFieldTab[i + 1], "");
+                                decodeStringArraysToBoolean(mapperDTO, dataResponse, internalField, subExternalField, externalFieldTab[i + 1]);
                                 break;
 
-                            // case of nested Array of Objects
-                            } else if (((JSONArray) object.get(champExternetab[i])).get(0) instanceof JSONObject){
+                                // case of nested Array of Objects
+                            } else if (((JSONArray) object.get(externalFieldTab[i])).get(0) instanceof JSONObject) {
                                 isNestedArray = true;
 
                                 // apply function decodeDataResponseArray on nested array
-                                String champInterneRoot = decodingSubObjectsInterne(champExternetab[i],champInterne,object);
-                                String champInterneSub = champInterne.replace(champInterneRoot+".","");
-                                String containedValue = "";
-                                for(int j= i+1; j < champExternetab.length; j++ ){
-                                    containedValue += "."+champExternetab[j];
+                                String internalFieldRoot = decodingSubObjectsIntern(externalFieldTab[i], internalField, object);
+                                String internalFieldSub = internalField.replace(internalFieldRoot + ".", "");
+                                StringBuilder containedValue = new StringBuilder();
+                                for (int j = i + 1; j < externalFieldTab.length; j++) {
+                                    containedValue.append(".").append(externalFieldTab[j]);
                                 }
-                                containedValue = containedValue.substring(1);
+                                containedValue = new StringBuilder(containedValue.substring(1));
 
-                                decodeDataResponseArray(mapperDTO,object,champInterneRoot,champInterneSub, containedValue);
+                                decodeDataResponseArray(mapperDTO, object, internalFieldRoot, internalFieldSub, containedValue.toString());
 
-                                //assign the array with tranformed values to champInterne
-                                String[] champInternetab = champInterne.split("\\.");
-                                Object nestedArray = object.get(champExternetab[i]);
+                                //assign the array with transformed values to internalField
+                                String[] internalFieldTab = internalField.split("\\.");
+                                Object nestedArray = object.get(externalFieldTab[i]);
 
-                                assignChampInterne(mapperDTO, champInterne.replace("."+champInternetab[champInternetab.length-1],""), dataResponse, nestedArray);
+                                assignInternalField(internalField.replace("." + internalFieldTab[internalFieldTab.length - 1], ""), dataResponse, nestedArray);
                                 break;
                             }
 
 
                         }
 
-                        object = (JSONObject) object.get(champExternetab[i]);
+                        object = (JSONObject) object.get(externalFieldTab[i]);
                     }
 
                 }
 
             } else {
-                value = dataResponse.get(champExterne);
+                value = dataResponse.get(externalField);
             }
         } else {
 
-            throw new InternalException(CommonUtils.placeholderFormat(MISSING_CHAMP_EXTERNE, FIRST_PLACEHOLDER, mapperDTO.getDataMapperId().toString()));
+            throw new InternalException(CommonUtils.placeholderFormat(MISSING_EXTERNAL_FIELD, FIRST_PLACEHOLDER, mapperDTO.getDataMapperId().toString()));
         }
 
 
-        if (value!=null && !isNestedArray){
+        if (value != null && !isNestedArray) {
 
-            if(StringUtils.isNotBlank(mapperDTO.getFormat())){
+            if (StringUtils.isNotBlank(mapperDTO.getFormat())) {
                 String format = mapperDTO.getFormat();
                 String timezone = mapperDTO.getTimezone();
 
-                Map<String,Object> formattedData = FormatUtils.formatValue(value,format,champInterne,timezone, mapperDTO);
+                Map<String, Object> formattedData = FormatUtils.formatValue(value, format, internalField, timezone, mapperDTO);
                 value = formattedData.get("value");
-                champInterne = (String) formattedData.get("champInterne");
+                internalField = (String) formattedData.get("internalField");
             }
 
-            //creation of the corresponding field "champInterne"
-            if(value != null && StringUtils.isNotBlank(champInterne)){
-                assignChampInterne(mapperDTO, champInterne, dataResponse, value);
+            //creation of the corresponding field "internalField"
+            if (value != null && StringUtils.isNotBlank(internalField)) {
+                assignInternalField(internalField, dataResponse, value);
             }
 
         }
-
 
 
     }
 
 
     /**
-     * Create the corresponding champInterne and assign the found value to it
-     * @param mapperDTO
-     * @param champInterne
+     * Create the corresponding internalField and assign the found value to it
+     *
+     * @param internalField
      * @param dataResponse
      * @param value
      * @throws JSONException
      */
-    private static void assignChampInterne (DataMapperDTO mapperDTO, String champInterne, JSONObject dataResponse, Object value) throws JSONException {
+    private static void assignInternalField(String internalField, JSONObject dataResponse, Object value) throws JSONException {
 
-        if (champInterne.contains(".")) {
-            String[] champInternetab = champInterne.split("\\.");
+        if (internalField.contains(".")) {
+            String[] internalFieldTab = internalField.split("\\.");
             JSONObject object = new JSONObject();
-            // assign the value of champExterne to the corresponding intern field
-            object.put(champInternetab[champInternetab.length - 1], value);
+            // assign the value of externalField to the corresponding internal field
+            object.put(internalFieldTab[internalFieldTab.length - 1], value);
 
-            //case where root of champInterne not created yet
-            if (dataResponse.isNull(champInternetab[0])) {
+            //case where root of internalField not created yet
+            if (dataResponse.isNull(internalFieldTab[0])) {
 
-                // creation of the full object with subObjects indicated in champInterne to create
-                for (int i = 2; i <= champInternetab.length; i++) {
+                // creation of the full object with subObjects indicated in internalField to create
+                for (int i = 2; i <= internalFieldTab.length; i++) {
                     JSONObject parent = new JSONObject();
-                    parent.put(champInternetab[champInternetab.length - i], object);
+                    parent.put(internalFieldTab[internalFieldTab.length - i], object);
                     object = parent;
                 }
-                dataResponse.put(champInternetab[0], object.get(champInternetab[0]));
+                dataResponse.put(internalFieldTab[0], object.get(internalFieldTab[0]));
 
-            // champInterne root has already been created through a previous iteration on data_mappers
+                // internalField root has already been created through a previous iteration on data_mappers
             } else {
-                JSONObject responseObject = dataResponse.getJSONObject(champInternetab[0]);
-                if (champInternetab.length > 2) {
+                JSONObject responseObject = dataResponse.getJSONObject(internalFieldTab[0]);
+                if (internalFieldTab.length > 2) {
 
-                    //loop on different levels of existing champInterne  to reach the level were new object needs to be added
-                    for (int i = 1; i < champInternetab.length - 1; i++) {
-                        if (!responseObject.isNull(champInternetab[i])) {
-                            responseObject = responseObject.getJSONObject(champInternetab[i]);
-                            if (i == champInternetab.length - 2) {
-                                responseObject.put(champInternetab[i + 1], object.get(champInternetab[i + 1]));
+                    //loop on different levels of existing internalField  to reach the level where the new object needs to be added
+                    for (int i = 1; i < internalFieldTab.length - 1; i++) {
+                        if (!responseObject.isNull(internalFieldTab[i])) {
+                            responseObject = responseObject.getJSONObject(internalFieldTab[i]);
+                            if (i == internalFieldTab.length - 2) {
+                                responseObject.put(internalFieldTab[i + 1], object.get(internalFieldTab[i + 1]));
                             }
                         } else {
-                            if(i == champInternetab.length - 2){
-                                responseObject.put(champInternetab[i],object);
+                            if (i == internalFieldTab.length - 2) {
+                                responseObject.put(internalFieldTab[i], object);
                             } else {
-                                for (int j = i; j <= champInternetab.length - i; j++) {
+                                for (int j = i; j <= internalFieldTab.length - i; j++) {
                                     JSONObject parent = new JSONObject();
-                                    parent.put(champInternetab[champInternetab.length - j], object);
+                                    parent.put(internalFieldTab[internalFieldTab.length - j], object);
                                     object = parent;
                                 }
 
-                                responseObject.put(champInternetab[i], object.get(champInternetab[i]));
+                                responseObject.put(internalFieldTab[i], object.get(internalFieldTab[i]));
                             }
 
                         }
 
                     }
                 } else {
-                    responseObject.put(champInternetab[1], object.get(champInternetab[1]));
+                    responseObject.put(internalFieldTab[1], object.get(internalFieldTab[1]));
                 }
 
 
             }
 
         } else {
-            dataResponse.putOpt(champInterne, value);
+            dataResponse.putOpt(internalField, value);
         }
 
     }

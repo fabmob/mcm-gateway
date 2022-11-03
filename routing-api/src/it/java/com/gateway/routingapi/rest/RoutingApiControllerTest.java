@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectReader;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.tests.enums.JsonResponseTypeEnum;
 import com.gateway.commonapi.utils.CommonUtils;
-import com.gateway.routingapi.service.RoutingService;
 import com.gateway.routingapi.service.impl.RoutingServiceImpl;
 import com.gateway.routingapi.util.constant.RoutingDict;
 import com.gateway.routingapi.utils.RoutingITTestCase;
@@ -30,9 +29,9 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
+
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 import static com.gateway.routingapi.util.constant.RoutingDict.*;
@@ -61,10 +60,11 @@ class RoutingApiControllerTest extends RoutingITTestCase {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         MockitoAnnotations.initMocks(this);
         JacksonTester.initFields(this, this.objectMapper);
     }
+
     /**
      * Test execute Default adapter PostOperation
      *
@@ -73,12 +73,11 @@ class RoutingApiControllerTest extends RoutingITTestCase {
     @Test
     void testAdaptPostOperation() throws Exception {
 
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
         String actionName = "GLOBAL_VIEW_SEARCH";
-        Map<String, String> params = new HashMap<>();
 
         String uriRouting = CommonUtils.placeholderFormat(
-                ROUTE_PATH + ROUTING_MSP_ID_PATH, "mspId", mspId.toString() +
+                ROUTE_PATH + ROUTING_MSP_ID_PATH, "partnerId", partnerId +
                         ROUTING_ACTION_NAME_ID_PATH, "actionName", actionName);
 
         testHttpRequestWithExpectedResult(uriRouting, HttpMethod.POST, HttpStatus.OK,
@@ -95,12 +94,11 @@ class RoutingApiControllerTest extends RoutingITTestCase {
     @Test
     void testAdaptPostOperationNull() throws Exception {
 
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
         String actionName = "GLOBAL_VIEW_SEARCH";
-        Map<String, String> params = new HashMap<>();
 
         String uriRouting = CommonUtils.placeholderFormat(
-                ROUTE_PATH + ROUTING_MSP_ID_PATH, "mspId", mspId.toString() +
+                ROUTE_PATH + ROUTING_MSP_ID_PATH, "partnerId", partnerId +
                         ROUTING_ACTION_NAME_ID_PATH, "actionName", actionName);
 
         testHttpRequestWithExpectedResult(uriRouting, HttpMethod.POST, HttpStatus.OK,
@@ -109,14 +107,13 @@ class RoutingApiControllerTest extends RoutingITTestCase {
     }
 
 
-
     /**
      * Central management of the Routing  ControllerTest
      *
      * @param uri                      the uri of the operation
      * @param httpMethod               HTTP VERB (GET, PUT, POST, PATCH, DELETE)
      * @param httpStatusExpectedResult Https code status expected
-     * @param requestPayloadPath       payload of the request (optionnal for some verbs)
+     * @param requestPayloadPath       payload of the request (optional for some verbs)
      * @param expectedResultPath       path of the json expected answer file
      * @param resulType                JsonArray or JsonObject expected as result
      * @param message                  Message of the test running
@@ -134,7 +131,7 @@ class RoutingApiControllerTest extends RoutingITTestCase {
         // mock makecall() operation with a stub object from createMocked function
         doReturn(mspResponseMocked).when(routingService).routeOperation(any(), any(), any(), any());
         // mock makecall() operation with a stub object from createMocked function
-        doReturn(mspResponseMocked).when(routingService).routeOperation(null,null,null,null);
+        doReturn(mspResponseMocked).when(routingService).routeOperation(null, null, null, null);
 
         // preparing the service call and expected elements
         ResultMatcher mockResultMatcher = WsTestUtil.getResultMatcher(httpStatusExpectedResult);
@@ -195,7 +192,7 @@ class RoutingApiControllerTest extends RoutingITTestCase {
      */
     private Object createMockedResponse() throws IOException {
         String mockStringyfied = WsTestUtil.readJsonFromFilePath(IT_RESOURCES_PATH + ROUTING_MOCK_ADAPT_GET_JSON);
-        ObjectReader objectReader = objectMapper.reader().forType(new TypeReference<Object>() {
+        ObjectReader objectReader = objectMapper.reader().forType(new TypeReference<>() {
         });
 
         return objectReader.readValue(mockStringyfied);
@@ -208,7 +205,7 @@ class RoutingApiControllerTest extends RoutingITTestCase {
      */
     private Object createMockedResponseNull() throws IOException {
         String mockStringyfied = WsTestUtil.readJsonFromFilePath(IT_RESOURCES_PATH + ROUTING_MOCK_ADAPT_GET_JSON);
-        ObjectReader objectReader = objectMapper.reader().forType(new TypeReference<Object>() {
+        ObjectReader objectReader = objectMapper.reader().forType(new TypeReference<>() {
         });
 
         return objectReader.readValue(mockStringyfied);

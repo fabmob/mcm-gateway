@@ -1,11 +1,6 @@
 package com.gateway.commonapi.dto.api;
 
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.gateway.commonapi.dto.api.geojson.Polygon;
 import com.gateway.commonapi.utils.enums.ZoneType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -15,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.List;
 
 /**
  * Bean representing a geographical area.
@@ -34,8 +32,7 @@ public class Zone implements Serializable {
             name = "zoneType",
             description = "Type of area",
             required = true,
-            example = "OPERATING",
-            allowableValues = "OPERATING, NO_PARKING, SPEED_LIMIT, PREFENTIAL_PARKING")
+            example = "OPERATING")
     @JsonProperty("zoneType")
     private ZoneType zoneType;
 

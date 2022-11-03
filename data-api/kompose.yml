@@ -11,10 +11,12 @@ services:
      environment:
        - DATABASE_USERNAME=${DATABASE_USER_NAME}
        - DATABASE_PASSWORD=${DATABASE_USER_PWD}
-       - DATABASE_HOST=postgresgateway.${KUBERNETES_GATEWAY_DB_NAMESPACE}.svc.cluster.local
-       - MAAS_API_CACHE_HOST=redis.${KUBERNETES_GATEWAY_REDIS_NAMESPACE}.svc.cluster.local
+       - DATABASE_HOST=postgresgateway.postgresgateway-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - CACHE_MANAGER_HOST=cache-manager.cache-manager-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
        - MAAS_API_CACHE_PORT=6379
        - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
        - SERVICE_BASE_PATH=${DATA_API_FQDN}
      ports:
        - '8081'

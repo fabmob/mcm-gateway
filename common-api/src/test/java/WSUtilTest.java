@@ -4,25 +4,18 @@ import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.dto.exceptions.NotFound;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
-import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.tests.UTTestCase;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.utils.CommonUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -32,7 +25,6 @@ import java.util.UUID;
 
 import static com.gateway.commonapi.utils.CommonUtils.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -55,11 +47,11 @@ public class WSUtilTest extends UTTestCase {
     public void testMediaTypeCharset() {
 
         log.info("Test WSUtilTests > testMediaTypeCharset");
-        Assertions.assertEquals(MediaType.APPLICATION_JSON_UTF8.getCharset(), WsTestUtil.getMediaType(HttpMethod.GET).getCharset(), "Verify charset for GET");
-        Assertions.assertEquals(MediaType.APPLICATION_JSON_UTF8.getCharset(), WsTestUtil.getMediaType(HttpMethod.POST).getCharset(), "Verify charset for POST");
+        Assertions.assertEquals(MediaType.APPLICATION_JSON.getCharset(), WsTestUtil.getMediaType(HttpMethod.GET).getCharset(), "Verify charset for GET");
+        Assertions.assertEquals(MediaType.APPLICATION_JSON.getCharset(), WsTestUtil.getMediaType(HttpMethod.POST).getCharset(), "Verify charset for POST");
         Assertions.assertNull(WsTestUtil.getMediaType(HttpMethod.DELETE), "Verify charset for DELETE");
         Assertions.assertNull(WsTestUtil.getMediaType(HttpMethod.PUT), "Verify charset for PUT");
-        Assertions.assertEquals(MediaType.APPLICATION_JSON_UTF8.getCharset(), WsTestUtil.getMediaType(HttpMethod.PATCH).getCharset(), "Verify charset for PATCH");
+        Assertions.assertEquals(MediaType.APPLICATION_JSON.getCharset(), WsTestUtil.getMediaType(HttpMethod.PATCH).getCharset(), "Verify charset for PATCH");
     }
 
     @Test
@@ -87,17 +79,17 @@ public class WSUtilTest extends UTTestCase {
     }
 
     @Test
-    public void testGetMockHttpServletRequestBuilder(){
+    public void testGetMockHttpServletRequestBuilder() {
 
-       Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("baseUri","uri", HttpMethod.GET,"contentPayload"));
-       Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("baseUri","uri", HttpMethod.PUT,"contentPayload"));
-       Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("baseUri","uri", HttpMethod.DELETE,"contentPayload"));
-       Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("baseUri","uri", HttpMethod.PATCH,"contentPayload"));
-       Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("baseUri","uri", HttpMethod.POST,"contentPayload"));
+        Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("http://baseUri", "uri", HttpMethod.GET, "contentPayload"));
+        Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("http://baseUri", "uri", HttpMethod.PUT, "contentPayload"));
+        Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("http://baseUri", "uri", HttpMethod.DELETE, "contentPayload"));
+        Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("http://baseUri", "uri", HttpMethod.PATCH, "contentPayload"));
+        Assertions.assertNotNull(WsTestUtil.getMockHttpServletRequestBuilder("http://baseUri", "uri", HttpMethod.POST, "contentPayload"));
     }
 
     @Test
-    public void testGetResultMatcher(){
+    public void testGetResultMatcher() {
         Assertions.assertNotNull(WsTestUtil.getResultMatcher(HttpStatus.OK));
         Assertions.assertNotNull(WsTestUtil.getResultMatcher(HttpStatus.CREATED));
         Assertions.assertNotNull(WsTestUtil.getResultMatcher(HttpStatus.NOT_FOUND));
@@ -114,7 +106,7 @@ public class WSUtilTest extends UTTestCase {
 
     @Test
     public void testIgnoreUUID() {
-        Assertions.assertEquals( "\"mspId\": \""+WsTestUtil.FAKE_UUID+"\"", WsTestUtil.ignoreUUID("\"mspId\": \"f5e6cc23-740c-44f1-87bb-96762b35490d\""));
+        Assertions.assertEquals("\"mspId\": \"" + WsTestUtil.FAKE_UUID + "\"", WsTestUtil.ignoreUUID("\"mspId\": \"f5e6cc23-740c-44f1-87bb-96762b35490d\""));
     }
 
     @Test
@@ -125,7 +117,7 @@ public class WSUtilTest extends UTTestCase {
     @SneakyThrows
     @Test
     public void testExceptions() {
-        NotFound errorObject = new NotFound("myLabel","this is a message");
+        NotFound errorObject = new NotFound("myLabel", "this is a message");
         ObjectMapper objectMapper = new ObjectMapper();
         String message = objectMapper.writeValueAsString(errorObject);
         Assertions.assertEquals(errorObject.getLabel(), objectMapper.readValue(message, NotFound.class).getLabel());
@@ -136,13 +128,13 @@ public class WSUtilTest extends UTTestCase {
 
     @Test
     public void testPlaceholderFormat() {
-        Assertions.assertEquals("/url/14/id",CommonUtils.placeholderFormat("/url/{placeholder}/id", "placeholder", "14"));
-        Assertions.assertEquals("/url/14/id/myValue",CommonUtils.placeholderFormat("/url/{placeholder}/id/{otherVar}", "placeholder", "14", "otherVar", "myValue"));
-        Assertions.assertThrowsExactly(IllegalArgumentException.class,() -> CommonUtils.placeholderFormat("/url/{placeholder}/id", "placeholder"));
+        Assertions.assertEquals("/url/14/id", CommonUtils.placeholderFormat("/url/{placeholder}/id", "placeholder", "14"));
+        Assertions.assertEquals("/url/14/id/myValue", CommonUtils.placeholderFormat("/url/{placeholder}/id/{otherVar}", "placeholder", "14", "otherVar", "myValue"));
+        Assertions.assertThrowsExactly(IllegalArgumentException.class, () -> CommonUtils.placeholderFormat("/url/{placeholder}/id", "placeholder"));
     }
 
     @Test
-    public void testSetHttpHeaders(){
+    public void testSetHttpHeaders() {
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set("Correlation-id", new ThreadLocalUserSession().get().getContextId());
 
@@ -172,18 +164,18 @@ public class WSUtilTest extends UTTestCase {
     }
 
     @Test
-    public void testSetHeader(){
-        String correlationId = new ThreadLocalUserSession().get().getContextId();
+    public void testSetHeader() {
+        String CORRELATION_ID = new ThreadLocalUserSession().get().getContextId();
         org.springframework.http.HttpHeaders httpHeaders = new org.springframework.http.HttpHeaders();
-        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, CORRELATION_ID);
         HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
-        Assertions.assertEquals(httpEntity, setHeader());
+        Assertions.assertEquals(httpEntity, setHeaders());
     }
 
 
     @Test
-    public void testThreadLocalUserSession (){
+    public void testThreadLocalUserSession() {
 
         String initialThreadName = Thread.currentThread().getName();
         ThreadLocalUserSession session = new ThreadLocalUserSession();
@@ -210,7 +202,7 @@ public class WSUtilTest extends UTTestCase {
 
 
     @Test
-    public void testProcessFunction(){
+    public void testProcessFunction() {
         String processFunction = "BASE64";
         String value = "myValue";
 
@@ -222,7 +214,7 @@ public class WSUtilTest extends UTTestCase {
     }
 
     @Test
-    public void testConstructUrlTemplate(){
+    public void testConstructUrlTemplate() {
         String urlCall = "http://localhost:8081/v1/adapters/addAdapter";
         Map<String, String> params = new HashMap<>();
         params.put("clé", "valeur");
@@ -235,4 +227,24 @@ public class WSUtilTest extends UTTestCase {
         String invalidUri = "";
         Assertions.assertEquals(invalidUri, constructUrlTemplate(invalidUri, params));
     }
+
+    @Test
+    public void testIsValidFunction() {
+        Assertions.assertEquals(true, isValidFunction("NUMERIC_OPERATOR(*,\"100\")"));
+        Assertions.assertEquals(true, isValidFunction("NUMERIC_OPERATOR(*,100)"));
+        Assertions.assertEquals(true, isValidFunction("CONVERT_STRING_TO_BOOLEAN(\"parking_lot\"=\"isParkingLot\",\"street_parking\"=\"isStreetParking\",\"underground_parking\"=\"isUnderground\",\"sidewalk_parking\"=\"isSidewalkParking\")"));
+        Assertions.assertEquals(true, isValidFunction("CONVERT_STRING_TO_BOOLEAN(parking_lot = isParkingLot,street_parking = isStreetParking)"));
+        Assertions.assertEquals(true, isValidFunction("FORMAT_DATE(\"timestamp\")"));
+        Assertions.assertEquals(true, isValidFunction("CONVERT_LIST_TO_STRING(\", \")"));
+
+        Assertions.assertEquals(false, isValidFunction("FALSE_FUNCTION(\", \")"));
+        Assertions.assertEquals(false, isValidFunction("NUMERIC_OPERATOR(*,toto)"));
+        Assertions.assertEquals(false, isValidFunction("NUMERIC_OPERATOR(*,100\")"));
+        Assertions.assertEquals(false, isValidFunction("NUMERIC_OPERATOR(*,\"100)"));
+        Assertions.assertEquals(false, isValidFunction("NUMERIC_OPERATOR(*,10\"0)"));
+        Assertions.assertEquals(false, isValidFunction("CONVERT_STRING_TO_BOOLEAN(parking_lot = \"isParkingLot,street_parking = isStreetParking)"));
+
+    }
+
+
 }

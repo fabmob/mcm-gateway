@@ -12,13 +12,12 @@ public interface DefaultAdapterService {
 
     /**
      * all the logic of call request construction and response transformation
-     * @param params      List of parameters
-     * @param mspActionId action identifier
-     * @param mspId       Msp identifier
+     *
+     * @param params          List of parameters
+     * @param partnerActionId action identifier
+     * @param partnerId       Msp identifier
      * @return list of objects returned by the msp
      */
-    List<Object> adaptOperation(Map<String, String> params, UUID mspActionId, UUID mspId, Map<String, Object> originalBody) throws JSONException, IOException, IntrospectionException;
-
-    ;
+    List<Object> adaptOperation(Map<String, String> params, UUID partnerActionId, UUID partnerId, Map<String, Object> originalBody) throws JSONException, IOException, IntrospectionException;
 }
 

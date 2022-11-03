@@ -10,7 +10,7 @@ import java.io.Serializable;
 @Embeddable
 @Getter
 @Setter
-public class StandardPK implements Serializable {
+public class    StandardPK implements Serializable {
     /**
      *
      */
@@ -23,10 +23,10 @@ public class StandardPK implements Serializable {
     private String versionDataMapping;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "msp_id")
-    private MspMeta msp;
+    @JoinColumn(name = "partner_id")
+    private PartnerMeta partner;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "mspActionId")
-    private MSPActions action;
+    @JoinColumn(name = "partnerActionId")
+    private PartnerActions action;
 }

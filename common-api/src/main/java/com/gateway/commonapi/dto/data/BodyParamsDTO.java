@@ -1,14 +1,13 @@
 package com.gateway.commonapi.dto.data;
-import java.util.UUID;
-
-import io.swagger.v3.oas.annotations.media.Schema;
-import org.springframework.boot.jackson.JsonComponent;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.boot.jackson.JsonComponent;
+
+import java.util.UUID;
 
 @JsonComponent
 @Data

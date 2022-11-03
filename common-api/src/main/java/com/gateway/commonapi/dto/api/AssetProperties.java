@@ -1,20 +1,23 @@
 package com.gateway.commonapi.dto.api;
 
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gateway.commonapi.utils.enums.*;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Aspects of an asset or assetType. Most aspects are optional and should only be used when applicable.

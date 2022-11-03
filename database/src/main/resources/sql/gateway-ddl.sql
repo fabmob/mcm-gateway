@@ -37,7 +37,7 @@ CREATE TABLE msp.msp_meta (
     has_speed_limit_zone boolean,
     has_station boolean,
     has_station_status boolean,
-    has_vehicule boolean,
+    has_vehicle boolean,
     is_enabled boolean,
     logo_format character varying(4),
     logo_url character varying(200),

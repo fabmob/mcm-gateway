@@ -15,8 +15,12 @@ services:
        - 'kompose.service.type=clusterip'
      environment:
        - SERVICE_BASE_PATH=${DEFAULT_ADAPTER_FQDN}
-       - DATA_API_HOST=data-api.${KUBERNETES_DATA_API_NAMESPACE}.svc.cluster.local
-       - REQUEST_RELAY_HOST=request-relay.${KUBERNETES_REQUEST_RELAY_NAMESPACE}.svc.cluster.local
+       - DATA_API_HOST=data-api.data-api-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - REQUEST_RELAY_HOST=request-relay.request-relay-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_PORT=6379
+       - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
  #    networks:
  #      - web-nw
 

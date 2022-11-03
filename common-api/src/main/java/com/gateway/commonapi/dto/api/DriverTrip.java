@@ -1,20 +1,14 @@
 package com.gateway.commonapi.dto.api;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.validation.annotation.Validated;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.EqualsAndHashCode;
 
 /**
  * Details about a Driver Trip
  */
-@Schema(allOf = Trip.class)
+//@Schema(allOf = Trip.class)
+@EqualsAndHashCode
 public class DriverTrip extends Trip {
     @Schema(required = true, name = "driver")
     @JsonProperty("driver")
@@ -53,8 +47,6 @@ public class DriverTrip extends Trip {
     @Schema(name = "car")
     @JsonProperty("car")
     private Car car;
-
-
 
 
 }

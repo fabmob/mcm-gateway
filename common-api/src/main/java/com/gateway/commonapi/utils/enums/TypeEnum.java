@@ -2,24 +2,25 @@ package com.gateway.commonapi.utils.enums;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.gateway.commonapi.exception.BadRequestException;
+import com.gateway.commonapi.utils.ExceptionUtils;
 
-/**
- * type of external reference (GTFS, CHB).
- */
+import java.util.Objects;
+
 public enum TypeEnum {
-    GTFS_STOP_ID("GTFS_STOP_ID"),
+    PUBLIC_TRANSPORT("PUBLIC_TRANSPORT"),
+    CARPOOLING("CARPOOLING"),
+    PARKING("PARKING"),
+    EV_CHARGING("EV_CHARGING"),
+    SELF_SERVICE_BICYCLE("SELF_SERVICE_BICYCLE"),
+    CAR_SHARING("CAR_SHARING"),
+    FREE_FLOATING("FREE_FLOATING"),
+    TAXI_VTC("TAXI_VTC"),
+    MAAS_APPLICATION("MAAS_APPLICATION"),
+    MAAS_EDITOR("MAAS_EDITOR");
 
-    GTFS_STOP_CODE("GTFS_STOP_CODE"),
 
-    GTFS_AREA_ID("GTFS_AREA_ID"),
-
-    CHB_STOP_PLACE_CODE("CHB_STOP_PLACE_CODE"),
-
-    CHB_QUAY_CODE("CHB_QUAY_CODE"),
-
-    NS_CODE("NS_CODE");
-
-    private String value;
+    private final String value;
 
     TypeEnum(String value) {
         this.value = value;
@@ -38,6 +39,14 @@ public enum TypeEnum {
                 return b;
             }
         }
-        return null;
+        throw new BadRequestException(ExceptionUtils.getBadEnumValueMessage(TypeEnum.class, text));
+    }
+
+    /**
+     * @param value of the typeEnum
+     * @return true if the value is one of MAAS possible values
+     */
+    public static boolean isMaasType(String value) {
+        return (Objects.equals(value, TypeEnum.MAAS_APPLICATION.value) || Objects.equals(value, TypeEnum.MAAS_EDITOR.value));
     }
 }

@@ -6,15 +6,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureDataJpa;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = GatewayApplication.class,  webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ComponentScan(basePackages = {  "com.gateway.api" })
-@TestPropertySource(properties = {"classpath:application.yml"})
-@AutoConfigureMockMvc(addFilters = false)
+@SpringBootTest(classes = GatewayApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ComponentScan(basePackages = {"com.gateway.api"})
+@AutoConfigureMockMvc
 @AutoConfigureDataJpa
 @Ignore("Mother class of the tests")
 public class ApiITTestCase {

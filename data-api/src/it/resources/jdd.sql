@@ -1,7 +1,8 @@
 CREATE SCHEMA IF NOT EXISTS msp;
+CREATE SCHEMA IF NOT EXISTS configuration;
 
 TRUNCATE  msp.price_list cascade;
-TRUNCATE  msp.msp_meta cascade;
+TRUNCATE  msp.partner_meta cascade;
 TRUNCATE  msp.price_list_item cascade;
 begin;
 
@@ -13,12 +14,12 @@ INSERT INTO msp.price_list (price_list_id, comment, out_of_bound_fee, parking_fo
 ('50d8c105-8742-4187-b4e8-c67c51a34229', '', 5, 3, null);
 
 
-INSERT INTO msp.msp_meta (msp_id,has_hold,has_no_parking_zone,has_operating_zone,has_parking,has_pref_parking_zone,has_speed_limit_zone,has_station,has_station_status,has_vehicule,is_enabled,logo_format,logo_url,"name","operator",primary_color,secondary_color,"type",url,url_webview,price_list_price_list_id) VALUES
-('b814c97e-df56-4651-ac50-11525537964f', false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'TROTTINETTE', 'https://www.cityscoot.eu/paris/', false, '22808a15-1b7b-4605-9764-3c71a3f05ae4'),
-('6c317901-749f-4d7d-82bb-afdc737b26b3', false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'TROTTINETTE', 'https://www.cityscoot.eu/paris/', false, '08b05a7e-e027-48ba-8916-83c7ddca8c9e'),
-('f6b6d937-dd91-4dd2-99d6-74958ee4e09a', false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'TROTTINETTE', 'https://www.cityscoot.eu/paris/', false, '2d973d40-8e33-4b59-9334-a98bbf0e18c5'),
-('28784eb7-de79-434d-a1b6-819ebfd50860', false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'TROTTINETTE', 'https://www.cityscoot.eu/paris/', false, 'dad32a8c-0033-4e49-b6b9-cd051744f699'),
-('3eeec675-2da2-421b-9b6c-ed05776b9f64', false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'TROTTINETTE', 'https://www.cityscoot.eu/paris/', false, '50d8c105-8742-4187-b4e8-c67c51a34229');
+INSERT INTO msp.partner_meta (partner_id,partner_type,has_hold,has_no_parking_zone,has_operating_zone,has_parking,has_pref_parking_zone,has_speed_limit_zone,has_station,has_station_status,has_vehicle,is_enabled,logo_format,logo_url,"name","operator",primary_color,secondary_color,"type",url,url_webview,price_list_price_list_id) VALUES
+('b814c97e-df56-4651-ac50-11525537964f', 'MSP',false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'CARPOOLING', 'https://www.cityscoot.eu/paris/', false, '22808a15-1b7b-4605-9764-3c71a3f05ae4'),
+('6c317901-749f-4d7d-82bb-afdc737b26b3', 'MSP',false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'CARPOOLING', 'https://www.cityscoot.eu/paris/', false, '08b05a7e-e027-48ba-8916-83c7ddca8c9e'),
+('f6b6d937-dd91-4dd2-99d6-74958ee4e09a', 'MSP',false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'CARPOOLING', 'https://www.cityscoot.eu/paris/', false, '2d973d40-8e33-4b59-9334-a98bbf0e18c5'),
+('28784eb7-de79-434d-a1b6-819ebfd50860', 'MSP',false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'CARPOOLING', 'https://www.cityscoot.eu/paris/', false, 'dad32a8c-0033-4e49-b6b9-cd051744f699'),
+('3eeec675-2da2-421b-9b6c-ed05776b9f64', 'MSP',false, false, false, false, false, false, false, true, NULL, NULL, 'PNG', '@MAAS_API_DIRECTORY_ICON@/icon_cityscoot@3x.png', 'Dott', 'Dott', '#0054BB', '#0054BB', 'CARPOOLING', 'https://www.cityscoot.eu/paris/', false, '50d8c105-8742-4187-b4e8-c67c51a34229');
 
 
 INSERT INTO msp.price_list_item (dtype,price_list_item_id,fare_per_unit,fixed_fare,lower_price_limit,unit,upper_price_limit,price_list_distance,price_list_duration) VALUES

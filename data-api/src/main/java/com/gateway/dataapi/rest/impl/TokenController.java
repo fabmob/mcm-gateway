@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
 
-import static com.gateway.commonapi.utils.ControllerMessageDict.*;
-import static com.gateway.dataapi.util.constant.DataApiPathDict.*;
+import static com.gateway.commonapi.constants.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.DataApiPathDict.*;
 
 
 @RestController
@@ -27,7 +27,7 @@ public class TokenController {
 
     private static final String ADD_TOKEN = "************* Add Token ************* ";
     private static final String DELETE_TOKEN = "************* Delete Token ************* ";
-    private static final String GET_ALL_TOKEN_OR_BY_MSP_META_ID = "************* Get All Tokens with optional filter mspMetaId ************* ";
+    private static final String GET_ALL_TOKEN_OR_BY_PARTNER_META_ID = "************* Get All Tokens with optional filter partnerMetaId ************* ";
     TokenService tokenService;
 
     public TokenController(TokenService tokenService) {
@@ -87,7 +87,7 @@ public class TokenController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get Token By MspMetaId", description = "Description list of Tokens", tags = {TOKENS_TAG})
+    @Operation(summary = "Get Token By PartnerMetaId", description = "Description list of Tokens", tags = {TOKENS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -95,9 +95,9 @@ public class TokenController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = TOKENS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<TokenDTO> getAllTokens(@RequestParam(name = "mspMetaId", required = true) UUID mspMetaId) {
-        log.info(GET_ALL_TOKEN_OR_BY_MSP_META_ID);
-        TokenDTO token = tokenService.getByMspMetaId(mspMetaId);
+    public ResponseEntity<TokenDTO> getAllTokens(@RequestParam(name = "partnerMetaId", required = true) UUID partnerMetaId) {
+        log.info(GET_ALL_TOKEN_OR_BY_PARTNER_META_ID);
+        TokenDTO token = tokenService.getByPartnerMetaId(partnerMetaId);
         return new ResponseEntity<>(token, HttpStatus.OK);
 
     }

@@ -3,12 +3,11 @@ package com.gateway.commonapi.dto.api;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.gateway.commonapi.utils.enums.GenderEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import java.io.Serializable;
 
-
+@Data
 public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -75,8 +74,6 @@ public class User implements Serializable {
             description = "User's grade from 1 to 5.",
             example = "4")
     @JsonProperty("grade")
-    @Min(1)
-    @Max(5)
     private Integer grade = null;
 
     /**

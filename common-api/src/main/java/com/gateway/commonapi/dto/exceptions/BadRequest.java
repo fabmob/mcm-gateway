@@ -3,12 +3,13 @@ package com.gateway.commonapi.dto.exceptions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
+
+import java.io.Serializable;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class BadRequest extends GenericError {
+public class BadRequest extends GenericError implements Serializable {
 
     private static final long serialVersionUID = 1905102001950251207L;
 
@@ -41,6 +42,7 @@ public class BadRequest extends GenericError {
     }
 
     @Schema(example = "400")
+    @Override
     public Integer getStatus() {
         return this.status;
     }

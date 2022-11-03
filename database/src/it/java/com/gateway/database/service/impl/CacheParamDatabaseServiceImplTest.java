@@ -6,7 +6,7 @@ import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.database.model.CacheParam;
 import com.gateway.database.model.CacheParamPK;
-import com.gateway.database.model.MspMeta;
+import com.gateway.database.model.PartnerMeta;
 import com.gateway.database.repository.CacheParamRepository;
 import com.gateway.database.service.CacheParamDatabaseService;
 import org.junit.Test;
@@ -50,14 +50,14 @@ public class CacheParamDatabaseServiceImplTest {
     public CacheParam initCacheParam() {
         CacheParam cacheParam = new CacheParam();
         CacheParamPK cacheParamPK = new CacheParamPK();
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
         cacheParam.setCacheParamId(UUID.randomUUID());
-        MspMeta mspMeta = new MspMeta();
-        mspMeta.setMspId(mspId);
+        PartnerMeta partnerMeta = new PartnerMeta();
+        partnerMeta.setPartnerId(partnerId);
         cacheParam.setSoftTTL(333);
         cacheParam.setHardTTL(999);
         cacheParamPK.setActionType("STATION_SEARCH");
-        cacheParamPK.setMsp(mspMeta);
+        cacheParamPK.setPartner(partnerMeta);
         cacheParam.setCacheParamPK(cacheParamPK);
         cacheParam.setRefreshCacheDelay(666);
         return cacheParam;

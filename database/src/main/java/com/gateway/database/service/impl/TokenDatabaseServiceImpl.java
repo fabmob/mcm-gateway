@@ -1,17 +1,16 @@
 package com.gateway.database.service.impl;
 
-import java.text.MessageFormat;
-import java.util.UUID;
-
+import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.database.model.Token;
 import com.gateway.database.repository.TokensRepository;
 import com.gateway.database.service.TokenDatabaseService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.text.MessageFormat;
+import java.util.UUID;
 
 import static com.gateway.database.util.constant.DataMessageDict.*;
 
@@ -41,14 +40,14 @@ public class TokenDatabaseServiceImpl implements TokenDatabaseService {
      * Add a new Token
      *
      * @param token Token object
-     * @return Token informations for the Token added
+     * @return Token information for the Token added
      */
     @Override
     public Token addToken(Token token) {
         try {
             return tokenRepository.save(token);
         } catch (Exception ex) {
-            throw new NotFoundException(CommonUtils.placeholderFormat(TOKEN_WITH_MSP_META_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, token.getMsp().getMspId().toString()));
+            throw new NotFoundException(CommonUtils.placeholderFormat(TOKEN_WITH_PARTNER_META_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, token.getPartner().getPartnerId().toString()));
         }
     }
 
@@ -67,26 +66,25 @@ public class TokenDatabaseServiceImpl implements TokenDatabaseService {
     }
 
     /**
-     * Retrieve a Token informations.
+     * Retrieve a Token information.
      *
      * @param id Identifier of the Token
-     * @return Token informations for the Token
+     * @return Token information for the Token
      */
     @Override
     public Token findTokenById(UUID id) {
-        Token token = tokenRepository.findById(id)
+        return tokenRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(TOKEN_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString()))));
-        return token;
     }
 
     /**
-     * Get Token from MspMeta id
+     * Get Token from PartnerMeta id
      *
-     * @param id Identifier of the MspMetaDto
+     * @param id Identifier of the PartnerMetaDto
      * @return Token
      */
     @Override
-    public Token findByMspMetaId(UUID id) {
-        return tokenRepository.findByMspMspId(id);
+    public Token findByPartnerMetaId(UUID id) {
+        return tokenRepository.findByPartnerPartnerId(id);
     }
 }

@@ -1,7 +1,7 @@
 {
   "stations": [
     {
-      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "stationId": "400",
       "name": "Trocadero",
       "shortName": "Island Central",
@@ -42,7 +42,7 @@
   ],
   "stationsStatus": [
     {
-      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "stationId": "400",
       "numAssetsAvailable": 12,
       "numAssetsAvailableType":null,
@@ -65,12 +65,12 @@
       ],
       "bookDeeplink": "string",
       "useDeeplink": "string",
-      "lastReported": 0
+      "lastReported": 1646302112
     }
   ],
   "assets": [
     {
-      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "assetId": "string",
       "assetType": "string",
       "isReserved": true,
@@ -80,7 +80,7 @@
       "mileage": 0,
       "licensePlate": "string",
       "homeStationId": "sta0001",
-      "lastReported": "1970-01-19T15:11:06.109+0000",
+      "lastReported": 1646302112,
       "planId": "plan3",
       "overriddenProperties": {
         "name": "string",
@@ -175,7 +175,7 @@
   ],
   "parkings": [
     {
-      "mspId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+      "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
       "parkingId": "95cae659-d225-454e-9d3b-32a982f73074",
       "name": "Andrésy - Gare de Maurecourt - Sébastien Rouault",
       "url": "https://zenpark.com/parkings/parking-andresy-gare-de-maurecourt-sebastien-rouault\"",

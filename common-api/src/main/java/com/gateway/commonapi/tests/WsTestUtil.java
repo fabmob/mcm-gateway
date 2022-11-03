@@ -1,34 +1,38 @@
 package com.gateway.commonapi.tests;
 
+import com.gateway.commonapi.constants.GlobalConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import com.gateway.commonapi.constants.GlobalConstants;
-import org.apache.commons.io.IOUtils;
-import org.springframework.test.web.servlet.ResultMatcher;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 /**
  * Utility tools to implement IT tests for web services.
  */
+@Slf4j
 public class WsTestUtil {
 
     public static final String FAKE_UUID = "FAKE_UUID";
     public static final String FAKE_TIMESTAMP = "2080-01-01T00:00:00.154+01:00";
     public static final String UUID_REGEXP = "\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b";
 
-    private WsTestUtil() {}
+    private WsTestUtil() {
+    }
 
     /**
      * Convert a Path file into a String
+     *
      * @param pathFile file path
      * @return Content of the file as String
      * @throws IOException IO Exception reading file
@@ -37,10 +41,11 @@ public class WsTestUtil {
         File fileRef = new File(pathFile);
         String jsonRef = "";
         if (fileRef.exists()) {
-            InputStream stream = new FileInputStream(pathFile);
-            String jsonStringyfied = IOUtils.toString(stream, StandardCharsets.UTF_8);
-            // replace multiple spaces into single one
-            jsonRef = jsonStringyfied.trim().replaceAll("\\r|\\n","").replaceAll("\\s{2,}+", "");
+            try (InputStream stream = new FileInputStream(pathFile)) {
+                String jsonStringyfied = IOUtils.toString(stream, StandardCharsets.UTF_8);
+                // replace multiple spaces into single one
+                jsonRef = jsonStringyfied.trim().replaceAll("\\r|\\n", "").replaceAll("\\s{2,}+", "");
+            }
         }
 
         return jsonRef;
@@ -48,9 +53,10 @@ public class WsTestUtil {
 
     /**
      * Prepare the MockHttpServletRequestBuilder to simulate a web service call
-     * @param baseUri basePath of the web service (eg : /v1)
-     * @param uri operation path to call
-     * @param httpMethod verb of the http request (GET,PUT, POST, DELETE, PATCH, ...)
+     *
+     * @param baseUri               basePath of the web service (eg : /v1)
+     * @param uri                   operation path to call
+     * @param httpMethod            verb of the http request (GET,PUT, POST, DELETE, PATCH, ...)
      * @param requestPayloadContent If not empty the payload to inject into the request body
      * @return MockHttpServletRequestBuilder
      */
@@ -86,6 +92,7 @@ public class WsTestUtil {
 
     /**
      * Return the expected response MediaType regarding the httpMethod used.
+     *
      * @param httpMethod GET/PUT/POST/DELETE/PATCH
      * @return
      */
@@ -95,7 +102,7 @@ public class WsTestUtil {
             case GET:
             case POST:
             case PATCH:
-                mediaType = MediaType.APPLICATION_JSON_UTF8;
+                mediaType = MediaType.APPLICATION_JSON;
                 break;
             case PUT:
             case DELETE:
@@ -108,6 +115,7 @@ public class WsTestUtil {
 
     /**
      * Prepare the test ResultMatcher to test call response status regarding the HTTP response code expected.
+     *
      * @param httpStatusExpectedResult expected http status code
      * @return the {@link ResultMatcher} to use for test
      */
@@ -162,13 +170,14 @@ public class WsTestUtil {
 
     /**
      * Prepare the test ResultMatcher to test contentType regarding the HTTP response code expected and responseContentType
-     * @param responseContentType Content type expected
+     *
+     * @param responseContentType      Content type expected
      * @param httpStatusExpectedResult Http status code expected as result of the call
      * @return @{@link ResultMatcher} to test contentType
      */
     public static ResultMatcher getContentTypeResultMatcher(MediaType responseContentType, HttpStatus httpStatusExpectedResult) {
 
-        ResultMatcher contentTypeResultMatcher ;
+        ResultMatcher contentTypeResultMatcher;
 
         switch (httpStatusExpectedResult) {
             case NOT_FOUND:
@@ -194,6 +203,7 @@ public class WsTestUtil {
 
     /**
      * Replace UUID in a json with a fake string
+     *
      * @param jsonStringyfied Json where to replace UUID
      * @return the modified json with no UUID anymore
      */
@@ -203,6 +213,7 @@ public class WsTestUtil {
 
     /**
      * Replace TimeStamps with fake one
+     *
      * @param jsonStringyfied
      * @return the modified json with mocked timestamps
      */

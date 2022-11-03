@@ -12,7 +12,7 @@ public interface DataMapperService {
      * Add a new DataMapperDto
      *
      * @param datamapper DataMapperDTO object
-     * @return DataMapperDTO informations for the DataMapperDTO added
+     * @return DataMapperDTO information for the DataMapperDTO added
      */
     DataMapperDTO addDataMapper(DataMapperDTO datamapper);
 
@@ -24,11 +24,11 @@ public interface DataMapperService {
     List<DataMapperDTO> getAllDataMappers();
 
     /**
-     * Update all the DataMapper informations
+     * Update all the DataMapper information
      *
      * @param id         Identifier of the DataMapperDTO
      * @param datamapper DataMapperDTO object
-     * @return DataMapperDTO informations for the DataMapperDTO puted
+     * @return DataMapperDTO information for the DataMapperDTO put
      */
     DataMapperDTO updateDataMapper(UUID id, DataMapperDTO datamapper);
 
@@ -40,20 +40,20 @@ public interface DataMapperService {
     void deleteDataMapper(UUID id);
 
     /**
-     * Retrieve a DataMapperDto informations.
+     * Retrieve a DataMapperDto information.
      *
      * @param id Identifier of the DataMapperDto
-     * @return DataMapperDto informations for the DataMapperDto
+     * @return DataMapperDto information for the DataMapperDto
      * @throws NotFoundException not found object
      */
     DataMapperDTO getDataMapperFromId(UUID id) throws NotFoundException;
 
     /**
-     * Get DataMapper from MspActions id
+     * Get DataMapper from PartnerActions id
      *
-     * @param id Identifier of the MspActionsDto
+     * @param id Identifier of the PartnerActionsDto
      * @return DataMapperDto
      * @throws NotFoundException element is not found
      */
-    List<DataMapperDTO> getByMspActionId(UUID id) throws NotFoundException;
+    List<DataMapperDTO> getByPartnerActionId(UUID id) throws NotFoundException;
 }

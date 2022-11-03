@@ -1,12 +1,11 @@
 package com.gateway.dataapi.model.mapper;
 
-import java.util.List;
-import java.util.Set;
-
-import org.mapstruct.Mapper;
-
 import com.gateway.commonapi.dto.data.ParamsMultiCallsDTO;
 import com.gateway.database.model.ParamsMultiCalls;
+import org.mapstruct.Mapper;
+
+import java.util.List;
+import java.util.Set;
 
 @Mapper
 public interface ParamsMultiCallsMapper {

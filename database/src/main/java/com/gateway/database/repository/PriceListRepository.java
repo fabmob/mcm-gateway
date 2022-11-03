@@ -13,7 +13,8 @@ import java.util.UUID;
 @Repository
 public interface PriceListRepository extends CrudRepository<PriceList, UUID> {
     /**
-     * Remove priceList with provided provided priceListId
+     * Remove priceList with provided priceListId
+     *
      * @param priceListId the uuid of priceListItem to remove
      */
     @Transactional

@@ -1,21 +1,21 @@
 package com.gateway.commonapi.dto.api;
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gateway.commonapi.utils.enums.AssetClass;
 import com.gateway.commonapi.utils.enums.MSPType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.Valid;
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * AssetType
@@ -27,7 +27,7 @@ import javax.validation.constraints.*;
 @AllArgsConstructor
 @Validated
 @Schema(description = "Information about an asset type")
-@JsonPropertyOrder({ "assetTypeId", "mspId","type","stationId","nrAvailable","assets","assetClass","assetSubClass","sharedProperties","applicablePricings","conditions"})
+@JsonPropertyOrder({ "assetTypeId", "partnerId","type","stationId","nrAvailable","assets","assetClass","assetSubClass","sharedProperties","applicablePricings","conditions"})
 public class AssetType implements Serializable {
 
   @Schema(
@@ -38,11 +38,11 @@ public class AssetType implements Serializable {
   @JsonProperty("assetTypeId")
   private String assetTypeId = null;
 
-  @JsonProperty("mspId")
+  @JsonProperty("partnerId")
   @NotNull
-  @Schema(description = "MSP Identifier",
+  @Schema(description = "partner Identifier",
           example = "b814c97e-df56-4651-ac50-11525537964f")
-  private UUID mspId;
+  private UUID partnerId;
 
   @JsonProperty("type")
   @NotNull
@@ -328,9 +328,9 @@ public class AssetType implements Serializable {
   }
 
 
-  public AssetType(String assetTypeId, UUID mspId, String stationId, Integer nrAvailable, List<Asset> assets, AssetClass assetClass) {
+  public AssetType(String assetTypeId, UUID partnerId, String stationId, Integer nrAvailable, List<Asset> assets, AssetClass assetClass) {
     this.assetTypeId = assetTypeId;
-    this.mspId = mspId;
+    this.partnerId = partnerId;
     this.stationId = stationId;
     this.nrAvailable = nrAvailable;
     this.assets = assets;

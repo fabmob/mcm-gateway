@@ -1,22 +1,21 @@
 package com.gateway.dataapi.model.mapper;
 
-import java.util.List;
-
+import com.gateway.commonapi.dto.data.TokenDTO;
+import com.gateway.database.model.Token;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import com.gateway.commonapi.dto.data.TokenDTO;
-import com.gateway.database.model.Token;
+import java.util.List;
 
 @Mapper
 public interface TokenMapper {
-	@Mapping(target = "mspId", source = "msp.mspId")
+	@Mapping(target = "partnerId", source = "partner.partnerId")
 	TokenDTO mapEntityToDto(Token source);
 
 	List<TokenDTO> mapEntityToDto(List<Token> source);
 
 	List<Token> mapDtoToEntity(List<TokenDTO> source);
 
-	@Mapping(target = "msp.mspId", source = "mspId")
+	@Mapping(target = "partner.partnerId", source = "partnerId")
 	Token mapDtoToEntity(TokenDTO source);
 }

@@ -1,0 +1,57 @@
+{
+    "partnerCallId": "0cc82aa4-7fa1-4038-b8e6-993bd85e6410",
+    "url": "MAAS_COMMUNAUTO_GET_BOOKINGS_URL:https://pp.reservauto.net/Scripts/Client/Ajax/MobileApplication/ReservationList.asp",
+    "method": "GET",
+    "isMocked": 0,
+    "nbCalls": 1,
+    "partnerActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265",
+    "body": {
+        "bodyId": "7c2ba609-213c-448a-a51c-d108c8e4f51d",
+        "template": null,
+        "isStatic": 1,
+        "bodyParams": [
+            {
+                "bodyParamsId;": "4139fe77-af79-461d-a20b-e8fd656455d3",
+                "keyMapper": "VhiculeID",
+                "key": null,
+                "sensitive": 30,
+                "value": null,
+                "precision": null,
+                "timezone": null,
+                "isRefreshToken": null
+            }
+        ]
+    },
+    "headers": [
+        {
+            "headersId": "839a7cf4-81d1-4591-b333-ea99c53c43e7",
+            "key": "Content-Type",
+            "sensitive": null,
+            "value": "application/json",
+            "processFunction": null,
+            "securityFlag": null,
+            "valuePrefix": null,
+            "valueTemplate": null,
+            "headersValuesTemplate": [
+                {
+                    "headersValuesTemplateId": "9bce8f72-8865-4b3c-ae09-4c43457bb029",
+                    "key": "user",
+                    "value": "{MAAS_CITYSCOOT_CLIENT_ID:kFEkfWQt8UATcsccM7Ey}"
+                }
+            ]
+        }
+    ],
+    "params": [
+        {
+            "paramsId": "84f8074a-4f47-4a65-93d2-f427025e3b7b",
+            "key": "StartDate",
+            "sensitive": null,
+            "value": "-15",
+            "keyMapper": null,
+            "precision": null,
+            "timezone": "Europe/Paris"
+        }
+    ],
+    "paramsMultiCalls": [],
+    "executionOrder": 1
+}

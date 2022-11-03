@@ -4,19 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gateway.commonapi.utils.enums.TypeEnumDriver;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 
 /**
  * Details about a Passenger journeys
  */
 
+@EqualsAndHashCode
 @JsonPropertyOrder({"operator", "passengerPickupLat", "passengerPickupLng", "passengerDropLat",
         "passengerDropLng", "passengerPickupAddress", "passengerDropAddress", "distance", "driverDepartureLat"
-        , "driverDepartureLng", "driverArrivalLat","driverArrivalLng" ,
-        "driverDepartureAddress", "driverArrivalAddress",  "duration",
-        "journeyPolyline", "preferences", "webUrl", "passenger", "id","passengerPickupDate",
-        "driverDepartureDate","type","requestedSeats"})
+        , "driverDepartureLng", "driverArrivalLat", "driverArrivalLng",
+        "driverDepartureAddress", "driverArrivalAddress", "duration",
+        "journeyPolyline", "preferences", "webUrl", "passenger", "id", "passengerPickupDate",
+        "driverDepartureDate", "type", "requestedSeats"})
 public class PassengerJourney extends PassengerTrip {
     private static final long serialVersionUID = 1L;
     /**

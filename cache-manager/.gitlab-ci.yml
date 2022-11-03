@@ -1,0 +1,82 @@
+include:
+  - local: "cache-manager/.gitlab-ci/helm.yml"
+
+.cache-manager-base:
+  variables:
+    MODULE_NAME: cache-manager
+    MODULE_PATH: ${MODULE_NAME}
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/adoptopenjdk:11-jre-hotspot
+
+.cache_manager_init_vars: &cache_manager_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export CACHE_MANAGER_IMAGE_NAME=${REGISTRY_BASE_NAME}/cache-manager:${IMAGE_TAG_NAME}
+  export BASE_CACHE_MANAGER_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+
+.cache-manager-build: &cache-manager-build |
+  echo "VERSION=$VERSION"
+  envsubst < settings.xml
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
+  cd cache-manager
+  cat pom.xml | egrep "version"
+  envsubst < ../settings.xml
+  mvn clean install --batch-mode -s ../settings.xml -DskipTests
+
+cache_manager_build:
+  extends:
+    - .cache-manager-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/cache-manager
+  script:
+    - *cache_manager_init_vars
+    - *cache-manager-build
+  artifacts:
+    paths:
+      - cache-manager/target
+  needs: [ "deploy-nexus", "check-if-release-version" ]
+
+cache_manager_image_build:
+  extends:
+    - .cache-manager-base
+    - .image-job
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/cache_manager_image_build
+  script:
+    - *cache_manager_init_vars
+    - |
+      cd cache-manager
+      image
+  needs: [ "cache_manager_build" , "check-if-release-version" ]
+
+
+cache_manager_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .cache-manager-base
+  script:
+    - *cache_manager_init_vars
+    - |
+      export MAAS_API_CACHE_KEYS_PREFIX="preview"
+      deploy
+  needs: [ "cache_manager_image_build", "check-if-release-version" ]
+  environment:
+    on_stop: cache_manager_preview_cleanup
+
+
+cache_manager_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .cache-manager-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

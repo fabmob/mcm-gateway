@@ -1,25 +1,25 @@
 package com.gateway.commonapi.dto.api;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Bean for dynamic information about a station.
- *
+ * <p>
  * Based on GBFS format retrieved from <a href="https://github.com/NABSA/gbfs/blob/master/gbfs.md#station_statusjson">station_status.json</a>.
  */
 
@@ -30,9 +30,9 @@ import javax.validation.constraints.NotNull;
 @Validated
 @Schema(description = "Dynamic information about a station")
 @JsonPropertyOrder({
-        "mspId", "stationId",
+        "partnerId", "stationId",
         "numAssetsAvailable", "numAssetsAvailableType", "numAssetsDisabled",
-        "numDocksAvailable", "assetsDocksAvailable","numDocksDisabled",
+        "numDocksAvailable", "assetsDocksAvailable", "numDocksDisabled",
         "isInstalled", "isRenting", "isReturning",
         "actions", "bookDeeplink", "useDeeplink",
         "lastReported", "_links"})
@@ -47,16 +47,16 @@ public class StationStatus implements Serializable {
     }
 
     /**
-     * MSP identifier.
+     * Partner identifier.
      */
     @Schema(
-            name = "mspId",
+            name = "partnerId",
             example = "b814c97e-df56-4651-ac50-11525537964f",
-            description = "Identifier of the MSP",
+            description = "Identifier of the partner",
             required = true)
-    @JsonProperty("mspId")
+    @JsonProperty("partnerId")
     @NotNull
-    private UUID mspId;
+    private UUID partnerId;
 
     /**
      * Station identifier.
@@ -180,25 +180,25 @@ public class StationStatus implements Serializable {
     private ActionList actions;
 
     /**
-     * Deep link for booking a asset in the station.
-     *
+     * Deep link for booking an asset in the station.
+     * <p>
      * Use getActions().getAction(ActionType.BOOK_asset) to getBookDeeplink.
      */
     @Schema(
-            name="bookDeeplink",
-            description="Deep link to book a asset in the station",
+            name = "bookDeeplink",
+            description = "Deep link to book a asset in the station",
             example = "https://station/asset/book")
     @JsonProperty("bookDeeplink")
     private String bookDeeplink;
 
     /**
-     * Deep link for using a asset in the station.
-     *
-     *  Use getActions().getAction(ActionType.USE_asset) to getUseDeeplink.
+     * Deep link for using an asset in the station.
+     * <p>
+     * Use getActions().getAction(ActionType.USE_asset) to getUseDeeplink.
      */
     @Schema(
-            name="useDeeplink",
-            description="Deep link to use a asset in the station",
+            name = "useDeeplink",
+            description = "Deep link to use a asset in the station",
             example = "https://station/asset/use")
     @JsonProperty("useDeeplink")
     private String useDeeplink;
@@ -211,11 +211,11 @@ public class StationStatus implements Serializable {
             description = "Last reported time stamp",
             example = "1646302112")
     @JsonProperty("lastReported")
-    private Timestamp lastReported;
+    private Integer lastReported;
 
 
-    public StationStatus(UUID mspId, String stationId, Long numAssetsAvailable, Boolean isInstalled, Boolean isRenting, Boolean isReturning) {
-        this.mspId = mspId;
+    public StationStatus(UUID partnerId, String stationId, Long numAssetsAvailable, Boolean isInstalled, Boolean isRenting, Boolean isReturning) {
+        this.partnerId = partnerId;
         this.stationId = stationId;
         this.numAssetsAvailable = numAssetsAvailable;
         this.isInstalled = isInstalled;

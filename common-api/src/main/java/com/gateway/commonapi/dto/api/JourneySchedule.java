@@ -1,7 +1,6 @@
 package com.gateway.commonapi.dto.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gateway.commonapi.utils.enums.TypeEnumDriver;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -11,6 +10,8 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.Serializable;
+
 
 @Slf4j
 @Jacksonized
@@ -18,7 +19,7 @@ import org.springframework.validation.annotation.Validated;
 @NoArgsConstructor
 @AllArgsConstructor
 @Validated
-public class JourneySchedule {
+public class JourneySchedule implements Serializable {
 
     @Schema(description = "Journey's id. It MUST be unique for a given operator.",
             example = "journey012345", minLength = 1, maxLength = 255)
@@ -43,7 +44,7 @@ public class JourneySchedule {
 
     @Schema(required = true,
             description = "Type of journey. A dynamic journey is happening in real time.\n" +
-            "ENUM \"PLANNED, DYNAMIC, LINE\"",
+                    "ENUM \"PLANNED, DYNAMIC, LINE\"",
             example = "PLANNED")
     @JsonProperty("type")
     private TypeEnumDriver type;

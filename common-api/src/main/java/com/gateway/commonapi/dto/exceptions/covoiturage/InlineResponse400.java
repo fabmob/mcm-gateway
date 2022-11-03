@@ -8,7 +8,7 @@ import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
 @Schema(name = "InlineResponse400",
-        description = "Error response according to standard covoiturage")
+        description = "Error response according to standard carpool")
 
 /**
  * InlineResponse400

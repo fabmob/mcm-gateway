@@ -24,12 +24,12 @@ public class CacheParamDTO {
     @JsonProperty("cacheParamId")
     private UUID cacheParamId;
 
-    @Schema(name = "mspId",
-            description = "Msp id",
+    @Schema(name = "partnerId",
+            description = "partner id",
             example = "b814c97e-df56-4651-ac50-11525537964f",
             required = true)
-    @JsonProperty("mspId")
-    private UUID mspId;
+    @JsonProperty("partnerId")
+    private UUID partnerId;
 
     @Schema(name = "actionType",
             description = "Type of action to cache",

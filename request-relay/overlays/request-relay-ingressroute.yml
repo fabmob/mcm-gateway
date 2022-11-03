@@ -8,15 +8,15 @@ spec:
     # - websecure
   routes:
     - match: Host(`${REQUEST_RELAY_FQDN}`)
-#      middlewares:
-#        - name: api-headers-middleware
-#        - name: api-ratelimit-middleware
-#        - name: api-inflightreq-middleware
+      middlewares:
+        - name: request-relay-headers-middleware
+        - name: request-relay-ratelimit-middleware
+        - name: request-relay-inflightreq-middleware
       kind: Rule
       services:
         - kind: Service
           name: request-relay
-          port: 8083
+          port: 8085
   # tls:
   #   secretName: ${SECRET_NAME} # api-tls # cert-dev
   #   domains:

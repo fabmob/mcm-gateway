@@ -10,10 +10,13 @@ services:
          MAVEN_IMAGE_NAME: ${BASE_ROUTING_API_IMAGE_NAME}
      environment:
        - SERVICE_BASE_PATH=${ROUTING_API_FQDN}
-       - DATA_API_HOST=data-api.${KUBERNETES_DATA_API_NAMESPACE}.svc.cluster.local
-       - DEFAULT_ADAPTER_HOST=default-adapter.${KUBERNETES_DEFAULT_ADAPTER_NAMESPACE}.svc.cluster.local
-       - ADAPTER_PROTOCOL=https
-       - GENERIC_ADAPTER_FQDN=${GENERIC_ADAPTER_FQDN}
+       - DATA_API_HOST=data-api.data-api-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - DEFAULT_ADAPTER_HOST=default-adapter.default-adapter-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - GENERIC_ADAPTER_HOST=generic-adapter.generic-adapter-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_PORT=6379
+       - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
      ports:
        - '8082:8082'
      labels:

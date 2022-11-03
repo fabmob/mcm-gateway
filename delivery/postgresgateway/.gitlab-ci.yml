@@ -25,35 +25,45 @@ postgres_build:
     - .postgres-base
     - .build-job
     - .no-needs
+    - .trigger-condition
   script:
     - *postgres_init_vars
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/postgres
 
 
 postgres_image_build:
   extends:
     - .image-job
     - .postgres-base
+    - .trigger-condition
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/postgres
   script:
     - *postgres_init_vars
     - |
       image
-  needs: [ "postgres_build" ]
+  needs: [ "postgres_build" , "check-if-release-version" ]
 
 
 postgres_preview_deploy:
   extends:
     - .preview-deploy-job
     - .postgres-base
+    - .trigger-condition
   image: ${KUBETOOLS_IMAGE_TAGNAME}
   script:
     - *postgres_init_vars
     - |
-      set -x
-      #KUBERNETES_GATEWAY_DB_NAMESPACE=$(pod_namespace postgresgateway)
-      #export KUBERNETES_GATEWAY_DB_NAMESPACE
       deploy
-      config_volume postgresgateway
-  needs: [ "postgres_image_build", "commons-kubetools-image" ]
+      service_name=postgresgateway
+      PV_CHECK=$(kubectl get pv -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME}-${LANDSCAPE} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep "${BRANCH_NAME}-${LANDSCAPE}/postgres-volume" | awk '{ print $1 }' | head -n 1)
+      if [ $PV_CHECK != "" ]
+      then
+        echo "### Patch the persistent volume to retain than delete for $1 ###"
+        kubectl patch pv $PV_CHECK -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+      fi
+  needs: [ "postgres_image_build", "commons-kubetools-image", "check-if-release-version" ]
   environment:
     on_stop: postgres_preview_cleanup
 
@@ -63,12 +73,12 @@ postgres_clear_database:
     - .preview-deploy-job
     - .postgres-base
     - .manual
+    - .trigger-condition
   image: ${KUBETOOLS_IMAGE_TAGNAME}
   script:
     - *postgres_init_vars
     - |
       set -x
-      KUBERNETES_GATEWAY_DB_NAMESPACE=$(pod_namespace postgresgateway)
       echo "POSTGRES CLEANING START ${BRANCH_NAME}"
       DB_POD_NAME=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $2 }')
       DB_NAMESPACE=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $1 }')
@@ -82,12 +92,12 @@ postgres_destroy_database_tables:
     - .preview-deploy-job
     - .postgres-base
     - .manual
+    - .trigger-condition
   image: ${KUBETOOLS_IMAGE_TAGNAME}
   script:
     - *postgres_init_vars
     - |
       set -x
-      KUBERNETES_GATEWAY_DB_NAMESPACE=$(pod_namespace postgresgateway)
       echo "POSTGRES CLEANING START ${BRANCH_NAME}"
       DB_POD_NAME=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $2 }')
       DB_NAMESPACE=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | grep postgresgateway | awk '{ print $1 }')

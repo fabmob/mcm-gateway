@@ -19,6 +19,9 @@ redis_build:
     - .redis-base
     - .build-job
     - .no-needs
+    - .trigger-condition
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/redis
   script:
     - *redis_init_vars
 
@@ -27,25 +30,27 @@ redis_image_build:
   extends:
     - .image-job
     - .redis-base
+    - .trigger-condition
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/redis
   script:
     - *redis_init_vars
     - |
       image
-  needs: [ "redis_build" ]
+  needs: [ "redis_build" , "check-if-release-version" ]
 
 
 redis_preview_deploy:
   extends:
     - .preview-deploy-job
     - .redis-base
+    - .trigger-condition
   script:
     - *redis_init_vars
     - |
       set -x
-      #KUBERNETES_GATEWAY_REDIS_NAMESPACE=$(pod_namespace redis)
-      #export KUBERNETES_GATEWAY_REDIS_NAMESPACE
       deploy
-  needs: [ "redis_image_build", "commons-kubetools-image" ]
+  needs: [ "redis_image_build", "commons-kubetools-image", "check-if-release-version" ]
   environment:
     on_stop: redis_preview_cleanup
 

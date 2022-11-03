@@ -16,8 +16,8 @@ public class CacheParamPK implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "msp_id")
-    private MspMeta msp;
+    @JoinColumn(name = "partner_id")
+    private PartnerMeta partner;
 
     @Column(name = "action_type", length = 30)
     private String actionType;

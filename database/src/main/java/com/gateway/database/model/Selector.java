@@ -25,5 +25,5 @@ public class Selector implements Serializable {
     private String value;
 
     @OneToOne(fetch = FetchType.LAZY, mappedBy = "selector")
-    private MSPActions mspActions;
+    private PartnerActions partnerActions;
 }

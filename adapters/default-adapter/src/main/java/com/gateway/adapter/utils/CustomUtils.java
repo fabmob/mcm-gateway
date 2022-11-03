@@ -1,20 +1,23 @@
 package com.gateway.adapter.utils;
 
 import com.gateway.commonapi.exception.InternalException;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import java.time.*;
+
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.IllegalFormatException;
 
 import static com.gateway.adapter.utils.constant.AdapterMessageDict.*;
 
 @Slf4j
-@NoArgsConstructor
 public class CustomUtils {
-
+    private CustomUtils() {
+    }
 
     /**
      * Add minutes to the OffsetDateTime to enlarge search - Can be negative
+     *
      * @param dateTime
      * @param precision
      * @return OffsetDateTime
@@ -32,6 +35,7 @@ public class CustomUtils {
 
     /**
      * format the given dateTime to the expected timezone
+     *
      * @param dateTime
      * @param timezone
      * @return OffsetDateTime
@@ -49,6 +53,7 @@ public class CustomUtils {
 
     /**
      * return value if it is not sensitive or **** if yes
+     *
      * @param sensitive
      * @param value
      * @return censored value or not

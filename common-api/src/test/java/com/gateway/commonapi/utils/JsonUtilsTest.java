@@ -9,7 +9,7 @@ import org.mockito.InjectMocks;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class JsonUtilsTest {
 
@@ -27,7 +27,7 @@ class JsonUtilsTest {
         SelectorDTO selector = new SelectorDTO();
         String responseBody = this.createMockResponse();
         JsonElement jsonElement = JsonUtils.getJsonArray(selector, responseBody);
-        assertEquals(jsonElement, null);
+        assertNull(jsonElement);
 
     }
 

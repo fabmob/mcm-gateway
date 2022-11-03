@@ -6,7 +6,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.4.RELEASE</version>
+        <version>2.6.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -25,17 +25,21 @@
         <module>request-relay</module>
         <module>routing-api</module>
         <module>adapters</module>
+        <module>mock-api</module>
+        <module>cache-manager</module>
     </modules>
 
     <properties>
         <java.version>11</java.version>
         <spring.boot.maven.plugin.version>2.1.4.RELEASE</spring.boot.maven.plugin.version>
+        <spring.boot.version>2.6.6</spring.boot.version>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <org.projectlombok.version>1.18.22</org.projectlombok.version>
         <org.projectlombok.mapstruct.binding>0.2.0</org.projectlombok.mapstruct.binding>
 
         <sonar.projectName>Gateway : global</sonar.projectName>
-        <sonar.host.url>https://sonarqube-dev.cicd.moncomptemobilite.fr</sonar.host.url>
+        <sonar.host.url>${env.SONAR_URL}</sonar.host.url>
+
         <!--SONAR PROPERTIES-->
         <sonar.exclusions>src/it/**, src/test/**</sonar.exclusions>
         <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
@@ -45,20 +49,21 @@
             **/*Filter.java,
             **/*DTO.java,
             **/dto/**/*.java,
-            **/cache/**/*.java,
+            **/admin/**/*.java,
             **/model/**/*.java,
             **/it/**/*.*,
             **/repository/*.java,
             **/test/**/*.*,
             **/exception/*.java,
-            msp-meta/**/*.*,
+            partner-meta/**/*.*,
             **/properties/*.java,
             **/util/constant/*.java,
             **/utils/constant/*.java,
             **/util/enums/*.java,
             **/utils/enums/*.java,
             **/utils/JsonUtils.java,
-            **/utils/ControllerMessageDict.java,
+            **/constants/*.java,
+            **/log/*.java,
             **/constant/GatewayApiPathDict.java,
             **/constant/GatewayMessageDict.java,
             adapters/custom-adapter/**/*.java
@@ -75,26 +80,30 @@
         <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
         <sonar.jacoco.reportPath>${project.basedir}/../target/jacoco.exec</sonar.jacoco.reportPath>
         <sonar.language>java</sonar.language>
+
+        <!-- SpringBoot has a old dependancy to jackson. As SpringBoot 2.7.5 is not published yet, force dependency to 2.13.4+ without some vulnerabilities -->
+        <jackson-core.version>2.13.4</jackson-core.version>
+        <jackson-bom.version>2.13.4.20221013</jackson-bom.version>
     </properties>
 
     <distributionManagement>
         <repository>
-            <id>maven-releases</id>
+            <id>gateway-maven-releases</id>
             <name>NEXUS Releases Maven Repository</name>
-            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-releases/</url>
+            <url>${env.NEXUS_URL}/repository/gateway-maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>maven-snapshots</id>
+            <id>gateway-maven-snapshots</id>
             <name>NEXUS Snapshots Maven Repository</name>
-            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+            <url>${env.NEXUS_URL}/repository/gateway-maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
     <repositories>
         <repository>
-            <id>maven-snapshots</id>
+            <id>gateway-maven-snapshots</id>
             <name>NEXUS Snapshots Maven Repository</name>
-            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+            <url>${env.NEXUS_URL}/repository/gateway-maven-snapshots/</url>
         </repository>
     </repositories>
 
@@ -124,7 +133,7 @@
         <dependency>
             <groupId>com.jayway.jsonpath</groupId>
             <artifactId>json-path</artifactId>
-            <scope>test</scope>
+            <version>2.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -148,6 +157,12 @@
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-java8</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>${jackson-core.version}</version>
+        </dependency>
+
 
         <!-- Swagger UI -->
         <dependency>
@@ -163,11 +178,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.hateoas</groupId>
-            <artifactId>spring-hateoas</artifactId>
-            <version>0.25.1.RELEASE</version>
-            <scope>compile</scope>
-            <optional>true</optional>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-hateoas</artifactId>
+            <version>${spring.boot.version}</version>
         </dependency>
 
         <dependency>

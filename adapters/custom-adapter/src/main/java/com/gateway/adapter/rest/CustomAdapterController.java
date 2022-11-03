@@ -14,7 +14,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotNull;
 import java.beans.IntrospectionException;
@@ -36,7 +39,7 @@ public class CustomAdapterController {
     @Autowired
     private CustomAdapterService customAdapterService;
 
-    @Operation(summary = "Custom Post request adapter ", description = "Convert a maas request regarding datamapping into the msp format", tags = {
+    @Operation(summary = "Custom Post request adapter ", description = "Convert a maas request regarding datamapping into the partner format", tags = {
             ADAPTER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = REPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -46,14 +49,14 @@ public class CustomAdapterController {
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @PostMapping(value = AdapterPathDict.ADAPTER_PATH,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Object> adaptGet(@RequestParam(name = ACTION_ID_PARAM) @NotNull UUID mspActionId, @RequestParam(name = MSP_ID_PARAM) @NotNull UUID mspId, @RequestParam(required = false) Map<String, String> params) throws IOException, InterruptedException, IntrospectionException {
+    public ResponseEntity<Object> adaptGet(@RequestParam(name = ACTION_ID_PARAM) @NotNull UUID partnerActionId, @RequestParam(name = PARTNER_ID_PARAM) @NotNull UUID partnerId, @RequestParam(required = false) Map<String, String> params) throws IOException, InterruptedException, IntrospectionException {
         log.info("Call of service custom Post adapter");
 
-        log.debug(String.format(MSP_ACTION_ID_PARAM, params.get(ACTION_ID_PARAM)));
+        log.debug(String.format(PARTNER_ACTION_ID_PARAM, params.get(ACTION_ID_PARAM)));
         if (log.isDebugEnabled()) {
             params.forEach((key, value) -> log.debug(String.format(PARAM, key, value)));
         }
-        return new ResponseEntity<>(customAdapterService.adaptOperation(params, mspActionId, mspId, null), HttpStatus.OK);
+        return new ResponseEntity<>(customAdapterService.adaptOperation(params, partnerActionId, partnerId, null), HttpStatus.OK);
     }
 
 

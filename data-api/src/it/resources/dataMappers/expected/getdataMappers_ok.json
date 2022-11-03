@@ -1,46 +1,46 @@
 [
-    {
-        "dataMapperId": "231866de-4e4f-4ab7-948b-372ce1acaef2",
-        "champInterne": "ID_STATION",
-        "champExterne": "StationID",
-        "isArray": 0,
-        "format": null,
-        "timezone": "",
-        "containedValue": null,
-        "defaultValue": null,
-        "mspActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265"
-    },
-    {
-        "dataMapperId": "2643cd99-7088-4f1b-b49b-116149886d1e",
-        "champInterne": "VEHICLE_ID",
-        "champExterne": "vehicleId",
-        "isArray": 0,
-        "format": null,
-        "timezone": "",
-        "containedValue": null,
-        "defaultValue": "VOITURE",
-        "mspActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518"
-    },
-    {
-        "dataMapperId": "bf934856-0356-4152-8164-573bca1a3302",
-        "champInterne": "COLOR",
-        "champExterne": "vehicleColor",
-        "isArray": 0,
-        "format": null,
-        "timezone": "",
-        "containedValue": null,
-        "defaultValue": "VOITURE",
-        "mspActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518"
-    },
-    {
-        "dataMapperId": "0e51c003-6222-449d-9f08-20a7e2b8d94d",
-        "champInterne": "ADDRESS",
-        "champExterne": "stationNo:005->40 rue Dussoubs, 75002 Paris;",
-        "isArray": 0,
-        "format": null,
-        "timezone": "",
-        "containedValue": null,
-        "defaultValue": null,
-        "mspActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756"
-    }
+  {
+    "dataMapperId": "231866de-4e4f-4ab7-948b-372ce1acaef2",
+    "internalField": "ID_STATION",
+    "externalField": "StationID",
+    "isArray": 0,
+    "format": null,
+    "timezone": "",
+    "containedValue": null,
+    "defaultValue": null,
+    "partnerActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265"
+  },
+  {
+    "dataMapperId": "2643cd99-7088-4f1b-b49b-116149886d1e",
+    "internalField": "VEHICLE_ID",
+    "externalField": "vehicleId",
+    "isArray": 0,
+    "format": null,
+    "timezone": "",
+    "containedValue": null,
+    "defaultValue": "VOITURE",
+    "partnerActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518"
+  },
+  {
+    "dataMapperId": "bf934856-0356-4152-8164-573bca1a3302",
+    "internalField": "COLOR",
+    "externalField": "vehicleColor",
+    "isArray": 0,
+    "format": null,
+    "timezone": "",
+    "containedValue": null,
+    "defaultValue": "VOITURE",
+    "partnerActionId": "2c1a2210-4916-4aaa-8287-7a4d50e93518"
+  },
+  {
+    "dataMapperId": "0e51c003-6222-449d-9f08-20a7e2b8d94d",
+    "internalField": "ADDRESS",
+    "externalField": "stationNo:005->40 rue Dussoubs, 75002 Paris;",
+    "isArray": 0,
+    "format": null,
+    "timezone": "",
+    "containedValue": null,
+    "defaultValue": null,
+    "partnerActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756"
+  }
 ]

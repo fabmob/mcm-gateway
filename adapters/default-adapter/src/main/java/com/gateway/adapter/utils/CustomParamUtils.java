@@ -4,12 +4,10 @@ import com.gateway.adapter.utils.constant.AdapterMessageDict;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.data.ParamsMultiCallsDTO;
 import com.gateway.commonapi.dto.data.TokenDTO;
-import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.text.MessageFormat;
 import java.time.LocalDateTime;
@@ -28,11 +26,10 @@ import static com.gateway.adapter.utils.constant.AdapterMessageDict.BASE_ERROR_M
  */
 @Slf4j
 public class CustomParamUtils {
+    private CustomParamUtils() {
+    }
 
-    @Value("${gateway.service.defaultAdapter.timeInMinutes}")
-    private Integer timeInMinutes;
-
-    public static String correlationId = String.valueOf(CommonUtils.setHeader().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+    public static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
     /**
      * decode initValue from a paramMultiCalls and retrieve start date that can be NOW (current date) or Shifted with an Offset (current date + Offset)
@@ -47,14 +44,14 @@ public class CustomParamUtils {
             try {
                 startDate = ZonedDateTime.now(ZoneId.of(recursiveParams.getTimezone()));
             } catch (Exception exception) {
-                log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, exception.getMessage()), exception);
+                log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, exception.getMessage()), exception);
                 startDate = ZonedDateTime.now(ZoneOffset.UTC);
             }
         }
         if (startDate.truncatedTo(ChronoUnit.HOURS).until(startDate, ChronoUnit.MINUTES) > 29) {
-            startDate = truncatStartDate(startDate, 60);
+            startDate = truncateStartDate(startDate, 60);
         } else {
-            startDate = truncatStartDate(startDate, 30);
+            startDate = truncateStartDate(startDate, 30);
         }
         if (AdapterMessageDict.NOW.equals(recursiveParams.getInitValue())) {
             return startDate.format(formatter);
@@ -71,7 +68,7 @@ public class CustomParamUtils {
      * @param amountToAdd
      * @return
      */
-    public static ZonedDateTime truncatStartDate(ZonedDateTime date, Integer amountToAdd) {
+    public static ZonedDateTime truncateStartDate(ZonedDateTime date, Integer amountToAdd) {
         return date.truncatedTo(ChronoUnit.HOURS).plus(amountToAdd, ChronoUnit.MINUTES);
     }
 
@@ -107,15 +104,15 @@ public class CustomParamUtils {
         boolean result = false;
         // if Token is expired or it expires in a minute
         if (token != null && token.getExpireAt() != null) {
-            result = !((token.getExpireAt() != null) && ( token.getExpireAt().isBefore(LocalDateTime.now().plusMinutes(timeInMinutes))))  ;
+            result = !((token.getExpireAt() != null) && (token.getExpireAt().isBefore(LocalDateTime.now().plusMinutes(timeInMinutes))));
         }
         return result;
     }
 
     /**
-     * retrieve token expiration time from msp response
+     * retrieve token expiration time from partner response
      *
-     * @param jsonObjectResponse msp response
+     * @param jsonObjectResponse partner response
      * @return token expiration date
      * @throws JSONException
      */

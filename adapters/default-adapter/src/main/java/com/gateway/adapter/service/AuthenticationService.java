@@ -1,7 +1,6 @@
 package com.gateway.adapter.service;
 
-import com.gateway.commonapi.dto.data.MspActionDTO;
-import com.gateway.commonapi.dto.data.MspMetaDTO;
+import com.gateway.commonapi.dto.data.PartnerActionDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,11 +12,11 @@ import java.util.List;
 public interface AuthenticationService {
 
     /**
-     * looping for all actions of an mspMeta and check if it exist at least one operation that needs authentication
+     * looping for all actions of an mspMeta and check if it exists at least one operation that needs authentication
      *
      * @return the authentication action
      */
-    MspActionDTO needAuthenticationAction(List<MspActionDTO> actions);
+    PartnerActionDTO needAuthenticationAction(List<PartnerActionDTO> actions);
 
     /**
      * if isAuthentication is true , the msp need authentication and the methode return true
@@ -25,6 +24,6 @@ public interface AuthenticationService {
      * @param actions
      * @return true or false
      */
-    boolean needAuthentication(List<MspActionDTO> actions);
+    boolean needAuthentication(List<PartnerActionDTO> actions);
 
 }

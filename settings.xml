@@ -4,7 +4,12 @@
 
     <servers>
         <server>
-            <id>maven-snapshots</id>
+            <id>gateway-maven-snapshots</id>
+            <username>${NEXUS_USER_NAME}</username>
+            <password>${NEXUS_USER_PWD}</password>
+        </server>
+        <server>
+            <id>gateway-maven-releases</id>
             <username>${NEXUS_USER_NAME}</username>
             <password>${NEXUS_USER_PWD}</password>
         </server>

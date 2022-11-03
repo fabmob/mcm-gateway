@@ -10,7 +10,7 @@ public interface AdaptersDatabaseService {
      * Add a new Adapter
      *
      * @param adapter Adapter object
-     * @return Adapter informations for the Adapter added
+     * @return Adapter information for the Adapter added
      */
     public Adapters addAdapter(Adapters adapter);
 
@@ -24,10 +24,10 @@ public interface AdaptersDatabaseService {
 
 
     /**
-     * Retrieve a Adapter informations.
+     * Retrieve a Adapter information.
      *
      * @param id Identifier of the Adapter
-     * @return Adapter informations for the Adapter
+     * @return Adapter information for the Adapter
      */
 
     public Adapters findAdapterById(UUID id);

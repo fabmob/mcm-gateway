@@ -1,0 +1,8 @@
+gitops:
+ manifest_projects:
+ - id: mcm/std-maas/gateway
+   paths: 
+   - glob: 'gateway/*.yml' 
+observability:
+ logging:
+   level: debug

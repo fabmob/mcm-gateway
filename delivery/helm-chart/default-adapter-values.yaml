@@ -1,0 +1,159 @@
+services:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: default-adapter
+        app.gateway.com/service-type: internal-service
+      name: default-adapter
+    spec:
+      ports:
+        - name: "8090"
+          port: 8090
+          targetPort: 8090
+      selector:
+        io.kompose.service: default-adapter
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+
+networkPolicies:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: deny-internal-services-nw
+    spec:
+      podSelector: { }
+      policyTypes:
+        - Ingress
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: internal-services-nw
+    spec:
+      podSelector:
+        matchLabels:
+          visibility: internal
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  com.mcm.maas.internal: "true"
+
+deployments:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: default-adapter
+      name: default-adapter
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          io.kompose.service: default-adapter
+      strategy: {}
+      template:
+        metadata:
+          annotations:
+            app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+            app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+            kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+            kompose.service.type: clusterip
+            kubernetes.io/ingress.class: traefik
+          labels:
+            io.kompose.service: default-adapter
+            visibility: internal
+        spec:
+          containers:
+            env:
+              SERVICE_BASE_PATH: ${DEFAULT_ADAPTER_FQDN}
+              DATA_API_HOST: data-api.data-api-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local
+              REQUEST_RELAY_HOST: request-relay.request-relay-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local
+              MAAS_API_CACHE_SSL: true
+              MAAS_API_CACHE_HOST: ${MAAS_API_CACHE_HOST}
+              MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
+              MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
+              MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+              USE_CACHE: false
+            image: ${DEFAULT_ADAPTER_IMAGE_NAME}
+            name: default-adapter
+            ports:
+              - containerPort: 8090
+            resources: {}
+          imagePullSecrets:
+            - name: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+          restartPolicy: Always
+    status: {}
+
+middlewares:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: default-adapter-headers-middleware
+    spec:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Port: "443"
+          X-Forwarded-Proto: https
+
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: default-adapter-inflightreq-middleware
+    spec:
+      inFlightReq:
+        amount: 100
+
+#  - metadata:
+#      annotations:
+#        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+#        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+#        kubernetes.io/ingress.class: traefik
+#      name: default-adapter-ratelimit-middleware
+#    spec:
+#      rateLimit:
+#        average: 30
+#        burst: 50
+#        period: 1m
+#        sourceCriterion:
+#          ipStrategy:
+#            depth: 2
+
+ingressRoutes:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: default-adapter
+    spec:
+      entryPoints:
+        - web
+      routes:
+        - kind: Rule
+          match: Host(`${DEFAULT_ADAPTER_FQDN}`)
+          middlewares:
+            - name: default-adapter-headers-middleware
+#            - name: default-adapter-ratelimit-middleware
+            - name: default-adapter-inflightreq-middleware
+          services:
+            - kind: Service
+              name: default-adapter
+              port: 8090

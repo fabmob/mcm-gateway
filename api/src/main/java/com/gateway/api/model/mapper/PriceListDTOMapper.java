@@ -2,7 +2,6 @@ package com.gateway.api.model.mapper;
 
 import com.gateway.api.model.PriceList;
 import com.gateway.commonapi.dto.data.PriceListDTO;
-
 import org.mapstruct.Mapper;
 
 import java.util.List;

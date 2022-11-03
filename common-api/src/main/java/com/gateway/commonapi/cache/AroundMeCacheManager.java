@@ -1,24 +1,18 @@
 package com.gateway.commonapi.cache;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectReader;
-import com.gateway.commonapi.dto.api.Asset;
-import com.gateway.commonapi.dto.api.GlobalView;
+import com.gateway.commonapi.dto.api.*;
 import com.gateway.commonapi.exception.InternalException;
-import com.gateway.commonapi.tests.WsTestUtil;
+import com.gateway.commonapi.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.geo.Distance;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static com.gateway.commonapi.constants.GlobalConstants.LAT_OR_LNG_IS_NULL;
 
 /**
  * Cache Manager for the around-me operation
@@ -26,85 +20,63 @@ import java.util.UUID;
 @Slf4j
 @Component
 public class AroundMeCacheManager {
-
-    public static final String ASSETS = "ASSETS";
-    public static final String SERVICE_PREFIX = "aroundMe";
-
-    /**
-     * global object mapper in order not to instantiate it each time
-     */
-    static ObjectMapper objectMapper = new ObjectMapper();
-
     @Autowired
     private CacheUtil<String, Asset> aroundMeAssetCacheUtil;
 
+    @Autowired
+    private StationCacheManager stationCacheManager;
 
-    /**
-     * retrieve Asset from cache based of mspId and assetId
-     * @param mspId
-     * @param assetId
-     * @return Asset
-     */
-    public Asset getAssetFromCache(UUID mspId, String assetId) {
-        return aroundMeAssetCacheUtil.getValue(aroundMeAssetCacheUtil.getKeyPrefixEnv() + mspId.toString() + "-" + ASSETS + "_" + assetId, Asset.class);
-    }
+    @Autowired
+    private ParkingCacheManager parkingCacheManager;
 
+    @Autowired
+    private AssetCacheManager assetCacheManager;
 
-    /**
-     * populate Cache regarding a keyCache for the map (e.g : mspId+service)
-     */
-    public void populateAssetCache( List<Asset> assets, UUID mspId ) {
+    @Autowired
+    private StationStatusCacheManager stationStatusCacheManager;
 
-        log.info("{} assets mocked", assets.size());
-        assets.forEach(asset -> {
-            try {
-                String assetsStringyfied = objectMapper.writeValueAsString(asset);
-                String elementCacheKey = mspId.toString() + "-" + SERVICE_PREFIX + "-" + ASSETS + "_" + asset.getAssetId();
-
-                log.debug("Adding element with key {}", elementCacheKey);
-                aroundMeAssetCacheUtil.putValue(elementCacheKey, assetsStringyfied);
-
-                aroundMeAssetCacheUtil.addGeoMetadata(asset.getMspId().toString() + "-" + SERVICE_PREFIX,
-                        asset.getOverriddenProperties().getLocation().getCoordinates().getLat(),
-                        asset.getOverriddenProperties().getLocation().getCoordinates().getLng(), asset.getAssetId());
-
-                log.info("Adding assetId {}  to the cache ", asset.getAssetId());
-            } catch (JsonProcessingException e) {
-                log.error(e.getMessage(), e);
-            }
-        });
-    }
 
     /**
      * Search GlobalView elements from cache
-     * @param mspIds list of msp ids
+     *
+     * @param partnerIds   list of partner ids
      * @param latitude     latitude of the center of the circle of research
      * @param longitude    longitude of the center of the circle of research
      * @param radius       radius of the search
      * @param distanceUnit distance unit of the radius
      * @return
      */
-    public GlobalView searchElementsFromGeoCache(List<UUID> mspIds, double latitude, double longitude, int radius,
+    public GlobalView searchElementsFromGeoCache(List<UUID> partnerIds, Double latitude, Double longitude, Float radius,
                                                  RedisGeoCommands.DistanceUnit distanceUnit) {
+
+        if (longitude == null || latitude == null || radius == null) {
+            throw new InternalException(CommonUtils.placeholderFormat(LAT_OR_LNG_IS_NULL));
+        }
+
         GlobalView globalView = new GlobalView();
         globalView.setAssets(new ArrayList<>());
 
-        // iterate over all msp to get all assets.
-        for (UUID mspId :  mspIds ) {
-            List<Asset> assets = new ArrayList<>();
-            // need to retrieve all type of objects used in globalview ("stations", "stationsStatus", "assets", "parkings")
-            List<Pair<Distance, Asset>> resList = aroundMeAssetCacheUtil.searchAndRetrieveByDistance(mspId.toString(), SERVICE_PREFIX, ASSETS,
-                    latitude, longitude,
-                    radius, distanceUnit, Asset.class);
-            for (Pair<Distance, Asset> geoRes : resList) {
-                log.info("distance {} {} for {}", geoRes.getKey().getValue(), geoRes.getKey().getMetric().getAbbreviation(), geoRes.getValue().toString());
-                assets.add(geoRes.getValue());
-            }
+        // iterate over all partner to get all assets.
+        for (UUID partnerId : partnerIds) {
+
+            List<Asset> assets = assetCacheManager.getAllAssetsFromCacheByGeoParams(partnerId, longitude, latitude, radius, RedisGeoCommands.DistanceUnit.METERS);
             globalView.getAssets().addAll(assets);
+
+
+            // retrieve parkings
+            List<Parking> parkingsList = parkingCacheManager.getAllParkingsFromCacheByGeoParams(partnerId, longitude, latitude, radius, RedisGeoCommands.DistanceUnit.METERS);
+            globalView.getParkings().addAll(parkingsList);
+
+
+            // retrieve stations
+            List<Station> stationsList = stationCacheManager.getAllStationFromCacheByGeoParams(partnerId, longitude, latitude, radius, RedisGeoCommands.DistanceUnit.METERS);
+            globalView.getStations().addAll(stationsList);
+
+
+            // // retrieve station status
+            List<StationStatus> stationStatuses = stationStatusCacheManager.getAllStationStatusFromCache(partnerId, null);
+            globalView.getStationsStatus().addAll(stationStatuses);
         }
-
-        // later will need to get also parking, stations, ...
-
         return globalView;
     }
 
@@ -115,26 +87,8 @@ public class AroundMeCacheManager {
      * @param keyPattern
      */
     public void clearCache(String keyPattern) {
-        aroundMeAssetCacheUtil.clearCache(keyPattern);
+        aroundMeAssetCacheUtil.clearCache(keyPattern, false);
     }
 
-    /**
-     * Load a list of Asset from json mock file
-     * Method that should be removed when real data will be unmocked.
-     *
-     * @return
-     */
-    public static List<Asset> createMockAssets() {
-        try {
-            String mockStringyfied = WsTestUtil.readJsonFromFilePath("./src/main/resources/assets-mock.json");
-            if(mockStringyfied.isBlank()) {
-                log.error("Content file is empty or file not found");
-            }
-            ObjectReader objectReader = objectMapper.reader().forType(new TypeReference<List<Asset>>() {
-            });
-            return objectReader.readValue(mockStringyfied);
-        } catch (IOException e) {
-            throw new InternalException(e.getMessage());
-        }
-    }
 }
+

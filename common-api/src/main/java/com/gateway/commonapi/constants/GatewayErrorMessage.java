@@ -1,0 +1,57 @@
+package com.gateway.commonapi.constants;
+
+public class GatewayErrorMessage {
+    private GatewayErrorMessage() {
+    }
+
+    // lat
+    public static final String INVALID_LAT_MESSAGE = "Invalid latitude {0}. Latitude must be between -90 and +90.";
+    public static final String INVALID_TYPE = "Invalid";
+    public static final String INVALID_LAT_TITLE = "Invalid latitude";
+
+    // lon
+    public static final String INVALID_LON_MESSAGE = "Invalid longitude {0}. Longitude must be between -180 and +180.";
+    public static final String INVALID_LON_TITLE = "Invalid longitude";
+
+    // rad
+    public static final String INVALID_RAD_MESSAGE = "Invalid radius {0}. Radius must be positive or zero.";
+    public static final String INVALID_RAD_TITLE = "Invalid radius";
+
+    // maxResult
+    public static final String INVALID_MAX_RESULT = "Invalid max result {0}. Max result must be positive and not zero.";
+    public static final String INVALID_MAX_RESULT_TITLE = "Invalid max result";
+
+    // partnerId
+    public static final String UNKNOWN_PARTNER_ID_MESSAGE = "Unknown partner id {0}.";
+    public static final String UNKNOWN_PARTNER_ID = "Unknown partner id";
+    public static final String INVALID_PARTNER_ID = "Invalid partner id";
+    public static final String UNKNOWN_AREA_TYPE = "Unknown area type";
+    public static final String UNKNOWN_PARTNER_TYPE = "Unknown partner type";
+
+
+    public static final String UNKNOWN_AREA_MESSAGE = "Unknown area type {0}. Allowed area types are 'OPERATING', 'NO_PARKING', 'SPEED_LIMIT', or 'PREFERENTIAL_PARKING'.";
+    public static final String UNKNOWN_PARTNER_TYPE_MESSAGE = "Unknown partner type {0}. Allowed partner types are 'MSP' or 'MAAS'.";
+    public static final String INVALID_PARTNER_ID_MESSAGE = "Invalid partner id {0}. Unauthorized to reach this partner.";
+
+
+    public static final String PLACEHOLDER = "0";
+
+    // COVOIT IV
+    public static final String INVALID_RAD_MESSAGE_COVOIT = "Invalid radius {0}. Radius must be positive or zero.";
+    public static final String INVALID_MAX_RESULT_COVOIT = "Invalid max result {0}. Invalid max result be positive or zero.";
+    public static final String INVALID_TIME_OF_DAY_COVOIT = "Invalid time of day {0}. Format of time of day must be HH:MM:SS.";
+    public static final String INVALID_DAY_OF_WEEK_COVOIT = "Invalid day of week {0}. Day of week must be at least one of MON,TUE,WED,THU,FRI,SAT,SUN.";
+    public static final String INVALID_MIN_OR_MAX_DEPARTURE_DATE_COVOIT = "Invalid min or max departure date {0}, {1}. Minimal departure date must be less than maximal departure date.";
+
+    // COVOIT MSG
+    public static final String INVALID_GRADE_COVOIT = "Invalid grade {0}. Grade must be from 1 to 5.";
+    public static final String INVALID_GENDER_COVOIT = "Invalid gender {0}. Gender must be one of F, M or O.";
+    public static final String INVALID_STATUS_COVOIT = "Invalid status {0}. Status must be one of WAITING_CONFIRMATION, CONFIRMED, CANCELLED, COMPLETED_PENDING_VALIDATION or VALIDATED.";
+    public static final String INVALID_DISTANCE_COVOIT = "Invalid distance {0}. Distance must be positive and not zero.";
+    public static final String INVALID_DURATION_COVOIT = "Invalid duration {0}. Duration must be positive and not zero.";
+    public static final String INVALID_TYPE_OF_PRICE_COVOIT = "Invalid type of price {0}. Type of price must be one of FREE, PAYING or UNKNOWN.";
+    public static final String INVALID_AMOUNT_COVOIT = "Invalid amount of price {0}. Amount of price must be positive or zero.";
+    public static final String INVALID_TYPE_OF_RECIPIENT_COVOIT = "Invalid recipient carpooler type {0}. Recipient carpooler type must be one of DRIVER or PASSENGER.";
+    public static final String UNKNOWN_BOOKING_ID = "Unknown booking id {0}.";
+}
+

@@ -8,8 +8,8 @@
     "propulsionType": "human",
     "ecoLabel": [
       {
-        "countryCode": 0,
-        "ecoSticker": 0
+        "countryCode": "string",
+        "ecoSticker": "string"
       }
     ],
     "maxRangeMeters": "string",

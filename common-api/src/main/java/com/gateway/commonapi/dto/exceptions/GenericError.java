@@ -34,31 +34,25 @@ public class GenericError {
     @JsonIgnore
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(GlobalConstants.GATEWAY_DATE_FORMAT);
     @Schema(name = "errorCode",
-            description = "Functionnal error code, -1 if technical error",
+            description = "Functional error code, -1 if technical error",
             type = "integer",
             example = "12",
             nullable = false,
             required = true)
     @JsonProperty("errorCode")
     private Integer errorCode;
-    @Schema(name = "label",
-            description = "label of the error",
-            type = "integer",
-            example = "Msp not activated yet",
-            nullable = true,
-            required = true)
+    @Schema(name = "label", description = "label of the error", type = "integer", example = "Msp not activated yet", nullable = true, required = true)
     @JsonProperty("label")
     private String label;
     @Schema(name = "description",
             description = "Description of the error",
             type = "string",
-            example = "Internal error occured",
+            example = "Internal error occurred",
             nullable = true,
             required = true)
     @JsonProperty("description")
     private String description;
-    @Schema(name = "timestamp",
-            description = "Date of the error on ISO8601 format " + GlobalConstants.GATEWAY_DATE_FORMAT,
+    @Schema(name = "timestamp", description = "Date of the error on ISO8601 format " + GlobalConstants.GATEWAY_DATE_FORMAT,
             type = "string",
             example = "2020-04-28T00:00:00.000Z",
             nullable = true,

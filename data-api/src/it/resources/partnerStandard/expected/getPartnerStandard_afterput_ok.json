@@ -1,0 +1,10 @@
+{
+  "partnerStandardId": "f7082f2f-317b-4e4c-ba77-54ce2f0dbfff",
+  "standardName": "FNMS update",
+  "isActive": false,
+  "versionStandard": "V1.1",
+  "versionDataMapping": "V1.0",
+  "partnerId": "b814c97e-df56-4651-ac50-11525537964f",
+  "partnerActionsId": "7c8f8780-a6fa-495d-8b36-24a20539adca",
+  "adaptersId": "40142f60-9694-479f-a6cd-28b199b5e240"
+}

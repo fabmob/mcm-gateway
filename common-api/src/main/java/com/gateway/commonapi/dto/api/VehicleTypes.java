@@ -12,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -74,7 +73,6 @@ public class VehicleTypes implements Serializable {
     private Integer cargoLoadCapacity;
 
     /**
-     * A revoir
      * The primary propulsion type of the vehicle.
      */
     @Schema(
@@ -212,11 +210,11 @@ public class VehicleTypes implements Serializable {
     private ReturnConstraint returnConstraint;
 
     /**
-     * The conditions for returning the vehicle at the end of the rental.
+     * Icons for the vehicle type.
      */
     @Schema(
             name = "vehicleAssets",
-            description = "The conditions for returning the vehicle at the end of the rental")
+            description = "Icons for the vehicle type")
     @JsonProperty("vehicleAssets")
     private VehicleAssets vehicleAssets;
 

@@ -18,6 +18,7 @@ public interface PriceListItemRepository extends CrudRepository<PriceListItem, U
 
     /**
      * Get the List of duration from price_list_item table
+     *
      * @param priceListId uuid of the pricelist
      * @return list of duration
      */
@@ -27,6 +28,7 @@ public interface PriceListItemRepository extends CrudRepository<PriceListItem, U
 
     /**
      * Get the List of distance from price_list_item table
+     *
      * @param priceListId uuid of the pricelist
      * @return list of distance
      */
@@ -35,7 +37,8 @@ public interface PriceListItemRepository extends CrudRepository<PriceListItem, U
     List<Distance> findAllDistancePriceListId(@Param("priceListId") UUID priceListId);
 
     /**
-     * Remove priceListItem with provided provided priceListItemId
+     * Remove priceListItem with provided priceListItemId
+     *
      * @param priceListItemId the uuid of priceListItem to remove
      */
     @Transactional

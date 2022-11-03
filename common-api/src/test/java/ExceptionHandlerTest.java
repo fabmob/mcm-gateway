@@ -1,8 +1,13 @@
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
+import com.gateway.commonapi.cache.CacheUtil;
 import com.gateway.commonapi.dto.exceptions.BusinessError;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.exception.handler.RestResponseEntityExceptionHandler;
+import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.tests.UTTestCase;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -38,13 +43,13 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 
 import javax.servlet.ServletException;
 import java.beans.PropertyChangeEvent;
-import java.net.ConnectException;
 import java.util.Optional;
+import java.util.UUID;
 
 @Slf4j
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:errors.properties")
-public class ExceptionHandlerTest {
+public class ExceptionHandlerTest extends UTTestCase {
 
     public static final String DEFAULT_EXCEPTION_MESSAGE = "ExceptionMessage";
 
@@ -56,13 +61,22 @@ public class ExceptionHandlerTest {
         }
 
         @Bean
+        public CacheUtil<String, String> cacheUtil() {
+            return cacheUtil;
+        }
+
+        @Bean
         public RestResponseEntityExceptionHandler responseEntityExceptionHandler() {
+            new ThreadLocalUserSession().get().setOutputStandard(StandardEnum.GATEWAY);
             return new RestResponseEntityExceptionHandler();
         }
     }
 
     @Autowired
     ErrorMessages errorMessages3;
+
+    @Autowired
+    public static CacheUtil<String, String> cacheUtil;
 
     @Autowired
     RestResponseEntityExceptionHandler responseEntityExceptionHandler;
@@ -90,27 +104,27 @@ public class ExceptionHandlerTest {
     @Test
     public void testHandleBadRequest() {
         response = responseEntityExceptionHandler.handleBadRequest(new BadRequestException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), DEFAULT_EXCEPTION_MESSAGE, "Mauvaise requête", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), DEFAULT_EXCEPTION_MESSAGE, "Bad Request", 400);
     }
 
     @Test
     public void testHandleBadGateway() {
         response = responseEntityExceptionHandler.handleBadGateway(new BadGatewayException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), DEFAULT_EXCEPTION_MESSAGE, "Erreur de communication", 502);
+        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), DEFAULT_EXCEPTION_MESSAGE, "Communication error", 502);
 
     }
 
     @Test
     public void testhandleBindException() {
-       response = responseEntityExceptionHandler.handleBindException
-               (new BindException(new BeanPropertyBindingResult(this,"objectName")), headers, status, servletWebRequest);
-       checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Le format de la requête n'est pas celui attendu", "", 400);
+        response = responseEntityExceptionHandler.handleBindException
+                (new BindException(new BeanPropertyBindingResult(this, "objectName")), headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The format of the request is not the one expected", "", 400);
     }
 
     @Test
     public void testHandleBusinessException() {
         response = responseEntityExceptionHandler.handleBusinessException
-                (new BusinessException(new BusinessError(42, "functional label", "functional descriptions")),  servletWebRequest);
+                (new BusinessException(new BusinessError(42, "functional label", "functional descriptions")), servletWebRequest);
         checkErrorResponse(response, HttpStatus.UNPROCESSABLE_ENTITY.value(), "functional descriptions", "functional label", 42);
     }
 
@@ -125,14 +139,14 @@ public class ExceptionHandlerTest {
     public void testHandleConnectException() {
         response = responseEntityExceptionHandler.handleConnectException
                 (new RuntimeException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), DEFAULT_EXCEPTION_MESSAGE, "Bad Gateway", 502);
+        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), DEFAULT_EXCEPTION_MESSAGE + ": " + DEFAULT_EXCEPTION_MESSAGE, "Bad Gateway", 502);
     }
 
     @Test
     public void testHandleNoHandlerFoundException() {
         response = responseEntityExceptionHandler.handleNoHandlerFoundException
                 (new NoHandlerFoundException(DEFAULT_EXCEPTION_MESSAGE, "", headers), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Intercepteur d''exception non attendu", "Erreur interne", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected exception catcher", "Internal error", 500);
     }
 
     @Test
@@ -146,22 +160,24 @@ public class ExceptionHandlerTest {
     public void testHandleConversionNotSupported() {
         response = responseEntityExceptionHandler.handleConversionNotSupported
                 (new ConversionNotSupportedException(new PropertyChangeEvent("source", "propertyName",
-                        "oldValue", "newValue"),null,null), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Erreur de conversion", "Conversion non supportée", 500);
+                        "oldValue", "newValue"), null, null), headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Conversion error", "Conversion not supported", 500);
     }
 
     @Test
     public void testHandleExceptionInternal() {
         response = responseEntityExceptionHandler.handleExceptionInternal
-                (new NullPointerException(DEFAULT_EXCEPTION_MESSAGE), null,headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Internal Server Error", 500);
+                (new NullPointerException(DEFAULT_EXCEPTION_MESSAGE), null, headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE + ": " + DEFAULT_EXCEPTION_MESSAGE, "Internal Server Error", 500);
     }
 
     @Test
     public void testHandleHttpMessageNotReadable() {
+        HttpMessageNotReadableException exception = new HttpMessageNotReadableException(DEFAULT_EXCEPTION_MESSAGE);
+        exception.initCause(new InvalidFormatException("The request format is not the expected one", "value", UUID.class));
         response = responseEntityExceptionHandler.handleHttpMessageNotReadable
-                (new HttpMessageNotReadableException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "La cause est cachée", "", 400);
+                (exception, headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request format is not the expected one", "Bad Request: Invalid Format", 400);
     }
 
     @Test
@@ -175,14 +191,14 @@ public class ExceptionHandlerTest {
     public void testHandleHttpRequestMethodNotSupported() {
         response = responseEntityExceptionHandler.handleHttpRequestMethodNotSupported
                 (new HttpRequestMethodNotSupportedException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Impossible de traiter l'opération demandée", "Méthode non supportée", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Unable to process the requested operation", "Method not supported", 400);
     }
 
     @Test
     public void testHandleInternal() {
         response = responseEntityExceptionHandler.handleInternal
                 (new ClassCastException(DEFAULT_EXCEPTION_MESSAGE), status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Internal Server Error", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE + ": " + DEFAULT_EXCEPTION_MESSAGE, "Internal Server Error", 500);
     }
 
     @Test
@@ -197,7 +213,7 @@ public class ExceptionHandlerTest {
     public void testHandleMissingServletRequestParameter() {
         response = responseEntityExceptionHandler.handleMissingServletRequestParameter
                 (new MissingServletRequestParameterException(DEFAULT_EXCEPTION_MESSAGE, "String"), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Required String parameter 'ExceptionMessage' is not present", "", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Required request parameter 'ExceptionMessage' for method parameter type String is not present", "", 400);
     }
 
     @Test
@@ -211,21 +227,22 @@ public class ExceptionHandlerTest {
     public void testHandleServiceUnavailable() {
         response = responseEntityExceptionHandler.handleServiceUnavailable
                 (new UnavailableException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.SERVICE_UNAVAILABLE.value(), DEFAULT_EXCEPTION_MESSAGE, "Service Unavailable", 503 );
+        checkErrorResponse(response, HttpStatus.SERVICE_UNAVAILABLE.value(), DEFAULT_EXCEPTION_MESSAGE, "Service Unavailable", 503);
     }
 
     @Test
     public void testHandleServletRequestBindingException() {
         response = responseEntityExceptionHandler.handleServletRequestBindingException
                 (new ServletRequestBindingException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Le format de la requête n'est pas celui attendu", "", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The format of the request is not the one expected", "", 400);
     }
 
     @Test
     public void testHandleTypeMismatch() {
+        TypeMismatchException exception = new TypeMismatchException("7962e1ef-4d4c-4300-9fe4", UUID.class, new IllegalArgumentException("Invalid UUID string: 7962e1ef-4d4c-4300-9fe4"));
         response = responseEntityExceptionHandler.handleTypeMismatch
-                (new TypeMismatchException(DEFAULT_EXCEPTION_MESSAGE,String.class), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Internal Server Error", "Type mismatch", 400);
+                (exception, headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Invalid partner id 7962e1ef-4d4c-4300-9fe4. Unauthorized to reach this partner.", "Invalid partner id", 1543);
     }
 
     @Test
@@ -239,8 +256,8 @@ public class ExceptionHandlerTest {
     @Test
     public void testHandleMissingPathVariable() {
         response = responseEntityExceptionHandler.handleMissingPathVariable
-                (new MissingPathVariableException("variableName", new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"),-1)), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Missing URI template variable 'variableName' for method parameter of type void", "MissingPathVariableException", 500);
+                (new MissingPathVariableException("variableName", new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"), -1)), headers, status, servletWebRequest);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Required URI template variable 'variableName' for method parameter type void is not present", "MissingPathVariableException", 500);
     }
 
     @SneakyThrows
@@ -248,9 +265,9 @@ public class ExceptionHandlerTest {
     public void testHandleMethodArgumentNotValid() {
         BindingResult bindingResult = new BeanPropertyBindingResult(new Object(), "objectName");
         response = responseEntityExceptionHandler.handleMethodArgumentNotValid
-                (new MethodArgumentNotValidException(new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"),-1),bindingResult),
+                (new MethodArgumentNotValidException(new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"), -1), bindingResult),
                         headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "La méthode invoquée n'est pas autorisée", "Méthode non autorisée", 405);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The invoked method is not allowed", "Unauthorized method", 405);
     }
 
     private void checkErrorResponse(ResponseEntity<Object> response, Integer expectedStatusCode, String expectedDescription, String expectedLabel, Integer expectedErrorCode) {

@@ -12,6 +12,8 @@
 
     <properties>
         <hibernate-javax-persistence.version>1.0.2.Final</hibernate-javax-persistence.version>
+        <spring.boot.version>2.6.6</spring.boot.version>
+        <spring.version>5.3.22</spring.version>
         <postgres.jdbc.driver.version>42.4.0</postgres.jdbc.driver.version>
         <java.version>11</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -26,14 +28,14 @@
 
     <distributionManagement>
         <repository>
-            <id>maven-releases</id>
+            <id>gateway-maven-releases</id>
             <name>NEXUS Releases Maven Repository</name>
-            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-releases/</url>
+            <url>${env.NEXUS_URL}/repository/gateway-maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>maven-snapshots</id>
+            <id>gateway-maven-snapshots</id>
             <name>NEXUS Snapshots Maven Repository</name>
-            <url>https://nexus-dev.cicd.moncomptemobilite.fr/repository/maven-snapshots/</url>
+            <url>${env.NEXUS_URL}/repository/gateway-maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
@@ -66,18 +68,18 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-commons</artifactId>
-            <version>2.1.4.RELEASE</version>
+            <version>${spring.boot.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.1.6.RELEASE</version>
+            <version>${spring.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-jpa</artifactId>
-            <version>2.1.6.RELEASE</version>
+            <version>${spring.boot.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

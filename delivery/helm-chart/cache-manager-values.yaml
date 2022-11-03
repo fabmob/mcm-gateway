@@ -1,0 +1,158 @@
+services:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: cache-manager
+        app.gateway.com/service-type: internal-service
+      name: cache-manager
+    spec:
+      ports:
+        - name: "8086"
+          port: 8086
+          targetPort: 8086
+      selector:
+        io.kompose.service: cache-manager
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+
+networkPolicies:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: deny-internal-services-nw
+    spec:
+      podSelector: { }
+      policyTypes:
+        - Ingress
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: internal-services-nw
+    spec:
+      podSelector:
+        matchLabels:
+          visibility: internal
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  com.mcm.maas.internal: "true"
+
+deployments:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: cache-manager
+      name: cache-manager
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          io.kompose.service: cache-manager
+      strategy: {}
+      template:
+        metadata:
+          annotations:
+            app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+            app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+            kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+            kompose.service.type: clusterip
+            kubernetes.io/ingress.class: traefik
+          labels:
+            io.kompose.service: cache-manager
+            visibility: internal
+        spec:
+          containers:
+            env:
+              DATA_API_HOST: data-api.data-api-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local
+              ROUTING_API_HOST: routing-api.routing-api-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local
+              MAAS_API_CACHE_SSL: true
+              MAAS_API_CACHE_HOST: ${MAAS_API_CACHE_HOST}
+              MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
+              MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
+              MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+              USE_CACHE: false
+            image: ${CACHE_MANAGER_IMAGE_NAME}
+            name: cache-manager
+            ports:
+              - containerPort: 8086
+            resources: {}
+          imagePullSecrets:
+            - name: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+          restartPolicy: Always
+    status: {}
+
+middlewares:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: cache-manager-headers-middleware
+    spec:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Port: "443"
+          X-Forwarded-Proto: https
+
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: cache-manager-inflightreq-middleware
+    spec:
+      inFlightReq:
+        amount: 100
+
+#  - metadata:
+#      annotations:
+#        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+#        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+#        kubernetes.io/ingress.class: traefik
+#      name: cache-manager-ratelimit-middleware
+#    spec:
+#      rateLimit:
+#        average: 30
+#        burst: 50
+#        period: 1m
+#        sourceCriterion:
+#          ipStrategy:
+#            depth: 2
+
+ingressRoutes:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: cache-manager
+    spec:
+      entryPoints:
+        - web
+      routes:
+        - kind: Rule
+          match: Host(`${CACHE_MANAGER_FQDN}`)
+          middlewares:
+            - name: cache-manager-headers-middleware
+#            - name: cache-manager-ratelimit-middleware
+            - name: cache-manager-inflightreq-middleware
+          services:
+            - kind: Service
+              name: cache-manager
+              port: 8086

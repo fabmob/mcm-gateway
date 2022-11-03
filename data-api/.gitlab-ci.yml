@@ -1,3 +1,6 @@
+include:
+  - local: "data-api/.gitlab-ci/helm.yml"
+
 .data-api-base:
   variables:
     MODULE_NAME: data-api
@@ -8,6 +11,7 @@
     DATABASE_USER_NAME: ${POSTGRES_SERVICE_USER}
     DATABASE_USER_PWD: ${POSTGRES_SERVICE_PASSWORD}
     KUBERNETES_GATEWAY_DB_NAMESPACE: ${KUBERNETES_GATEWAY_DB_NAMESPACE}
+
 
 .data_api_init_vars: &data_api_init_vars |
   export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
@@ -22,7 +26,11 @@
 .data-api-build: &data-api-build |
   set -x
   envsubst < settings.xml
-  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
   mvn clean install -s settings.xml -DskipTests
 
 data_api_build:
@@ -31,23 +39,27 @@ data_api_build:
     - .build-job
     - .no-needs
     - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/data-api
   script:
     - *data_api_init_vars
     - *data-api-build
   artifacts:
     paths:
       - data-api/target
-  needs: [ "deploy-nexus" ]
+  needs: [ "deploy-nexus", "check-if-release-version" ]
 
 data_api_image_build:
   extends:
     - .image-job
     - .data-api-base
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/data-api
   script:
     - *data_api_init_vars
     - |
       image
-  needs: [ "data_api_build" ]
+  needs: [ "data_api_build" , "check-if-release-version" ]
 
 
 data_api_preview_deploy:
@@ -57,14 +69,9 @@ data_api_preview_deploy:
   script:
     - *data_api_init_vars
     - |
-      KUBERNETES_GATEWAY_DB_NAMESPACE=$(pod_namespace postgresgateway)
-      export KUBERNETES_GATEWAY_DB_NAMESPACE
-      KUBERNETES_GATEWAY_REDIS_NAMESPACE=$(pod_namespace redis)
-      export KUBERNETES_GATEWAY_REDIS_NAMESPACE
-      MAAS_API_CACHE_KEYS_PREFIX="preview-"
-      export MAAS_API_CACHE_KEYS_PREFIX
+      export MAAS_API_CACHE_KEYS_PREFIX="preview"
       deploy
-  needs: [ "data_api_image_build" ]
+  needs: [ "data_api_image_build", "postgres_preview_deploy"]
   environment:
     on_stop: data_api_preview_cleanup
 

@@ -5,10 +5,10 @@ metadata:
 spec:
   routes:
     - match: Host(`${POSTGRES_FQDN}`)
-     # middlewares:
-     #   - name: postgresgateway-headers-middleware
-     #   - name: postgresgateway-ratelimit-middleware
-     #   - name: postgresgateway-inflightreq-middleware
+      #middlewares:
+      #   - name: postgresgateway-headers-middleware
+      #   - name: postgresgateway-ratelimit-middleware
+      # - name: postgresgateway-inflightreq-middleware
       kind: Rule
       services:
         - kind: Service

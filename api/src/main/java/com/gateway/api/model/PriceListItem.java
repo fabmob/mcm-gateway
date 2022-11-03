@@ -1,6 +1,5 @@
 package com.gateway.api.model;
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -8,7 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 /**
  * Bean for information about a price list item.

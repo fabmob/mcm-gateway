@@ -1,15 +1,14 @@
 package com.gateway.commonapi.dto.api;
 
-import java.util.ArrayList;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import com.gateway.commonapi.utils.enums.ActionType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.ArrayList;
 
 /**
  * Bean for a list of potential actions.

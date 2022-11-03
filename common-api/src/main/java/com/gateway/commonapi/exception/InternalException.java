@@ -1,9 +1,7 @@
 package com.gateway.commonapi.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.utils.CommonUtils;
-import com.gateway.commonapi.utils.ExceptionUtils;
 import lombok.Data;
 
 import java.io.Serializable;

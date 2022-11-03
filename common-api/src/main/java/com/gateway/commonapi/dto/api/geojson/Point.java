@@ -1,6 +1,5 @@
 package com.gateway.commonapi.dto.api.geojson;
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
@@ -8,7 +7,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 /**
  * Class for a GeoJSON point.

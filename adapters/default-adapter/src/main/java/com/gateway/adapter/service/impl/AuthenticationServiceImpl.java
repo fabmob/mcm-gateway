@@ -2,9 +2,10 @@ package com.gateway.adapter.service.impl;
 
 import com.gateway.adapter.service.AuthenticationService;
 import com.gateway.adapter.utils.constant.AdapterMessageDict;
-import com.gateway.commonapi.dto.data.MspActionDTO;
+import com.gateway.commonapi.dto.data.PartnerActionDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 
 
@@ -13,12 +14,12 @@ import java.util.List;
 public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
-    public MspActionDTO needAuthenticationAction (List<MspActionDTO> actions) {
+    public PartnerActionDTO needAuthenticationAction (List<PartnerActionDTO> actions) {
         int counter = 0;
-        MspActionDTO authenticationAction = new MspActionDTO();
-        for (MspActionDTO mspActionDTO : actions) {
-            if (mspActionDTO.isAuthentication()) {
-                authenticationAction = mspActionDTO;
+        PartnerActionDTO authenticationAction = new PartnerActionDTO();
+        for (PartnerActionDTO partnerActionDTO : actions) {
+            if (partnerActionDTO.isAuthentication()) {
+                authenticationAction = partnerActionDTO;
                 counter++;
             }
         }
@@ -30,10 +31,10 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 
     @Override
-    public boolean needAuthentication(List<MspActionDTO> actions) {
+    public boolean needAuthentication(List<PartnerActionDTO> actions) {
         boolean isAuthentication = false;
-        for (MspActionDTO mspActionDTO : actions) {
-            if (mspActionDTO.isAuthentication()) {
+        for (PartnerActionDTO partnerActionDTO : actions) {
+            if (partnerActionDTO.isAuthentication()) {
                 isAuthentication = true;
                 break;
             }

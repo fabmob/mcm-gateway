@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: cache-manager
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${CACHE_MANAGER_FQDN}`)
+      middlewares:
+        - name: cache-manager-headers-middleware
+        - name: cache-manager-ratelimit-middleware
+        - name: cache-manager-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: cache-manager
+          port: 8086
+  # tls:
+  #   secretName: ${SECRET_NAME} # cache-manager-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

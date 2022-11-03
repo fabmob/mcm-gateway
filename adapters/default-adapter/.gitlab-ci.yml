@@ -1,3 +1,6 @@
+include:
+  - local: "adapters/default-adapter/.gitlab-ci/helm.yml"
+
 .default-adapter-base:
   variables:
     MODULE_NAME: default-adapter
@@ -18,7 +21,11 @@
 .default-adapter-build: &default-adapter-build |
   set -x
   envsubst < settings.xml
-  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
   cd adapters/default-adapter
   envsubst < ../../settings.xml
   mvn clean install -s ../../settings.xml -DskipTests
@@ -29,23 +36,27 @@ default_adapter_build:
     - .build-job
     - .no-needs
     - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/default-adapter
   script:
     - *default_adapter_init_vars
     - *default-adapter-build
   artifacts:
     paths:
       - adapters/default-adapter/target
-  needs: [ "deploy-nexus" ]
+  needs: [ "deploy-nexus", "check-if-release-version" ]
 
 default_adapter_image_build:
   extends:
     - .image-job
     - .default-adapter-base
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/default-adapter
   script:
     - *default_adapter_init_vars
     - |
       image
-  needs: [ "default_adapter_build" ]
+  needs: [ "default_adapter_build" , "check-if-release-version" ]
 
 
 default_adapter_preview_deploy:
@@ -55,13 +66,8 @@ default_adapter_preview_deploy:
   script:
     - *default_adapter_init_vars
     - |
-      wait_pod data-api
-      KUBERNETES_DATA_API_NAMESPACE=$(pod_namespace data-api)
-      KUBERNETES_REQUEST_RELAY_NAMESPACE=$(pod_namespace request-relay)
-      export KUBERNETES_DATA_API_NAMESPACE
-      export KUBERNETES_REQUEST_RELAY_NAMESPACE
       deploy
-  needs: [ "default_adapter_image_build"]
+  needs: [ "default_adapter_image_build", "check-if-release-version" ]
   environment:
     on_stop: default_adapter_preview_cleanup
 

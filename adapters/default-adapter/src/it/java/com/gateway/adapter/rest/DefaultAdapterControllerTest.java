@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.gateway.adapter.AdapterITTestCase;
 import com.gateway.adapter.service.AuthenticationService;
-import com.gateway.adapter.utils.constant.AdapterPathDict;
 import com.gateway.adapter.service.impl.DefaultAdapterServiceImpl;
+import com.gateway.adapter.utils.constant.AdapterPathDict;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.tests.enums.JsonResponseTypeEnum;
 import com.gateway.commonapi.utils.CommonUtils;
@@ -21,7 +21,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.*;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -30,7 +32,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
-import java.util.*;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static com.gateway.adapter.utils.constant.AdapterPathDict.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,7 +68,7 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         MockitoAnnotations.initMocks(this);
         JacksonTester.initFields(this, this.objectMapper);
     }
@@ -75,12 +81,12 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
     @Test
     void testAdaptGetOperation() throws Exception {
 
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
         Map<String, String> params = new HashMap<>();
 
-        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", mspActionId +
-                DEFAULT_ADAPTER_MSP_ID_PATH, "mspId", String.valueOf(mspId));
+        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", partnerActionId +
+                DEFAULT_ADAPTER_PARTNER_ID_PATH, "partnerId", String.valueOf(partnerId));
 
         testHttpRequestWithExpectedResult(uriDefaultAdapter, HttpMethod.GET, HttpStatus.OK,
                 null, DEFAULT_ADAPTER_EXPECTED_ADAPT_GET_OK_JSON,
@@ -95,12 +101,12 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
     @Test
     void testAdaptPostOperation() throws Exception {
 
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
         Map<String, String> params = new HashMap<>();
 
-        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", mspActionId +
-                DEFAULT_ADAPTER_MSP_ID_PATH, "mspId", String.valueOf(mspId));
+        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", partnerActionId +
+                DEFAULT_ADAPTER_PARTNER_ID_PATH, "partnerId", String.valueOf(partnerId));
 
         testHttpRequestWithExpectedResult(uriDefaultAdapter, HttpMethod.POST, HttpStatus.OK,
                 REQUEST_BODY_OK_JSON, DEFAULT_ADAPTER_EXPECTED_ADAPT_GET_OK_JSON,
@@ -116,12 +122,12 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
     @Test
     void testAdaptPostNullBodyOperation() throws Exception {
 
-        UUID mspId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
-        UUID mspActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
+        UUID partnerId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888");
+        UUID partnerActionId = UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f880");
         Map<String, String> params = new HashMap<>();
 
-        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", mspActionId +
-                DEFAULT_ADAPTER_MSP_ID_PATH, "mspId", String.valueOf(mspId));
+        String uriDefaultAdapter = CommonUtils.placeholderFormat(ADAPTER_PATH + DEFAULT_ADAPTER_GET_BY_ACTIONS_ID_PATH, "actionId", partnerActionId +
+                DEFAULT_ADAPTER_PARTNER_ID_PATH, "partnerId", String.valueOf(partnerId));
 
         testHttpRequestWithExpectedResult(uriDefaultAdapter, HttpMethod.POST, HttpStatus.OK,
                 null, DEFAULT_ADAPTER_EXPECTED_ADAPT_GET_OK_JSON,
@@ -135,7 +141,7 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
      * @param uri                      the uri of the operation
      * @param httpMethod               HTTP VERB (GET, PUT, POST, PATCH, DELETE)
      * @param httpStatusExpectedResult Https code status expected
-     * @param requestPayloadPath       payload of the request (optionnal for some verbs)
+     * @param requestPayloadPath       payload of the request (optional for some verbs)
      * @param expectedResultPath       path of the json expected answer file
      * @param resulType                JsonArray or JsonObject expected as result
      * @param message                  Message of the test running
@@ -147,10 +153,10 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
                                                    String expectedResultPath, JsonResponseTypeEnum resulType,
                                                    final String message) throws Exception {
 
-        List<Object> mspResponseMocked = createMockedResponse();
+        List<Object> partnerResponseMocked = createMockedResponse();
 
         // mock makecall() operation with a stub object from createMocked function
-        doReturn(mspResponseMocked).when(defaultAdapterService).adaptOperation(any(), any(),any(),any());
+        doReturn(partnerResponseMocked).when(defaultAdapterService).adaptOperation(any(), any(), any(), any());
 
         // preparing the service call and expected elements
         ResultMatcher mockResultMatcher = WsTestUtil.getResultMatcher(httpStatusExpectedResult);
@@ -205,7 +211,7 @@ class DefaultAdapterControllerTest extends AdapterITTestCase {
 
 
     /**
-     * Create a mock of MSP response
+     * Create a mock of partner response
      *
      * @return Fake object for mock
      */

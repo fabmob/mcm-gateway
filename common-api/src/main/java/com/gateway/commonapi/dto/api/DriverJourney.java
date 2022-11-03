@@ -1,27 +1,25 @@
 package com.gateway.commonapi.dto.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-
 import com.gateway.commonapi.utils.enums.TypeEnumDriver;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import java.io.Serializable;
+import lombok.EqualsAndHashCode;
 
 /**
  * Details about a driver journeys
  */
 
+@EqualsAndHashCode
 @JsonPropertyOrder({"operator", "passengerPickupLat", "passengerPickupLng", "passengerDropLat",
         "passengerDropLng", "passengerPickupAddress", "passengerDropAddress", "distance", "driverDepartureLat"
-        , "driverDepartureLng", "driverArrivalLat","driverArrivalLng" ,
-        "driverDepartureAddress", "driverArrivalAddress",  "duration",
+        , "driverDepartureLng", "driverArrivalLat", "driverArrivalLng",
+        "driverDepartureAddress", "driverArrivalAddress", "duration",
         "journeyPolyline", "preferences", "webUrl", "driver", "departureToPickupWalkingDistance",
-        "departureToPickupWalkingDuration", "departureToPickupWalkingPolyline","dropoffToArrivalWalkingDistance",
-        "dropoffToArrivalWalkingDuration", "dropoffToArrivalWalkingPolyline","car","id",
-        "passengerPickupDate", "driverDepartureDate","type","availableSeats", "price","requestedSeats"})
-public class DriverJourney extends DriverTrip{
+        "departureToPickupWalkingDuration", "departureToPickupWalkingPolyline", "dropoffToArrivalWalkingDistance",
+        "dropoffToArrivalWalkingDuration", "dropoffToArrivalWalkingPolyline", "car", "id",
+        "passengerPickupDate", "driverDepartureDate", "type", "availableSeats", "price", "requestedSeats"})
+public class DriverJourney extends DriverTrip {
     private static final long serialVersionUID = 1L;
 
     /**

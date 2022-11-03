@@ -1,18 +1,20 @@
 package com.gateway.commonapi.dto.api;
 
 
-import java.io.Serializable;
-import java.util.List;
-import java.util.UUID;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gateway.commonapi.dto.api.geojson.Point;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.Setter;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Bean for static information about a car park.
@@ -22,7 +24,7 @@ import javax.validation.constraints.NotNull;
 @Validated
 @Schema(description = "Static information about a parking")
 @JsonPropertyOrder({
-        "mspId", "parkingId", "name", "url", "location", "address",
+        "partnerId", "parkingId", "name", "url", "location", "address",
         "description", "characteristics", "pictures", "accessTypes", "assetTypes", "actions" , "_links"})
 public class Parking  implements Serializable {
     
@@ -38,13 +40,13 @@ public class Parking  implements Serializable {
      * MSP identifier.
      */
     @Schema(
-            name="mspId",
-            example= "b814c97e-df56-4651-ac50-11525537964f",
-            description="Identifier of the MSP",
-            required=true)
-    @JsonProperty("mspId")
+            name = "partnerId",
+            example = "b814c97e-df56-4651-ac50-11525537964f",
+            description = "Identifier of the partner",
+            required = true)
+    @JsonProperty("partnerId")
     @NotNull
-    private UUID mspId;
+    private UUID partnerId;
 
     /**
      * Car park identifier.
@@ -184,8 +186,8 @@ public class Parking  implements Serializable {
     @JsonProperty("availability")
     private ParkingAvailability availability;
 
-    public Parking(UUID mspId, String parkingId, String parkingName) {
-        this.mspId = mspId;
+    public Parking(UUID partnerId, String parkingId, String parkingName) {
+        this.partnerId = partnerId;
         this.parkingId = parkingId;
         this.parkingName = parkingName;
     }

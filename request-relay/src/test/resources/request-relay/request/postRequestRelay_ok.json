@@ -1,5 +1,5 @@
 {
-  "url": "http://demo9038068.mockable.io/mockedmsp",
+  "url": "http://demo.io/mockedmsp",
   "method": "POST",
   "body": "{\"refreshToken\": \"ZENPARK_REFRESH_TOKEN\"}",
   "headers": [

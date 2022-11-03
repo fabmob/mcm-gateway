@@ -32,12 +32,12 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
     @Override
     public CacheParam addCacheParam(CacheParam cacheParam) {
         CacheParam mapper;
-        if (cacheParam.getCacheParamPK() != null && cacheParam.getCacheParamPK().getMsp().getMspId() != null && cacheParam.getCacheParamPK().getActionType() != null) {
+        if (cacheParam.getCacheParamPK() != null && cacheParam.getCacheParamPK().getPartner().getPartnerId() != null && cacheParam.getCacheParamPK().getActionType() != null) {
             if (cacheParamRepository.findById(cacheParam.getCacheParamPK()).isPresent()) {
-                throw new ConflictException(CommonUtils.placeholderFormat(DATA_ALREADY_EXISTS_IN_DB_USE_PUT_INSTEAD, FIRST_PLACEHOLDER, cacheParam.getCacheParamPK().getMsp().getMspId().toString(), SECOND_PLACEHOLDER, cacheParam.getCacheParamPK().getActionType()));
+                throw new ConflictException(CommonUtils.placeholderFormat(DATA_ALREADY_EXISTS_IN_DB_USE_PUT_INSTEAD, FIRST_PLACEHOLDER, cacheParam.getCacheParamPK().getPartner().getPartnerId().toString(), SECOND_PLACEHOLDER, cacheParam.getCacheParamPK().getActionType()));
             }
         } else {
-            throw new InternalException(MSPID_MUST_AND_ACTION_TYPE_MUST_BE_NOT_NULL);
+            throw new InternalException(PARTNER_ID_MUST_AND_ACTION_TYPE_MUST_BE_NOT_NULL);
 
         }
         this.checkData(cacheParam);
@@ -45,7 +45,7 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
             cacheParam.setCacheParamId(UUID.randomUUID());
             mapper = cacheParamRepository.save(cacheParam);
         } catch (Exception e) {
-            throw new InternalException(CommonUtils.placeholderFormat(MSP_META_WITH_ID_IS_NOT_FOUND2, FIRST_PLACEHOLDER, cacheParam.getCacheParamPK().getMsp().getMspId().toString()));
+            throw new InternalException(CommonUtils.placeholderFormat(PARTNER_META_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, cacheParam.getCacheParamPK().getPartner().getPartnerId().toString()));
         }
         return mapper;
     }
@@ -70,7 +70,7 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
         try {
             cacheParamRepository.deleteById(cacheParamPK);
         } catch (Exception e) {
-            throw new NotFoundException(CommonUtils.placeholderFormat(NOT_FOUND_CACHE_PARAM_PK, FIRST_PLACEHOLDER, cacheParamPK.getMsp().getMspId().toString(), SECOND_PLACEHOLDER, cacheParamPK.getActionType()));
+            throw new NotFoundException(CommonUtils.placeholderFormat(NOT_FOUND_CACHE_PARAM_PK, FIRST_PLACEHOLDER, cacheParamPK.getPartner().getPartnerId().toString(), SECOND_PLACEHOLDER, cacheParamPK.getActionType()));
         }
     }
 
@@ -83,7 +83,7 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
         CacheParam cacheParam = this.findCacheParamByID(cacheParamId);
         CacheParamPK cacheParamPK = new CacheParamPK();
         cacheParamPK.setActionType(cacheParam.getCacheParamPK().getActionType());
-        cacheParamPK.setMsp(cacheParam.getCacheParamPK().getMsp());
+        cacheParamPK.setPartner(cacheParam.getCacheParamPK().getPartner());
         cacheParamRepository.deleteById(cacheParamPK);
     }
 
@@ -96,7 +96,7 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
 
     public CacheParam findCacheParamByPK(CacheParamPK cacheParamPK) {
         return cacheParamRepository.findById(cacheParamPK)
-                .orElseThrow(() -> new NotFoundException(CommonUtils.placeholderFormat(NOT_FOUND_CACHE_PARAM_PK, FIRST_PLACEHOLDER, cacheParamPK.getMsp().getMspId().toString(), SECOND_PLACEHOLDER, cacheParamPK.getActionType())));
+                .orElseThrow(() -> new NotFoundException(CommonUtils.placeholderFormat(NOT_FOUND_CACHE_PARAM_PK, FIRST_PLACEHOLDER, cacheParamPK.getPartner().getPartnerId().toString(), SECOND_PLACEHOLDER, cacheParamPK.getActionType())));
     }
 
     /**
@@ -146,23 +146,23 @@ public class CacheParamDatabaseServiceImpl implements CacheParamDatabaseService 
     }
 
     /**
-     * filter by mspId or actionType or both
+     * filter by PartnerId or actionType or both
      *
-     * @param mspId      msp Id
+     * @param partnerId  Partner Id
      * @param actionType type of action ("STATION_SEARCH")
      * @return List of Cache Param using filters
      */
     @Override
-    public List<CacheParam> getAllCacheParamByCriteria(UUID mspId, String actionType) {
-        List<CacheParam> cacheParamList = cacheParamRepository.findByCriteria(actionType, mspId);
+    public List<CacheParam> getAllCacheParamByCriteria(UUID partnerId, String actionType) {
+        List<CacheParam> cacheParamList = cacheParamRepository.findByCriteria(actionType, partnerId);
         if (cacheParamList == null || cacheParamList.isEmpty()) {
-            throw new NotFoundException(CommonUtils.placeholderFormat(NO_RESULTS, FIRST_PLACEHOLDER, String.valueOf(mspId), SECOND_PLACEHOLDER, String.valueOf(actionType)));
+            throw new NotFoundException(CommonUtils.placeholderFormat(NO_RESULTS, FIRST_PLACEHOLDER, String.valueOf(partnerId), SECOND_PLACEHOLDER, String.valueOf(actionType)));
         }
         return cacheParamList;
     }
 
     /**
-     * check if datas are ok
+     * check if data are ok
      *
      * @param cacheParam cacheParam
      */

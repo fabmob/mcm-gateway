@@ -20,9 +20,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
-import static com.gateway.commonapi.utils.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.DataApiPathDict.*;
 import static com.gateway.dataapi.util.constant.DataApiMessageDict.CREATED;
-import static com.gateway.dataapi.util.constant.DataApiPathDict.*;
 
 @RequestMapping(CACHE_PARAM_BASE_PATH)
 @RestController
@@ -56,7 +56,7 @@ public class CacheParamController {
         return new ResponseEntity<>(cacheParamResponse, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Cache Param with Msp Id and Action type", description = "Description Get the specified Cache Param", tags = {
+    @Operation(summary = "Get the specified Cache Param with Partner Id and Action type", description = "Description Get the specified Cache Param", tags = {
             CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = DataApiMessageDict.RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -109,14 +109,14 @@ public class CacheParamController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<List<CacheParamDTO>> getAllCacheParam(@RequestParam(name = "mspId", required = false) UUID mspId,
+    public ResponseEntity<List<CacheParamDTO>> getAllCacheParam(@RequestParam(name = "partnerId", required = false) UUID partnerId,
                                                                 @RequestParam(name = "actionType", required = false) String actionType) {
         log.info(GET_ALL_CACHEPARAM);
         List<CacheParamDTO> mappers;
-        if (mspId == null && actionType == null) {
+        if (partnerId == null && actionType == null) {
             mappers = cacheParamService.getAllCacheParams();
         } else {
-            mappers = cacheParamService.getAllCacheParamByCriteria(mspId, actionType);
+            mappers = cacheParamService.getAllCacheParamByCriteria(partnerId, actionType);
         }
         return new ResponseEntity<>(mappers, HttpStatus.OK);
     }

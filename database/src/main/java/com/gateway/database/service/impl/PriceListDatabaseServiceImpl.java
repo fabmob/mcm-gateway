@@ -3,14 +3,14 @@ package com.gateway.database.service.impl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.database.model.Distance;
 import com.gateway.database.model.Duration;
-import com.gateway.database.model.MspMeta;
+import com.gateway.database.model.PartnerMeta;
 import com.gateway.database.model.PriceList;
-import com.gateway.database.repository.MspMetaRepository;
+import com.gateway.database.repository.PartnerMetaRepository;
 import com.gateway.database.repository.PriceListItemRepository;
 import com.gateway.database.repository.PriceListRepository;
-import com.gateway.database.service.PriceListItemDatabaseService;
 import com.gateway.database.service.PriceListDatabaseService;
-import com.gateway.database.util.enums.Msp;
+import com.gateway.database.service.PriceListItemDatabaseService;
+import com.gateway.database.util.enums.Partner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,7 @@ public class PriceListDatabaseServiceImpl implements PriceListDatabaseService {
     PriceListRepository priceListRepository;
 
     @Autowired
-    MspMetaRepository mspMetaRepository;
+    PartnerMetaRepository partnerMetaRepository;
 
     @Autowired
     PriceListItemDatabaseService priceListItemService;
@@ -68,15 +68,15 @@ public class PriceListDatabaseServiceImpl implements PriceListDatabaseService {
     }
 
     @Override
-    public PriceList updatePriceList(Map<String, Object> updates, MspMeta mspMeta) throws IOException {
-        PriceList priceList = mspMeta.getPriceList();
+    public PriceList updatePriceList(Map<String, Object> updates, PartnerMeta partnerMeta) throws IOException {
+        PriceList priceList = partnerMeta.getPriceList();
         PriceList priceListFinal;
-        if (priceList == null && updates.get(Msp.PRICELIST.getValue()) != null) {
+        if (priceList == null && updates.get(Partner.PRICELIST.getValue()) != null) {
             ObjectMapper objectMapper = new ObjectMapper();
-            priceListFinal = createPriceList(objectMapper.readValue(objectMapper.writeValueAsBytes(updates.get(Msp.PRICELIST.getValue())), PriceList.class));
+            priceListFinal = createPriceList(objectMapper.readValue(objectMapper.writeValueAsBytes(updates.get(Partner.PRICELIST.getValue())), PriceList.class));
         } else {
             priceListFinal = priceList;
-            Map<String, Object> priceListMap = (Map<String, Object>) updates.get(Msp.PRICELIST.getValue());
+            Map<String, Object> priceListMap = (Map<String, Object>) updates.get(Partner.PRICELIST.getValue());
             priceListMap.forEach(
                     (change, value) -> {
                         if (value != null) {
@@ -113,12 +113,12 @@ public class PriceListDatabaseServiceImpl implements PriceListDatabaseService {
                     }
             );
         }
-        mspMeta.setPriceList(priceListFinal);
-        if (mspMeta.getPriceList() != null) {
-            priceListRepository.save(mspMeta.getPriceList());
-            mspMetaRepository.save(mspMeta);
+        partnerMeta.setPriceList(priceListFinal);
+        if (partnerMeta.getPriceList() != null) {
+            priceListRepository.save(partnerMeta.getPriceList());
+            partnerMetaRepository.save(partnerMeta);
         }
-        return mspMeta.getPriceList();
+        return partnerMeta.getPriceList();
     }
 
 }

@@ -1,11 +1,13 @@
 package com.gateway.dataapi.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gateway.commonapi.constants.DataApiPathDict;
+import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.tests.enums.JsonResponseTypeEnum;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import com.gateway.dataapi.DataApiITCase;
-import com.gateway.dataapi.util.constant.DataApiPathDict;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -14,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -29,14 +30,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.gateway.dataapi.util.constant.DataApiPathDict.ID;
+import java.nio.charset.StandardCharsets;
+
+import static com.gateway.commonapi.constants.DataApiPathDict.ID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 class TokenControllerTest extends DataApiITCase {
     public static final String IT_RESOURCES_PATH = "./src/it/resources/";
     public static final String TOKEN_EXPECTED_GET_TOKEN_OK_JSON = "token/expected/getToken_ok.json";
     public static final String TOKEN_EXPECTED_GET_TOKEN_BY_ID_OK_JSON = "token/expected/getToken_by_id_ok.json";
-    public static final String TOKEN_EXPECTED_GET_TOKEN_BY_MSP_META_ID_OK_JSON = "token/expected/getToken_by_MspMeta_id_ok.json";
+    public static final String TOKEN_EXPECTED_GET_TOKEN_BY_PARTNER_META_ID_OK_JSON = "token/expected/getToken_by_PartnerMeta_id_ok.json";
     public static final String TOKEN_EXPECTED_GET_TOKEN_BY_ID_NOT_FOUND_JSON = "token/expected/getToken_by_id_not_found.json";
 
     public static final String TOKEN_REQUEST_POST_TOKEN_OK_JSON = "token/request/postToken_ok.json";
@@ -61,9 +64,10 @@ class TokenControllerTest extends DataApiITCase {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         MockitoAnnotations.initMocks(this);
         JacksonTester.initFields(this, this.objectMapper);
+        new ThreadLocalUserSession().get().setOutputStandard(StandardEnum.GATEWAY);
     }
 
     /**
@@ -82,18 +86,18 @@ class TokenControllerTest extends DataApiITCase {
     }
 
     /**
-     * test GET token by MspMeta id
+     * test GET token by PartnerMeta id
      *
      * @throws Exception
      */
     @Test
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
-    void testGetTokensByMspMetaId() throws Exception {
+    void testGetTokensByPartnerMetaId() throws Exception {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("mspMetaId", "b814c97e-df56-4651-ac50-11525537964f");
+        parameters.add("partnerMetaId", "b814c97e-df56-4651-ac50-11525537964f");
         testHttpRequestWithExpectedResult(DataApiPathDict.TOKENS_BASE_PATH +DataApiPathDict.TOKENS_PATH, HttpMethod.GET, HttpStatus.OK, null,
-                TOKEN_EXPECTED_GET_TOKEN_BY_MSP_META_ID_OK_JSON, JsonResponseTypeEnum.JSON_OBJECT, "Test token by mspMetaId",
+                TOKEN_EXPECTED_GET_TOKEN_BY_PARTNER_META_ID_OK_JSON, JsonResponseTypeEnum.JSON_OBJECT, "Test token by partnerMetaId",
                 true, false, parameters);
     }
 

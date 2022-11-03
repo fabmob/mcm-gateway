@@ -7,14 +7,12 @@ import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.database.model.Adapters;
-import com.gateway.database.model.MspStandard;
+import com.gateway.database.model.PartnerStandard;
 import com.gateway.database.repository.AdaptersRepository;
-import com.gateway.database.repository.MspStandardRepository;
+import com.gateway.database.repository.PartnerStandardRepository;
 import com.gateway.database.service.AdaptersDatabaseService;
-
 import com.gateway.database.util.constant.DataMessageDict;
 import lombok.NoArgsConstructor;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,15 +32,15 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
     private AdaptersRepository adaptersRepository;
 
     @Autowired
-    private MspStandardRepository mspStandardRepository;
+    private PartnerStandardRepository partnerStandardRepository;
 
     @Autowired
     private ErrorMessages errorMessage;
 
-    private final String correlationId = String.valueOf(CommonUtils.setHeader().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
-    public AdaptersDatabaseServiceImpl(AdaptersRepository adaptersRepository){
-        this.adaptersRepository=adaptersRepository;
+    public AdaptersDatabaseServiceImpl(AdaptersRepository adaptersRepository) {
+        this.adaptersRepository = adaptersRepository;
 
     }
 
@@ -61,12 +59,11 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
         Adapters postedAdapter;
         try {
             postedAdapter = adaptersRepository.save(adapter);
-        }
-        catch (Exception e){
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()), e);
+        } catch (Exception e) {
+            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()), e);
             throw new InternalException(CommonUtils.placeholderFormat(DataMessageDict.DUPLICATE_VALUE_OF_ADAPTER_NAME, FIRST_PLACEHOLDER, adapter.getAdapterName()));
         }
-         return postedAdapter;
+        return postedAdapter;
     }
 
     /**
@@ -98,19 +95,19 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
      */
     @Override
     public void deleteAdapter(UUID id) {
-        List<MspStandard> mspStandardListUsingThisAdapter = mspStandardRepository.findByAdapterId(id);
-        if (mspStandardListUsingThisAdapter.isEmpty()){
+        List<PartnerStandard> partnerStandardListUsingThisAdapter = partnerStandardRepository.findByAdapterId(id);
+        if (partnerStandardListUsingThisAdapter.isEmpty()) {
             try {
                 adaptersRepository.deleteById(id);
             } catch (Exception e) {
-                throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(),CommonUtils.placeholderFormat(ADAPTER_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
+                throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(ADAPTER_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
             }
         } else {
-            StringBuilder listOfMspStandard = new StringBuilder();
-            for (MspStandard mspStandard : mspStandardListUsingThisAdapter) {
-                listOfMspStandard.append("[").append(mspStandard.getMspStandardId()).append("]");
+            StringBuilder listOfPartnerStandard = new StringBuilder();
+            for (PartnerStandard partnerStandard : partnerStandardListUsingThisAdapter) {
+                listOfPartnerStandard.append("[").append(partnerStandard.getPartnerStandardId()).append("]");
             }
-            throw new ConflictException(MessageFormat.format(UNABLE_TO_DELETE_THIS_ADAPTER_ID_BECAUSE_IT_IS_USED_IN_ONE_OR_SEVERAL_STANDARDS, id, listOfMspStandard.toString()));
+            throw new ConflictException(MessageFormat.format(UNABLE_TO_DELETE_THIS_ADAPTER_ID_BECAUSE_IT_IS_USED_IN_ONE_OR_SEVERAL_STANDARDS, id, listOfPartnerStandard.toString()));
         }
     }
 }

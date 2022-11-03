@@ -24,7 +24,6 @@ public class Price implements Serializable {
     /**
      * Either « FREE », « PAYING » or « UNKNOWN ». « UNKNOWN » is given when it should be « PAYING » but we cannot set the price yet.
      *
-     * @return type
      **/
     @Schema(name = "type",
             example = "PAYING",

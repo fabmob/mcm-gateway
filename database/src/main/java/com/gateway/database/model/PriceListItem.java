@@ -1,24 +1,27 @@
 package com.gateway.database.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
-@Data @AllArgsConstructor @NoArgsConstructor
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = {"priceListForDuration", "priceListForDistance"})
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "price_list_item", schema = "msp")
 public class PriceListItem implements java.io.Serializable {
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    @Column(name = "price_list_item_id" )
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "price_list_item_id")
     private UUID priceListItemId;
 
     /**
      * Lower boundary of the price list item.
-     *
+     * <p>
      * For example, for prices depending on duration, it's the minimum duration.
      */
     @Column(name = "lower_price_limit")
@@ -26,7 +29,7 @@ public class PriceListItem implements java.io.Serializable {
 
     /**
      * Upper boundary of the price list item.
-     *
+     * <p>
      * For example, for prices depending on duration, it's the maximum duration.
      */
     @Column(name = "upper_price_limit")
@@ -51,11 +54,11 @@ public class PriceListItem implements java.io.Serializable {
     private Long unit;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name="price_list_duration")
+    @JoinColumn(name = "price_list_duration")
     private PriceList priceListForDuration;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name ="price_list_distance")
+    @JoinColumn(name = "price_list_distance")
     private PriceList priceListForDistance;
 
 }

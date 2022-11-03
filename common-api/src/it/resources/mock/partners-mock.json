@@ -1,0 +1,100 @@
+[
+  {
+    "partnerId": "b814c97e-df56-4651-ac50-11525537964f",
+    "partnerType": "MSP",
+    "hasVehicle": true,
+    "hasStation": true,
+    "hasStationStatus": true,
+    "hasNoParkingZone": false,
+    "hasPrefParkingZone": false,
+    "hasSpeedLimitZone": false,
+    "hasParking": true,
+    "hasHold": true,
+    "urlWebview": true,
+    "name": "Trotti",
+    "operator": "Voi Trotti",
+    "type": "CARPOOLING",
+    "url": "https://MSP_example_Trotti.com",
+    "logoUrl": "https://MSP_example_Trotti.com/logo",
+    "logoFormat": "PNG",
+    "primaryColor": "RED",
+    "secondaryColor": "Yellow",
+    "priceList": {
+      "priceListId": "b814c97e-df56-4651-ac50-115255379666",
+      "comment": "Trotti price list",
+      "duration": [
+        {
+          "priceListItemId": "b814c97e-df56-4651-ac50-115255379601",
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "distance": [
+        {
+          "priceListItemId": "b814c97e-df56-4651-ac50-115255379601",
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "parkingForbiddenFee": 5000,
+      "outOfBoundFee": 50000
+    },
+    "hasOperatingZone": true,
+    "isEnabled": true
+  },
+  {
+    "partnerId": "b814c97e-df56-4651-ac50-11525537964a",
+    "partnerType": "MSP",
+    "hasVehicle": true,
+    "hasStation": true,
+    "hasStationStatus": true,
+    "hasNoParkingZone": false,
+    "hasPrefParkingZone": false,
+    "hasSpeedLimitZone": false,
+    "hasParking": true,
+    "hasHold": true,
+    "urlWebview": true,
+    "name": "Trotti",
+    "operator": "Voi Trotti",
+    "type": "CARPOOLING",
+    "url": "https://MSP_example_Trotti.com",
+    "logoUrl": "https://MSP_example_Trotti.com/logo",
+    "logoFormat": "PNG",
+    "primaryColor": "RED",
+    "secondaryColor": "Yellow",
+    "priceList": {
+      "priceListId": "b814c97e-df56-4651-ac50-115255379666",
+      "comment": "Trotti price list",
+      "duration": [
+        {
+          "priceListItemId": "b814c97e-df56-4651-ac50-115255379601",
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "distance": [
+        {
+          "priceListItemId": "b814c97e-df56-4651-ac50-115255379601",
+          "lowerPriceLimit": 15,
+          "upperPriceLimit": 240,
+          "fixedFare": 1,
+          "farePerUnit": 1,
+          "unit": 1
+        }
+      ],
+      "parkingForbiddenFee": 5000,
+      "outOfBoundFee": 50000
+    },
+    "hasOperatingZone": true,
+    "isEnabled": true
+  }
+]

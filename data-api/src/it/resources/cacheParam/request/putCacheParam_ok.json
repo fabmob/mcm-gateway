@@ -1,6 +1,6 @@
 {
-  "mspId": "28784eb7-de79-434d-a1b6-819ebfd50860",
-  "actionType": "VEHICULE_SEARCH",
+  "partnerId": "28784eb7-de79-434d-a1b6-819ebfd50860",
+  "actionType": "VEHICLE_SEARCH",
   "softTTL": 1000,
   "hardTTL": 2000,
   "refreshCacheDelay": 3000

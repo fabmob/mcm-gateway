@@ -5,10 +5,14 @@ include:
 validate_env:
   stage: .pre
   image: ubuntu:20.04
+  extends:
+    - .trigger-condition
   script:
     - |
+      echo "*************************************** log"
+      env
       if [ -z ${BASE_DOMAIN} ]; then echo "BASE_DOMAIN must be set"; exit 1; fi
-
+      
 .cd-to-module: &cd-to-module |
   echo "--------------------->MODULE_NAME=${MODULE_NAME}"
   echo "pwd=`pwd`"
@@ -38,8 +42,12 @@ validate_env:
     NEXUS_DOCKER_REGISTRY_URL: ${NEXUS_DOCKER_REGISTRY}
     NEXUS_USER_NAME: ${NEXUS_USER_NAME}
     NEXUS_USER_PWD: ${NEXUS_USER_PWD}
-    BUILD_IMAGE_JAVA_NAME: ${NEXUS_DOCKER_REGISTRY}/library/maven:3-jdk-11
+    BUILD_IMAGE_JAVA_NAME: maven:3-jdk-11
     VERIFY_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/mcm-verify:${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_ID}
+    DEV_KUBE_CONTEXT: "mcm/std-maas/gateway:devmcm"
+    PPRD_KUBE_CONTEXT: "mcm/std-maas/gateway:preprodmcm"
+    NEXUS_URL: ${NEXUS_URL}
+    SONAR_URL: ${SONAR_URL}
   before_script:
     - *cd-to-module
 
@@ -56,6 +64,17 @@ validate_env:
 
 .manual:
   when: manual
+
+.trigger-condition:
+#  when: manual
+#  needs: []
+  script: |
+    echo "when: manual"
+
+.deactivate:
+#  when: manual
+  script: |
+    echo "when: manual"
 
 # si plusieurs only sur un job, il faut les cumuler sur une classe qu'on étend car ils s'overrident.
 .only-master:
@@ -144,6 +163,7 @@ validate_env:
     - .build-job-tags
     - .except-clean
     - .envsubst
+    - .trigger-condition
   stage: build
   image: ${BUILD_IMAGE_JAVA_NAME}
   script:
@@ -158,14 +178,16 @@ validate_env:
   before_script:
     - *install-envsubst
 
+
 # se connecte au registry de gitlab et de nexus
 .declare-image-functions: &declare-image-functions |
   function image {
-      docker login -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} ${REGISTRY_URL}
-      docker login -u ${NEXUS_USER_NAME} -p ${NEXUS_USER_PWD} ${NEXUS_DOCKER_REGISTRY_URL}
-      echo "DOCKER-COMPOSE!"  
-      docker-compose --file ${COMPOSE_FILENAME} build
-      docker-compose --file ${COMPOSE_FILENAME} push
+    set -x
+    docker login -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} ${REGISTRY_URL}
+    docker login -u ${NEXUS_USER_NAME} -p ${NEXUS_USER_PWD} ${NEXUS_DOCKER_REGISTRY_URL}
+    echo "DOCKER-COMPOSE!"
+    docker-compose --file ${COMPOSE_FILENAME} build
+    docker-compose --file ${COMPOSE_FILENAME} push
   }
 
 .pre-image-job:
@@ -173,10 +195,11 @@ validate_env:
     - .commons
     - .image-job-tags
     - .except-clean
+    - .trigger-condition
   stage: pre-image
   variables:
     COMPOSE_FILENAME: kompose.yml
-  image: ${NEXUS_DOCKER_REGISTRY_URL}/tiangolo/docker-with-compose:2021-09-18
+  image: tiangolo/docker-with-compose:2021-09-18
   before_script:
     - *cd-to-module
     - *declare-image-functions
@@ -189,6 +212,7 @@ validate_env:
   extends:
     - .commons
     - .image-job-tags
+    - .trigger-condition
   stage: image
   variables:
     COMPOSE_FILENAME: kompose.yml
@@ -198,9 +222,6 @@ validate_env:
     - *declare-image-functions
   script:
     - |
-      set -x
-      echo "MODULE_PATH=$MODULE_PATH"
-      pwd
       image
 
 .test-job:
@@ -209,6 +230,7 @@ validate_env:
     - .commons
     - .test-job-tags
     - .except-clean-or-skip
+    - .trigger-condition
   # artefacts: passer des choses buildées d'un job à un autre. Le job qui a besoin d'un artefact doit avoir une dependance needs vers celui qui exporte l'artefact
   artifacts:
     paths:
@@ -224,6 +246,7 @@ validate_env:
     - .commons
     - .test-job-tags
     - .except-clean-or-skip
+    - .trigger-condition
   image: ${VERIFY_IMAGE_NAME}
   stage: verify
   variables:
@@ -302,6 +325,7 @@ validate_env:
   extends:
     - .commons
     - .test-job-tags
+    - .trigger-condition
   image: ${KUBETOOLS_IMAGE_TAGNAME}
   script:
     - *cleanup_postgres-gateway
@@ -317,14 +341,16 @@ validate_env:
     API_FQDN: api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
     DEFAULT_ADAPTER_FQDN: default-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
     CUSTOM_ADAPTER_FQDN: custom-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
-    GENERIC_ADAPTER_FQDN: genericAdapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    GENERIC_ADAPTER_HOST: generic-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
     ROUTING_API_FQDN: routing-api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
     REQUEST_RELAY_FQDN: request-relay-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
     POSTGRES_FQDN: postgresgateway-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
 
 .testing-env-vars:
   variables:
-    LANDSCAPE: "testing"
+    LANDSCAPE: "testing-gw"
     landscape_subdomain: "testing.${BASE_DOMAIN}"
     SECRET_NAME: ${MODULE_NAME}-tls
     CLUSTER_ISSUER: clusterissuer-mcm-maas-dev
@@ -334,19 +360,23 @@ validate_env:
     CUSTOM_ADAPTER_FQDN: custom-adapter-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
     ROUTING_API_FQDN: routing-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
     REQUEST_RELAY_FQDN: request-relay-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
 
 #TODO switch to TAG VAR - digit
 .preprod-env-vars:
   variables:
-    LANDSCAPE: "preprod"
+    LANDSCAPE: "preprod-gw"
     landscape_subdomain: "preprod.${BASE_DOMAIN}"
     SECRET_NAME: ${MODULE_NAME}-tls
-    CLUSTER_ISSUER: clusterissuer-mcm-preprod
+    CLUSTER_ISSUER: clusterissuer-mcm-maas-preprod
     DATA_API_FQDN: data-api-${URL_TAG}.preprod.${BASE_DOMAIN}
     API_FQDN: api-${URL_TAG}.preprod.${BASE_DOMAIN}
     DEFAULT_ADAPTER_FQDN: default-adapter-${URL_TAG}.preprod.${BASE_DOMAIN}
     ROUTING_API_FQDN: routing-${URL_TAG}.testing${BASE_DOMAIN}
     REQUEST_RELAY_FQDN: request-relay-${URL_TAG}.preprod.${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${URL_TAG}.preprod.${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${URL_TAG}.preprod.${BASE_DOMAIN}
 
 # le clean se lance au bout de 3j en dev
 .auto-stop-preview:
@@ -358,23 +388,60 @@ validate_env:
     auto_stop_in: 1 week
 
 .declare-deployment-functions: &declare-deployment-functions |
+  function set_cluster_context {
+    if [[ "$CI_JOB_NAME" == *"_preview"* ||  "$CI_JOB_NAME" == *"_testing"* ]]; then kubectl config use-context "$DEV_KUBE_CONTEXT"; fi
+    if [[ "$CI_JOB_NAME" == *"_preprod"* ]]; then kubectl config use-context "$PPRD_KUBE_CONTEXT"; fi
+    if [[ "$CI_JOB_NAME" == *"_prod"* ]]; then kubectl config use-context "$PROD_KUBE_CONTEXT"; fi
+  }
+  
+  function get_cluster_context {
+    kubectl config get-contexts
+  }
+  
   function deploy {
-    set -x
-    echo "deploying: ${MODULE_NAME} for ${CI_ENVIRONMENT_TIER}, subdomain ${LANDSCAPE}..."
-    # création de la clé de précupération d'image sur gitlab ou nexus
-    export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
-    export PROXY_IMAGE_PULL_SECRET_NAME=${PROXY_IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
-    # cree la clé docker-registry pour accéder aux images depuis le cluster. on utiliser les secrets pour stocker les infos de récup des images
-    kubectl create secret docker-registry ${GITLAB_IMAGE_PULL_SECRET_NAME} --docker-server="$CI_REGISTRY" --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client | kubectl apply -f -
-    kubectl create secret docker-registry ${PROXY_IMAGE_PULL_SECRET_NAME} --docker-server="$NEXUS_DOCKER_REGISTRY_URL" --docker-username="$NEXUS_USER_NAME" --docker-password="$NEXUS_USER_PWD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client | kubectl apply -f -
-    
-    chmod 777 /usr/local/bin/a
-    chmod 777 /usr/local/bin/k
-    mkdir -p ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE} && ENV_PATH=${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env KOMPOSE_FILE=$1 k | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml
-    
-    cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml | envsubst | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
-    cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml | a
-    cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env | envsubst > ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/values.env
+    env 
+    if [[ ! $NEW_RELEASE_VERSION =~ ^[0-9]+[\.\-][0-9]+[\.\-][0-9]+$ ]]
+    then
+      set_cluster_context
+      get_cluster_context
+  
+      echo "deploying: ${MODULE_NAME} for ${CI_ENVIRONMENT_TIER}, subdomain ${LANDSCAPE}..."
+      # CREATE NAMESPACE ENV
+      NAMESPACE="${MODULE_NAME}-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}"
+      echo "This is your namespace: ${NAMESPACE}"
+  
+      # DELETE EXISTING NAMESPACES 
+      RES=`kubectl get namespaces | grep "^${NAMESPACE} " -c` > /dev/null 2>&1 || FAILED=true
+      echo "namespace ${NAMESPACE} trouve $RES fois"
+  
+      if [ "$RES" != "0" ]
+      then
+        kubectl delete namespace ${NAMESPACE}
+      else
+        echo "else"
+      fi
+  
+      kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+  
+      export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+      export PROXY_IMAGE_PULL_SECRET_NAME=${PROXY_IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+      kubectl create secret docker-registry ${GITLAB_IMAGE_PULL_SECRET_NAME} --docker-server="$CI_REGISTRY" --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client --namespace=${NAMESPACE} | kubectl apply -f -
+      kubectl create secret docker-registry ${PROXY_IMAGE_PULL_SECRET_NAME} --docker-server="$NEXUS_DOCKER_REGISTRY_URL" --docker-username="$NEXUS_USER_NAME" --docker-password="$NEXUS_USER_PWD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client --namespace=${NAMESPACE} | kubectl apply -f -
+  
+      chmod 777 /usr/local/bin/a
+      chmod 777 /usr/local/bin/k
+      mkdir -p ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE} && ENV_PATH=${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env KOMPOSE_FILE=$1 k | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml
+      echo "Special condition for ${MODULE_NAME}"
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml | envsubst | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
+      kubectl apply -f ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml --namespace=${NAMESPACE}
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env | envsubst > ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/values.env
+    else
+      echo "Nothing to deploy here, helm deployment will do it instead
+    fi
   }
   # fonction de nettoyage invoquée par gitlab au bout de la durée d'expiration définie
   # idéalement in faudrait pouvoir supprimer le namespace avec invocation du clear cluster cache plutot que se baser sur le resources.yml
@@ -388,13 +455,13 @@ validate_env:
   # récupère le nom de naspace pour une branche donnée
   function pod_namespace {
     service_name=$1
-    #echo "kubectl get pods -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep $service_name | awk '{ print $1 }' | head -n 1"
-  
-    kubectl get pods -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep $service_name | awk '{ print $1 }' | head -n 1
+    kubectl get pods -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME}-${LANDSCAPE} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep $service_name | awk '{ print $1 }' | head -n 1
   }
+
   function config_volume {
+    echo "configuring volume"
     service_name=$1
-    PV_CHECK=$(kubectl get pv -o wide --all-namespaces | grep $(pod_namespace $1) | awk '{ print $1 }' | head -n 1)
+    PV_CHECK=$(kubectl get pv -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME}-${LANDSCAPE} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep "${BRANCH_NAME}-${LANDSCAPE}/postgres-volume" | awk '{ print $1 }' | head -n 1)
     if [ $PV_CHECK != "" ]
     then
         echo "### Patch the persistent volume to retain than delete for $1 ###"
@@ -423,6 +490,7 @@ validate_env:
     - .commons
     - .except-clean
     - .no-dependencies
+    - .trigger-condition
   image: ${KUBETOOLS_IMAGE_TAGNAME}
   before_script:
     - *cd-to-module
@@ -451,6 +519,7 @@ validate_env:
     - .preview-env-vars
     - .preview-deploy-tags
     - .auto-stop-preview
+    - .trigger-condition
   variables:
     LANDSCAPE: preview-gw
   environment:
@@ -468,6 +537,7 @@ validate_env:
     - .only-testing
     - .preprod-deploy-tags
     - .manual
+    - .trigger-condition
   environment:
     deployment_tier: testing
 
@@ -478,6 +548,7 @@ validate_env:
     - .preprod-env-vars
     - .preprod-deploy-tags
     - .manual
+    - .trigger-condition
   environment:
     deployment_tier: production
 
@@ -526,16 +597,4 @@ validate_env:
   environment:
     deployment_tier: production
 
-.handover-job:
-  stage: handover
-  extends:
-    - .commons
-    - .no-git-clone
-    - .build-job-tags
-    - .manual
-    - .only-master
-    - .except-clean
-  image: ubuntu:20.04
-  script:
-    - |
-      echo "pushing manifests to ops git repository"
+

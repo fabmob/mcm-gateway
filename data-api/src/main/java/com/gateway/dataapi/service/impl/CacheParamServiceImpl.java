@@ -52,8 +52,8 @@ public class CacheParamServiceImpl implements CacheParamService {
     }
 
     @Override
-    public List<CacheParamDTO> getAllCacheParamByCriteria(UUID mspId, String actionType) {
-        return mapper.mapEntityToDTO(cacheParamDatabaseService.getAllCacheParamByCriteria(mspId, actionType));
+    public List<CacheParamDTO> getAllCacheParamByCriteria(UUID partnerId, String actionType) {
+        return mapper.mapEntityToDTO(cacheParamDatabaseService.getAllCacheParamByCriteria(partnerId, actionType));
     }
 
 }

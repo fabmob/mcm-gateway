@@ -1,10 +1,12 @@
 package com.gateway.dataapi.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gateway.commonapi.constants.DataApiPathDict;
+import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import com.gateway.dataapi.DataApiITCase;
-import com.gateway.dataapi.util.constant.DataApiPathDict;
 import com.gateway.dataapi.util.enums.JsonResponseTypeEnum;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
@@ -28,14 +30,16 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
 
-import static com.gateway.dataapi.util.constant.DataApiPathDict.ID;
+import java.nio.charset.StandardCharsets;
+
+import static com.gateway.commonapi.constants.DataApiPathDict.ID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 class DataMapperControllerTest extends DataApiITCase {
     public static final String IT_RESOURCES_PATH = "./src/it/resources/";
     public static final String DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_OK_JSON = "dataMappers/expected/getdataMappers_ok.json";
     public static final String DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_ID_OK_JSON = "dataMappers/expected/getdataMappers_by_id_ok.json";
-    public static final String DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_MSP_ACTIONS_ID_OK_JSON = "dataMappers/expected/getdataMappers_by_MspAction_id_ok.json";
+    public static final String DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_PARTNER_ACTIONS_ID_OK_JSON = "dataMappers/expected/getdataMappers_by_PartnerAction_id_ok.json";
     public static final String DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_ID_NOT_FOUND_JSON = "dataMappers/expected/getdataMappers_by_id_not_found.json";
     public static final String DATA_MAPPER_REQUEST_POST_DATA_MAPPER_OK_JSON = "dataMappers/request/postdataMappers_ok.json";
     public static final String DATA_MAPPER_EXPECTED_POST_DATA_MAPPER_OK_JSON = "dataMappers/expected/postdataMappers_ok.json";
@@ -58,9 +62,10 @@ class DataMapperControllerTest extends DataApiITCase {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).build();
+        this.mockMvc = MockMvcBuilders.webAppContextSetup(this.webApplicationContext).defaultResponseCharacterEncoding(StandardCharsets.UTF_8).build();
         MockitoAnnotations.initMocks(this);
         JacksonTester.initFields(this, this.objectMapper);
+        new ThreadLocalUserSession().get().setOutputStandard(StandardEnum.GATEWAY);
     }
 
     /**
@@ -93,20 +98,20 @@ class DataMapperControllerTest extends DataApiITCase {
     }
 
     /**
-     * test GET dataMappers by MspAction id
+     * test GET dataMappers by partneAction id
      *
      * @throws Exception
      */
     @Test
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
-    void testGetdataMappersByMspMetaId() throws Exception {
+    void testGetdataMappersByPartnerActionId() throws Exception {
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("mspActionId", "5e71dcb3-ca60-4a2a-9896-c509ad1ca756");
+        parameters.add("partnerActionId", "5e71dcb3-ca60-4a2a-9896-c509ad1ca756");
 
         testHttpRequestWithExpectedResult(DataApiPathDict.DATA_MAPPER_BASE_PATH, HttpMethod.GET, HttpStatus.OK, null,
-                DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_MSP_ACTIONS_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
-                "Test dataMapper by mspMetaId", true, false, parameters);
+                DATA_MAPPER_EXPECTED_GET_DATA_MAPPER_BY_PARTNER_ACTIONS_ID_OK_JSON, JsonResponseTypeEnum.JSON_ARRAY,
+                "Test dataMapper by partnerActionId", true, false, parameters);
     }
 
     /**

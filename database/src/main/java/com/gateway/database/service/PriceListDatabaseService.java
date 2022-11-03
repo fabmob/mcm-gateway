@@ -1,6 +1,6 @@
 package com.gateway.database.service;
 
-import com.gateway.database.model.MspMeta;
+import com.gateway.database.model.PartnerMeta;
 import com.gateway.database.model.PriceList;
 
 import java.io.IOException;
@@ -18,10 +18,10 @@ public interface PriceListDatabaseService {
     List<PriceList> findAllPriceList();
 
     /**
-     * Retrieve a priceList informations by id.
+     * Retrieve a priceList information by id.
      *
      * @param id Identifier of the priceList
-     * @return priceList  informations for the priceList
+     * @return priceList  information for the priceList
      */
     PriceList findPriceListById(UUID id);
 
@@ -29,7 +29,7 @@ public interface PriceListDatabaseService {
      * Create a new priceList
      *
      * @param priceList priceList object
-     * @return priceList  informations for the priceList posted
+     * @return priceList  information for the priceList posted
      */
     PriceList createPriceList(PriceList priceList);
 
@@ -38,8 +38,8 @@ public interface PriceListDatabaseService {
      *
      * @param updates contains priceList object
      * @param mspMeta that contains the priceList object
-     * @return priceList  informations for the priceList patched
+     * @return priceList  information for the priceList patched
      */
-    PriceList updatePriceList(Map<String, Object> updates, MspMeta mspMeta) throws IOException;
+    PriceList updatePriceList(Map<String, Object> updates, PartnerMeta mspMeta) throws IOException;
 
 }

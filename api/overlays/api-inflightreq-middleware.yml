@@ -5,4 +5,4 @@ metadata:
 spec:
   inFlightReq:
     amount: 100
-# protection aux attaques DDOS
+# DDOS attack protection

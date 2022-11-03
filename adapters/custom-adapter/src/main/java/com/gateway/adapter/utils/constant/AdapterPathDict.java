@@ -1,8 +1,11 @@
 package com.gateway.adapter.utils.constant;
 
 public class AdapterPathDict {
+    private AdapterPathDict() {
+    }
+
     public static final String ACTION_ID_PARAM = "actionId";
-    public static final String MSP_ID_PARAM = "mspId";
+    public static final String PARTNER_ID_PARAM = "partnerId";
 
     public static final String GLOBAL_PATH = "";
 
@@ -31,6 +34,4 @@ public class AdapterPathDict {
     public static final String REPONSE_OK = "Réponse OK";
 
 
-    public AdapterPathDict() {
-    }
 }

@@ -1,22 +1,12 @@
 package com.gateway.database.model;
 
+import lombok.Getter;
+import lombok.Setter;
+
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
 @Entity
 @Getter
@@ -37,6 +27,6 @@ public class Token implements Serializable {
 	private LocalDateTime expireAt;
 
 	@OneToOne(cascade = CascadeType.MERGE)
-    @JoinColumn(name="msp_id")
-	private MspMeta msp;
+    @JoinColumn(name="partner_id")
+	private PartnerMeta partner;
 }

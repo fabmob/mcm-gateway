@@ -1,7 +1,7 @@
 [{
   "stations": [
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "stationId": "sta1",
       "name": "station1",
       "coordinates": null,
@@ -11,7 +11,7 @@
       "rentalMethods": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "stationId": "sta2",
       "name": "station2",
       "coordinates": null,
@@ -21,7 +21,7 @@
       "rentalMethods": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "stationId": "sta3",
       "name": "station3",
       "coordinates": null,
@@ -31,7 +31,7 @@
       "rentalMethods": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "stationId": "sta4",
       "name": "station4",
       "coordinates": null,
@@ -41,7 +41,7 @@
       "rentalMethods": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce669264483",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce669264483",
       "stationId": "sta5",
       "name": "station5",
       "coordinates": null,
@@ -53,7 +53,7 @@
   ],
   "stationsStatus": [
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "stationId": "sta1",
       "numAssetsAvailable": 1,
       "numAssetsAvailableType": null,
@@ -69,7 +69,7 @@
       "lastReported": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "stationId": "sta2",
       "numAssetsAvailable": 0,
       "numAssetsAvailableType": null,
@@ -85,7 +85,7 @@
       "lastReported": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "stationId": "sta3",
       "numAssetsAvailable": 1,
       "numAssetsAvailableType": null,
@@ -101,7 +101,7 @@
       "lastReported": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "stationId": "sta4",
       "numAssetsAvailable": 0,
       "numAssetsAvailableType": null,
@@ -117,7 +117,7 @@
       "lastReported": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce669264483",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce669264483",
       "stationId": "sta5",
       "numAssetsAvailable": 0,
       "numAssetsAvailableType": null,
@@ -135,7 +135,7 @@
   ],
   "assets": [
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "assetId": "asset1",
       "assetType": "trotinette",
       "isReserved": false,
@@ -149,7 +149,7 @@
       "useDeeplink": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "assetId": "asset2",
       "assetType": "trotinette",
       "isReserved": true,
@@ -163,7 +163,7 @@
       "useDeeplink": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "assetId": "asset3",
       "assetType": "voiture",
       "isReserved": false,
@@ -177,7 +177,7 @@
       "useDeeplink": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "assetId": "asset4",
       "assetType": "trotinette",
       "isReserved": true,
@@ -193,7 +193,7 @@
   ],
   "parkings": [
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b759",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b759",
       "parkingId": "park1",
       "name": "parking1",
       "url": null,
@@ -210,7 +210,7 @@
       "availability": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce66505b735",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce66505b735",
       "parkingId": "park2",
       "name": "parking2",
       "url": null,
@@ -227,7 +227,7 @@
       "availability": null
     },
     {
-      "mspId": "14390fdf-34c1-41c9-885e-6ce669264483",
+      "partnerId": "14390fdf-34c1-41c9-885e-6ce669264483",
       "parkingId": "park3",
       "name": "parking3",
       "url": null,

@@ -1,5 +1,6 @@
 package com.gateway.commonapi.utils.enums;
 
+
 public enum ZoneType {
 	OPERATING("OPERATING"),
 	NO_PARKING("NOPARKING"),
@@ -11,4 +12,9 @@ public enum ZoneType {
 	ZoneType(String value) {
 		this.value = value;
 	}
+
+
+
+
 }
+

@@ -1,6 +1,9 @@
 package com.gateway.database.service;
 
-import com.gateway.database.model.*;
+import com.gateway.database.model.Distance;
+import com.gateway.database.model.Duration;
+import com.gateway.database.model.PriceList;
+import com.gateway.database.model.PriceListItem;
 
 import java.io.IOException;
 import java.util.List;
@@ -17,10 +20,10 @@ public interface PriceListItemDatabaseService {
     List<PriceListItem> findAllPriceListItem();
 
     /**
-     * Retrieve a priceListItem informations by id.
+     * Retrieve a priceListItem information by id.
      *
      * @param id Identifier of the priceListItem
-     * @return priceListItem  informations for the priceListItem
+     * @return priceListItem  information for the priceListItem
      */
     PriceListItem findPriceListItemById(UUID id);
 
@@ -28,7 +31,7 @@ public interface PriceListItemDatabaseService {
      * Create a new priceListItem
      *
      * @param priceListItem priceListItem object
-     * @return priceList  informations for the priceListItem posted
+     * @return priceList  information for the priceListItem posted
      */
     PriceListItem createPriceListItem(PriceListItem priceListItem);
 
@@ -37,7 +40,7 @@ public interface PriceListItemDatabaseService {
      *
      * @param updates   contains Distance object
      * @param priceList that contains the Distance object
-     * @return list of distances  informations for the Distance patched
+     * @return list of distances  information for the Distance patched
      * @throws IOException issue parsing json
      */
     List<Distance> updateDistance(Map<String, Object> updates, PriceList priceList) throws IOException;
@@ -47,7 +50,7 @@ public interface PriceListItemDatabaseService {
      *
      * @param updates   contains Duration object
      * @param priceList that contains the Duration object
-     * @return list of durations  informations for the Duration patched
+     * @return list of durations  information for the Duration patched
      * @throws IOException issue parsing json
      */
     List<Duration> updateDuration(Map<String, Object> updates, PriceList priceList) throws IOException;

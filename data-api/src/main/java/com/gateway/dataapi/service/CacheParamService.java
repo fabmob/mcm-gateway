@@ -34,7 +34,7 @@ public interface CacheParamService {
      * update the specified cache param
      *
      * @param cacheParamId cacheParam id
-     * @param body body in the request
+     * @param body         body in the request
      */
     void updateCacheParam(UUID cacheParamId, CacheParamDTO body);
 
@@ -47,10 +47,9 @@ public interface CacheParamService {
     CacheParamDTO getCacheParamFromID(UUID cacheParamId);
 
     /**
-     *
-     * @param mspId MSP ID
+     * @param partnerId  Partner ID
      * @param actionType Action type
      * @return List of Cache Param using filters
      */
-    List<CacheParamDTO> getAllCacheParamByCriteria(UUID mspId, String actionType);
+    List<CacheParamDTO> getAllCacheParamByCriteria(UUID partnerId, String actionType);
 }

@@ -4,10 +4,12 @@ import com.gateway.commonapi.dto.exceptions.BusinessError;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.exception.handler.RestResponseEntityExceptionHandler;
+import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.UTTestCase;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,9 +65,10 @@ public class ExceptionsTest extends UTTestCase {
         WebRequest request = new ServletWebRequest(servletRequest);
         String message = "functionnal error";
         BusinessException exception = new BusinessException(message);
+        new ThreadLocalUserSession().get().setOutputStandard(StandardEnum.GATEWAY);
         ResponseEntity<Object> response = responseEntityExceptionHandler.handleBusinessException(exception, request);
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        Assertions.assertEquals(message, ((GenericError)response.getBody()).getDescription());
+        Assertions.assertEquals(message, ((GenericError) response.getBody()).getDescription());
     }
 
     @Test
@@ -78,13 +81,13 @@ public class ExceptionsTest extends UTTestCase {
         GenericError errorDto = generateErrorDto();
         errorDto.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
         BusinessException businessException = new BusinessException(CommonUtils.stringifyGenericErrorDto(errorDto));
+        new ThreadLocalUserSession().get().setOutputStandard(StandardEnum.GATEWAY);
         ResponseEntity<Object> response = responseEntityExceptionHandler.handleBusinessException(businessException, request);
         Assertions.assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, response.getStatusCode());
-        Assertions.assertEquals(42, ((GenericError)response.getBody()).getErrorCode());
-        Assertions.assertEquals("test label", ((GenericError)response.getBody()).getLabel());
-        Assertions.assertEquals("test description", ((GenericError)response.getBody()).getDescription());
+        Assertions.assertEquals(42, ((GenericError) response.getBody()).getErrorCode());
+        Assertions.assertEquals("test label", ((GenericError) response.getBody()).getLabel());
+        Assertions.assertEquals("test description", ((GenericError) response.getBody()).getDescription());
     }
-
 
 
     @Test
@@ -185,6 +188,7 @@ public class ExceptionsTest extends UTTestCase {
         Assertions.assertEquals("description", new BadGateway(15, "label", "description").getDescription());
         Assertions.assertEquals("description", new BadGateway("description").getDescription());
     }
+
     @Test
     public void testInternalException() {
         GenericError stubError = generateErrorDto();
@@ -204,6 +208,7 @@ public class ExceptionsTest extends UTTestCase {
         Assertions.assertEquals("description", new BadGateway(15, "label", "description").getDescription());
         Assertions.assertEquals("description", new BadGateway("description").getDescription());
     }
+
     @Test
     public void testNotFoundException() {
         GenericError stubError = generateErrorDto();
@@ -222,6 +227,7 @@ public class ExceptionsTest extends UTTestCase {
         Assertions.assertEquals("description", new BadGateway(15, "label", "description").getDescription());
         Assertions.assertEquals("description", new BadGateway("description").getDescription());
     }
+
     @Test
     public void testUnauthorizedException() {
         GenericError stubError = generateErrorDto();

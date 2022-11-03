@@ -1,22 +1,26 @@
 package com.gateway.database.service.impl;
 
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.UUID;
-
 import com.gateway.commonapi.exception.ConflictException;
+import com.gateway.commonapi.exception.InternalException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.database.model.DataMapper;
+import com.gateway.database.repository.DataMapperRepository;
+import com.gateway.database.service.DataMapperDatabaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
-import com.gateway.database.model.DataMapper;
-import com.gateway.database.repository.DataMapperRepository;
-import com.gateway.database.service.DataMapperDatabaseService;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
+import static com.gateway.commonapi.constants.GlobalConstants.INTERNAL_FIELD;
+import static com.gateway.commonapi.constants.GlobalConstants.UNRECOGNISED_FUNCTION;
 import static com.gateway.database.util.constant.DataMessageDict.*;
 
 @Slf4j
@@ -45,24 +49,29 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
      * Add a new DataMapper
      *
      * @param datamapper DataMapper object
-     * @return DataMapper informations for the DataMapper added
+     * @return DataMapper information for the DataMapper added
      */
 
     @Override
     public DataMapper addDataMapper(DataMapper datamapper) {
         DataMapper mapper;
-        if(datamapper.getAction()!= null && StringUtils.isNotBlank(datamapper.getChampInterne())){
-            if (dataMapperRepository.findByActionMspActionIdAndChampInterne(datamapper.getAction().getMspActionId(), datamapper.getChampInterne()).isPresent()) {
-                throw new ConflictException(CommonUtils.placeholderFormat(DATA_MAPPER_ALREADY_EXISTS_IN_DB_USE_PUT_INSTEAD, FIRST_PLACEHOLDER, datamapper.getAction().getMspActionId().toString(), SECOND_PLACEHOLDER, datamapper.getChampInterne()));
+        if (datamapper.getAction() != null && StringUtils.isNotBlank(datamapper.getInternalField())) {
+            Optional<List<DataMapper>> existingDataMappers = dataMapperRepository.findByActionPartnerActionIdAndInternalField(datamapper.getAction().getPartnerActionId(), datamapper.getInternalField());
+            if (existingDataMappers.isPresent() && !CollectionUtils.isEmpty(existingDataMappers.get())) {
+                throw new ConflictException(CommonUtils.placeholderFormat(DATA_MAPPER_ALREADY_EXISTS_IN_DB_USE_PUT_INSTEAD, FIRST_PLACEHOLDER, datamapper.getAction().getPartnerActionId().toString(), SECOND_PLACEHOLDER, datamapper.getInternalField()));
             }
+        }
+        String format = datamapper.getFormat();
+        if (StringUtils.isNotBlank(format) && !CommonUtils.isValidFunction(format)) {
+            throw new InternalException(CommonUtils.placeholderFormat(UNRECOGNISED_FUNCTION, INTERNAL_FIELD, StringUtils.isNotBlank(datamapper.getInternalField()) ? datamapper.getInternalField() : "null"));
         }
 
         try {
             mapper = dataMapperRepository.save(datamapper);
         } catch (Exception e) {
-            log.error(e.getMessage(),e);
-            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(MSP_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER,
-                    ( datamapper.getAction() != null ? datamapper.getAction().getMspActionId().toString() : StringUtils.EMPTY))));
+            log.error(e.getMessage(), e);
+            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(PARTNER_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER,
+                    (datamapper.getAction() != null ? datamapper.getAction().getPartnerActionId().toString() : StringUtils.EMPTY))));
         }
         return mapper;
     }
@@ -87,10 +96,14 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
     @Override
     public DataMapper updateDataMapper(UUID id, DataMapper datamapper) {
         datamapper.setDataMapperId(id);
+        String format = datamapper.getFormat();
+        if (StringUtils.isNotBlank(format) && !CommonUtils.isValidFunction(format)) {
+            throw new InternalException(CommonUtils.placeholderFormat(UNRECOGNISED_FUNCTION, INTERNAL_FIELD, StringUtils.isNotBlank(datamapper.getInternalField()) ? datamapper.getInternalField() : "null"));
+        }
         try {
             dataMapperRepository.save(datamapper);
         } catch (Exception e) {
-            throw new NotFoundException(CommonUtils.placeholderFormat(MSP_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, datamapper.getAction().getMspActionId().toString()));
+            throw new NotFoundException(CommonUtils.placeholderFormat(PARTNER_ACTION_WITH_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, datamapper.getAction().getPartnerActionId().toString()));
         }
         return datamapper;
     }
@@ -123,16 +136,16 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
     }
 
     /**
-     * Get DataMapper from MspActions id
+     * Get DataMapper from PartnerActions id
      *
-     * @param id Identifier of the MspActions
+     * @param id Identifier of the PartnerActions
      * @return DataMapper
      */
     @Override
-    public List<DataMapper> findByActionMspActionId(UUID id) {
-        List<DataMapper> datamappers = dataMapperRepository.findByActionMspActionId(id);
+    public List<DataMapper> findByActionPartnerActionId(UUID id) {
+        List<DataMapper> datamappers = dataMapperRepository.findByActionPartnerActionId(id);
         if (datamappers == null || datamappers.isEmpty()) {
-            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_MSP_ACTIONS_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
+            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_PARTNER_ACTIONS_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
         }
         return datamappers;
     }

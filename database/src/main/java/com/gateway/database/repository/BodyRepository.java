@@ -1,10 +1,10 @@
 package com.gateway.database.repository;
-import java.util.UUID;
 
+import com.gateway.database.model.Body;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import com.gateway.database.model.Body;
+import java.util.UUID;
 
 
 @Repository

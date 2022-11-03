@@ -9,8 +9,12 @@ import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.commonapi.utils.ExceptionUtils;
+import com.gateway.commonapi.utils.enums.StandardEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.ConversionNotSupportedException;
 import org.springframework.beans.TypeMismatchException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +24,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.lang.Nullable;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpMediaTypeNotAcceptableException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -31,6 +34,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
@@ -39,12 +43,19 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import javax.validation.constraints.NotNull;
 import java.net.ConnectException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
+
+import static com.gateway.commonapi.constants.ErrorCodeDict.INVALID_PARTNER_UUID_CODE;
+import static com.gateway.commonapi.constants.GatewayApiPathDict.*;
+import static com.gateway.commonapi.constants.GatewayErrorMessage.*;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Slf4j
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
+
+    protected static final List<Integer> TOMP_CODES = new ArrayList<>(Arrays.asList(200, 400, 401, 403, 404, 500));
+    protected static final List<Integer> CARPOOLING_CODES = new ArrayList<>(Arrays.asList(200, 201, 400, 401, 404, 409, 429, 500));
 
     // need to manage all those http status
     // 400  Bad request
@@ -52,12 +63,13 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     // 404 Not found
     // 409 Conflict
     // 500 Internal server error
-    // 503 Service unaivailable
+    // 503 Service unavailable
     // 422
     // 502
 
     @Autowired
     ErrorMessages errorMessages;
+
 
     // ------- begin overrides from ResponseEntityExceptionHandler ------
     @Override
@@ -65,7 +77,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         GenericError errorBody = new GenericError();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMediaTypeNotAcceptableCode()));
         errorBody.setLabel(this.errorMessages.getTechnicalMediaTypeNotAcceptableLabel());
-        errorBody.setDescription(exception.getMessage()!=null ? exception.getMessage() : this.errorMessages.getTechnicalMediaTypeNotAcceptableDescription());
+        errorBody.setDescription(exception.getMessage() != null ? exception.getMessage() : this.errorMessages.getTechnicalMediaTypeNotAcceptableDescription());
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
 
@@ -73,7 +85,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     public ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         GenericError errorBody = new GenericError();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMediaTypeNotAcceptableCode()));
-        errorBody.setDescription(org.apache.commons.lang3.StringUtils.isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMediaTypeNotAcceptableDescription());
+        errorBody.setDescription(isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMediaTypeNotAcceptableDescription());
         errorBody.setLabel(this.errorMessages.getTechnicalMediaTypeNotAcceptableLabel());
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
@@ -82,8 +94,9 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     public ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         GenericError errorBody = new GenericError();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMissingPathVariableCode()));
-        errorBody.setDescription(exception!=null && org.apache.commons.lang3.StringUtils.isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMissingPathVariableDescription());
+        errorBody.setDescription(exception != null && isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMissingPathVariableDescription());
         errorBody.setLabel(this.errorMessages.getTechnicalMissingPathVariableLabel());
+
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
 
@@ -91,7 +104,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     public ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMissingServletRequestParamCode()));
-        errorBody.setDescription(org.apache.commons.lang3.StringUtils.isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMissingServletRequestParamDescription());
+        errorBody.setDescription(isNotBlank(exception.getMessage()) ? exception.getMessage() : this.errorMessages.getTechnicalMissingServletRequestParamDescription());
         errorBody.setLabel(this.errorMessages.getTechnicalMissingServletRequestParamLabel());
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
@@ -114,31 +127,72 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return getObjectResponseEntity(headers, status, request, errorBody);
     }
 
+
     @Override
-    public ResponseEntity<Object> handleTypeMismatch(TypeMismatchException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
-        BadRequest errorBody = new BadRequest();
-        errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalTypeMismatchExceptionCode()));
-        errorBody.setDescription(this.errorMessages.getTechnicalTypeMismatchExceptionDescription());
-        errorBody.setLabel(this.errorMessages.getTechnicalTypeMismatchExceptionLabel());
-        return getObjectResponseEntity(headers, status, request, errorBody);
+    public ResponseEntity<Object> handleTypeMismatch(TypeMismatchException exception,
+                                                     HttpHeaders headers, HttpStatus status,
+                                                     WebRequest request) {
+        if (ExceptionUtils.getRootException(exception, BadRequestException.class) != null) {
+            // Enum as request parameters cause mismatch errors, BadRequestException is thrown by enum converters
+            return handleBadRequest((BadRequestException) ExceptionUtils.getRootException(exception, BadRequestException.class), request);
+        }
+        if (ExceptionUtils.getRootException(exception, IllegalArgumentException.class) != null && UUID.class == exception.getRequiredType()) {
+            // for invalid uuid
+            GenericError error = new GenericError();
+            error.setErrorCode(INVALID_PARTNER_UUID_CODE);
+            error.setLabel(INVALID_PARTNER_ID);
+            error.setDescription(CommonUtils.placeholderFormat(INVALID_PARTNER_ID_MESSAGE, PLACEHOLDER, String.valueOf(exception.getValue())));
+
+            return getExceptionResponseEntity(new BadRequestException(error), request, HttpStatus.BAD_REQUEST, Integer.valueOf(this.errorMessages.getTechnicalBadRequestCode()),
+                    this.errorMessages.getTechnicalBadRequestLabel(), this.errorMessages.getTechnicalBadRequestDescription());
+
+        } else {
+            BadRequest errorBody = new BadRequest();
+            errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalTypeMismatchExceptionCode()));
+            if (exception.getCause() != null && StringUtils.isNotBlank(exception.getCause().getMessage())) {
+                errorBody.setDescription(exception.getCause().getMessage());
+            } else {
+                errorBody.setDescription(this.errorMessages.getTechnicalTypeMismatchExceptionDescription());
+            }
+            errorBody.setLabel(this.errorMessages.getTechnicalTypeMismatchExceptionLabel());
+            log.error(exception.getMessage(), exception);
+
+            return getExceptionResponseEntity(new BadRequestException(errorBody), request, HttpStatus.BAD_REQUEST, Integer.valueOf(this.errorMessages.getTechnicalBadRequestCode()),
+                    this.errorMessages.getTechnicalBadRequestLabel(), this.errorMessages.getTechnicalBadRequestDescription());
+
+        }
     }
 
     @Override
-    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException
+                                                                       exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+        if (ExceptionUtils.getRootException(exception, BadRequestException.class) != null) {
+            // Enum as body parameters cause notReadable errors, BadRequestException is thrown by enum converters
+            return handleBadRequest((BadRequestException) ExceptionUtils.getRootException(exception, BadRequestException.class), request);
+        }
+
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMessageNotReadableCode()));
-        if (!StringUtils.isEmpty(this.errorMessages.getTechnicalMessageNotReadableDescription())) {
-            errorBody.setDescription(this.errorMessages.getTechnicalMessageNotReadableDescription());
+        if (exception.getCause() != null) {
+            if (exception.getCause().getCause() != null && StringUtils.isNotBlank(exception.getCause().getCause().getMessage())) {
+                errorBody.setDescription(exception.getCause().getCause().getMessage());
+            } else if (StringUtils.isNotBlank(exception.getCause().getMessage())) {
+                errorBody.setDescription(exception.getCause().getMessage());
+            }
         } else {
-            errorBody.setDescription(exception.getMessage());
+            errorBody.setDescription(this.errorMessages.getTechnicalMessageNotReadableDescription());
         }
         errorBody.setLabel(this.errorMessages.getTechnicalMessageNotReadableLabel());
-        log.error(exception.getMessage(),exception);
-        return getObjectResponseEntity(headers, status, request, errorBody);
+        log.error(exception.getMessage(), exception);
+        CallUtils.saveOutputStandardInCallThread(request);
+        return getExceptionResponseEntity(new BadRequestException(errorBody), request, HttpStatus.BAD_REQUEST, Integer.valueOf(this.errorMessages.getTechnicalBadRequestCode()),
+                this.errorMessages.getTechnicalBadRequestLabel(), this.errorMessages.getTechnicalBadRequestDescription());
+
     }
 
     @Override
-    public ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException
+                                                                       exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         GenericError errorBody = new GenericError();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMessageNotWritableCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalMessageNotWritableDescription());
@@ -147,7 +201,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException
+                                                                       exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMethodNotAllowedCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalMethodNotAllowedDescription());
@@ -157,7 +212,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException
+                                                                          exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalMissingServletRequestParamCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalMissingServletRequestParamDescription());
@@ -166,7 +222,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleBindException(BindException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleBindException(BindException exception, HttpHeaders headers, HttpStatus
+            status, WebRequest request) {
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalBindExceptionCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalBindExceptionDescription());
@@ -175,7 +232,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleNoHandlerFoundException(NoHandlerFoundException exception, HttpHeaders
+            headers, HttpStatus status, WebRequest request) {
         GenericError errorBody = new GenericError();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalNoHandlerFoundCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalNoHandlerFoundDescription());
@@ -184,7 +242,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException
+                                                                              exception, HttpHeaders headers, HttpStatus status, WebRequest request) {
         BadRequest errorBody = new BadRequest();
         errorBody.setErrorCode(Integer.valueOf(this.errorMessages.getTechnicalHttpRequestMethodNotSupportedCode()));
         errorBody.setDescription(this.errorMessages.getTechnicalHttpRequestMethodNotSupportedDescription());
@@ -193,7 +252,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
     // ------- end of overrides -----
 
-    private ResponseEntity<Object> getObjectResponseEntity(HttpHeaders headers, HttpStatus status, WebRequest request, @NotNull GenericError errorBody) {
+    private ResponseEntity<Object> getObjectResponseEntity(HttpHeaders headers, HttpStatus status, WebRequest
+            request, @NotNull GenericError errorBody) {
         GenericError errorObject = new GenericError(errorBody.getStatus() != null ? HttpStatus.valueOf(errorBody.getStatus()) : HttpStatus.INTERNAL_SERVER_ERROR, errorBody.getErrorCode(), errorBody.getLabel(), errorBody.getDescription());
         if (org.apache.commons.lang3.StringUtils.isBlank(errorBody.getDescription())) {
             errorObject.setDescription(status.getReasonPhrase());
@@ -201,7 +261,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         return handleExceptionInternal(new InternalException(errorObject), errorObject, headers, status, request);
     }
 
-    @ExceptionHandler(value = {InternalException.class})
+    @ExceptionHandler(value = {InternalException.class, Exception.class})
     public ResponseEntity<Object> handleInternalException(RuntimeException exception, WebRequest request) {
         log.debug("Internal error raised : {}", exception.getMessage());
         return getExceptionResponseEntity(exception, request, HttpStatus.INTERNAL_SERVER_ERROR, HttpStatus.INTERNAL_SERVER_ERROR.value(), HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(), exception.getMessage());
@@ -215,7 +275,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
 
     // begin custom exceptions handling
     @ExceptionHandler(value = {BusinessException.class})
-    public ResponseEntity<Object> handleBusinessException(BusinessException exception,  WebRequest request) {
+    public ResponseEntity<Object> handleBusinessException(BusinessException exception, WebRequest request) {
         log.debug("Business error raised : {}", exception.getMessage());
         return getExceptionResponseEntity(exception, request, HttpStatus.UNPROCESSABLE_ENTITY, exception.getBusinessError().getErrorCode(), HttpStatus.UNPROCESSABLE_ENTITY.getReasonPhrase(), exception.getMessage());
     }
@@ -232,11 +292,12 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         BadGateway badGatewayError = exception.getBadGatewayError();
         log.debug("Error handleBadGateway raised : {}", badGatewayError);
         injectCallIdFromCorrelationId(request, badGatewayError);
+
         return getExceptionResponseEntity(exception, request, HttpStatus.BAD_GATEWAY, Integer.valueOf(this.errorMessages.getTechnicalBadGatewayCode()),
                 this.errorMessages.getTechnicalBadGatewayLabel(), this.errorMessages.getTechnicalBadGatewayDescription());
     }
 
-    @ExceptionHandler(value = {UnauthorizedException.class})
+    @ExceptionHandler(value = {UnauthorizedException.class, HttpClientErrorException.Unauthorized.class})
     public ResponseEntity<Object> handleUnauthorized(RuntimeException exception, WebRequest request) {
         log.debug("Error handleUnauthorized raised : {}", exception.getMessage());
         return getExceptionResponseEntity(exception, request, HttpStatus.UNAUTHORIZED, HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase(), exception.getMessage());
@@ -255,7 +316,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @Override
-    public ResponseEntity<Object> handleExceptionInternal(Exception exception, @Nullable Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    public ResponseEntity<Object> handleExceptionInternal(Exception exception, @Nullable Object body, HttpHeaders
+            headers, HttpStatus status, WebRequest request) {
         if (exception instanceof InternalException) {
             GenericError genericError = ((InternalException) exception).getInternalError();
             return getExceptionResponseEntity(((InternalException) exception), request, status, genericError.getStatus(), genericError.getLabel(), genericError.getDescription());
@@ -264,7 +326,8 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
     }
 
     @ExceptionHandler(value = {IllegalStateException.class, ClassCastException.class})
-    public ResponseEntity<Object> handleInternal(RuntimeException exception, HttpStatus originalStatus, WebRequest request) {
+    public ResponseEntity<Object> handleInternal(RuntimeException exception, HttpStatus originalStatus, WebRequest
+            request) {
         log.debug("Error handleInternal raised : {}", exception.getMessage());
         return getExceptionResponseEntity(exception, request, originalStatus, 500, originalStatus.getReasonPhrase(), exception.getMessage());
     }
@@ -286,24 +349,71 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
      * @param defaultErrorCode   default error code if not present in the exception message description
      * @param defaultLabel       default label if not present in the exception message description
      * @param defaultDescription default description if not present in the exception message description
-     * @return The responseEntity with Error dto from catched exception
+     * @return The responseEntity with Error dto from caught exception
      */
-    private ResponseEntity<Object> getExceptionResponseEntity(RuntimeException exception, WebRequest request, HttpStatus httpStatus, Integer defaultErrorCode, String defaultLabel, String defaultDescription) {
+    private ResponseEntity<Object> getExceptionResponseEntity(RuntimeException exception, WebRequest
+            request, HttpStatus httpStatus, Integer defaultErrorCode, String defaultLabel, String defaultDescription) {
 
         // prepare the response error DTO with labels and message in exception raised
         GenericError bodyGenericError = new GenericError(httpStatus, defaultErrorCode, defaultLabel, defaultDescription);
+
+        if ((!request.toString().contains(CARPOOLING_PATH) && !request.toString().contains(GET_PARTNERS_PATH)) || request.toString().contains(CACHE_PATH)) {
+            //set GTW standard for data-api endpoints
+            CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
+        } else {
+            CallUtils.saveOutputStandardInCallThread(request);
+        }
+
+        String outputStandard = request.getHeader(GlobalConstants.OUTPUT_STANDARD) != null ? request.getHeader(GlobalConstants.OUTPUT_STANDARD) : CallUtils.getOutputStandardFromCallThread();
+        StandardEnum standardEnum = StandardEnum.fromValue(outputStandard);
+
+        String validCodesString = request.getHeader(GlobalConstants.VALID_CODES) != null ? request.getHeader(GlobalConstants.VALID_CODES) : CallUtils.getValidCodesFromCallThread();
+        List<Integer> validCodes = null;
+        if (isNotBlank(validCodesString)) {
+            String validCodesStr = validCodesString.replace("[", "").replace("]", "");
+            validCodes = new ArrayList<>();
+            for (String code : validCodesStr.split(", ")) {
+                validCodes.add(Integer.parseInt(code));
+            }
+        } else if (standardEnum.equals(StandardEnum.COVOITURAGE_STANDARD)) {
+            validCodes = CARPOOLING_CODES;
+        } else if (standardEnum.equals(StandardEnum.TOMP_1_3_0)) {
+            validCodes = TOMP_CODES;
+        }
+
+
         mapJsonExceptionMessageWithErrorDto(exception, bodyGenericError);
 
         if (HttpStatus.INTERNAL_SERVER_ERROR.equals(httpStatus)) {
             request.setAttribute("javax.servlet.error.exception", exception, 0);
         }
         injectCallIdFromCorrelationId(request, bodyGenericError);
-        return new ResponseEntity<>(bodyGenericError, new HttpHeaders(), httpStatus);
+
+        ResponseEntity<Object> response;
+
+        String rawResponseFromException = CommonUtils.getRawResponseFromException(exception);
+        HttpStatus rawStatusCodeFromException = CommonUtils.getRawStatusResponseFromException(exception);
+
+        switch (standardEnum) {
+            case TOMP_1_3_0:
+                response = TompErrorConverter.getResponseEntityForTompStandard(httpStatus, bodyGenericError, rawResponseFromException, rawStatusCodeFromException, exception, validCodes);
+                break;
+            case COVOITURAGE_STANDARD:
+                response = CarpoolErrorConverter.getResponseEntityForCarpoolStandard(httpStatus, bodyGenericError, rawResponseFromException, rawStatusCodeFromException, exception, validCodes, request);
+                break;
+            case GBFS:
+            case OTHER:
+            default:
+                response = GatewayErrorConverter.getResponseEntityForGTW(httpStatus, bodyGenericError, rawResponseFromException, rawStatusCodeFromException, defaultDescription, exception);
+                break;
+        }
+        return response;
     }
+
 
     private void injectCallIdFromCorrelationId(WebRequest request, GenericError bodyGenericError) {
         String correlationIdFromContext;
-        // if existing a correlationId header use the value in it to extract the callId and put it in the error DTO response
+        // if existing a CORRELATION_ID header use the value in it to extract the callId and put it in the error DTO response
         if (null != request.getHeader(GlobalConstants.CORRELATION_ID_HEADER) && CommonUtils.isUUID(request.getHeader(GlobalConstants.CORRELATION_ID_HEADER))) {
             correlationIdFromContext = request.getHeader(GlobalConstants.CORRELATION_ID_HEADER);
         } else {
@@ -324,7 +434,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         GenericError errorFromMessage = null;
         try {
             // load the GenericError from stringyfied error in the exception message
-            errorFromMessage = objectMapper.readValue(org.apache.commons.lang3.StringUtils.isNotBlank(exception.getMessage()) ? exception.getMessage() : "", GenericError.class);
+            errorFromMessage = objectMapper.readValue(isNotBlank(exception.getMessage()) ? exception.getMessage() : "", GenericError.class);
         } catch (JsonProcessingException jsonException) {
             // in case this is not a json in the message but un simple string, we set message with it with new Generic error object
             errorFromMessage = new GenericError();
@@ -334,17 +444,17 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             genericError.setStatus(errorFromMessage.getStatus());
         }
 
-        // if attributes are not empty in the message comming from exception, we use it to erase the default from properties
-        if (!StringUtils.isEmpty(errorFromMessage.getDescription())) {
+        // if attributes are not empty in the message coming from exception, we use it to erase the default from properties
+        if (StringUtils.isNotBlank(errorFromMessage.getDescription())) {
             genericError.setDescription(errorFromMessage.getDescription());
         }
-        if (!StringUtils.isEmpty(errorFromMessage.getErrorCode())) {
+        if (errorFromMessage.getErrorCode() != null) {
             genericError.setErrorCode(errorFromMessage.getErrorCode());
         }
         if (!StringUtils.isEmpty(errorFromMessage.getLabel())) {
             genericError.setLabel(errorFromMessage.getLabel());
         }
-        if (!StringUtils.isEmpty(errorFromMessage.getCallId())) {
+        if (errorFromMessage.getCallId() != null) {
             genericError.setCallId(errorFromMessage.getCallId());
         }
         // if empty create date of error
@@ -353,6 +463,7 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
         } else {
             genericError.setTimestamp(errorFromMessage.getTimestamp());
         }
+
     }
 
 }

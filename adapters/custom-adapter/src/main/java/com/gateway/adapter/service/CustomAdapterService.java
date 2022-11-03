@@ -9,13 +9,13 @@ import java.util.UUID;
 public interface CustomAdapterService {
     
 	/**
-	 * Retun Mock With a list of objects associated to the MSP
+	 * Retun Mock With a list of objects associated to the Partner
      * @param params      List of parameters
-     * @param mspActionId action identifier
-     * @param mspId       Msp identifier
-     * @return list of objects returned by the msp
+     * @param partnerActionId action identifier
+     * @param partnerId       Partner identifier
+     * @return list of objects returned by the Partner
      */
-    List<Object> adaptOperation(Map<String, String> params, UUID mspActionId, UUID mspId, Map<String, Object> originalBody) throws  IOException, IntrospectionException;
+    List<Object> adaptOperation(Map<String, String> params, UUID partnerActionId, UUID partnerId, Map<String, Object> originalBody) throws  IOException, IntrospectionException;
 
 
 }

@@ -1,8 +1,12 @@
+include:
+  - local: "request-relay/.gitlab-ci/helm.yml"
+
 .request-relay-base:
   variables:
     MODULE_NAME: request-relay
     MODULE_PATH: ${MODULE_NAME}
     NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/adoptopenjdk:11-jre-hotspot
+
 
 .request_relay_init_vars: &request_relay_init_vars |
   export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
@@ -14,7 +18,11 @@
 .request-relay-build: &request-relay-build |
   set -x
   envsubst < settings.xml
-  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
   cd request-relay
   envsubst < ../settings.xml
   mvn clean install -s ../settings.xml -DskipTests
@@ -25,19 +33,23 @@ request_relay_build:
     - .build-job
     - .no-needs
     - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/request-relay
   script:
     - *request_relay_init_vars
     - *request-relay-build
   artifacts:
     paths:
       - request-relay/target
-  needs: [ "deploy-nexus" ]
+  needs: [ "deploy-nexus", "check-if-release-version" ]
 
 request_relay_image_build:
   extends:
     - .request-relay-base
     - .image-job
 #    - .except-clean
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/request-relay
   script:
     - *request_relay_init_vars
     - |
@@ -45,7 +57,7 @@ request_relay_image_build:
       cd request-relay
       pwd
       image
-  needs: [ "request_relay_build" ]
+  needs: [ "request_relay_build" , "check-if-release-version" ]
 
 
 request_relay_preview_deploy:
@@ -58,7 +70,7 @@ request_relay_preview_deploy:
       set -x
       echo " --------- Deploiement en cours ... ---------"
       deploy
-  needs: [ "request_relay_image_build" ]
+  needs: [ "request_relay_image_build" , "check-if-release-version" ]
   environment:
     on_stop: request_relay_preview_cleanup
 

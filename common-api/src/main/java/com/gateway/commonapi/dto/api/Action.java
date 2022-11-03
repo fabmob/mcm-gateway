@@ -1,6 +1,5 @@
 package com.gateway.commonapi.dto.api;
 
-import java.io.Serializable;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.gateway.commonapi.utils.enums.ActionType;
@@ -11,10 +10,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 
 
 /**
- * Bean for details about an potential action.
+ * Bean for details about a potential action.
  */
 
 @Data
@@ -32,7 +32,7 @@ public class Action implements Serializable {
     @Schema(
             name = "type",
             description = "Type of action that can be performed",
-            example = "BOOK_VEHICULE",
+            example = "BOOK_VEHICLE",
             required = true)
     @JsonProperty("type")
     @NotNull
@@ -64,7 +64,7 @@ public class Action implements Serializable {
     @Schema(
             name = "webview",
             description = "URL to display in a web view for performing the action",
-            example = "https://example.com/api/action/book_vehicule")
+            example = "https://example.com/api/action/book_vehicle")
     @JsonProperty("webview")
     private String webView;
 
@@ -74,7 +74,7 @@ public class Action implements Serializable {
     @Schema(
             name = "url",
             description = "URL to display in a browser for performing the action",
-            example = "https://example.com/api/action/book_vehicule")
+            example = "https://example.com/api/action/book_vehicle")
     @JsonProperty("url")
     private String url;
 }

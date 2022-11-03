@@ -1,0 +1,38 @@
+{
+  "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+  "partnerType": null,
+  "name": "Voi Name",
+  "operator": "Voi Trottinettes",
+  "type": "CARPOOLING",
+  "url": "string",
+  "logo": null ,
+  "logoUrl": "string",
+  "logoFormat": "string",
+  "primaryColor": "string",
+  "secondaryColor": "string",
+  "priceList": {
+    "comment": "string",
+    "duration": [
+      {
+        "fixedFare": 100,
+        "farePerUnit": 15,
+        "unit": 1,
+        "lowerPriceLimit": 0,
+        "upperPriceLimit": 30
+      }
+    ],
+    "distance": [
+      {
+        "fixedFare": 100,
+        "farePerUnit": 15,
+        "unit": 1,
+        "lowerPriceLimit": 0,
+        "upperPriceLimit": 30
+      }
+    ],
+    "parkingForbiddenFee": 0,
+    "outOfBoundFee": 0
+  },
+  "_links": null,
+  "urlWebview": true
+}

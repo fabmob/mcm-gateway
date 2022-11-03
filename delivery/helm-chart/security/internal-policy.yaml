@@ -1,0 +1,13 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: internal-services-nw
+spec:
+  podSelector:
+    matchLabels:
+      visibility: internal
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              com.mcm.maas.internal: "true"

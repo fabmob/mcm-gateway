@@ -68,3 +68,7 @@ security:
 
 ---
 
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"

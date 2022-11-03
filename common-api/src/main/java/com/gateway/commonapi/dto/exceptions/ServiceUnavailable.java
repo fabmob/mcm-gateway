@@ -3,7 +3,6 @@ package com.gateway.commonapi.dto.exceptions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Data
@@ -34,6 +33,7 @@ public class ServiceUnavailable extends GenericError {
     }
 
     @Schema(example = "503")
+    @Override
     public Integer getStatus() {
         return this.status;
     }

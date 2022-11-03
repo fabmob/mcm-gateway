@@ -1,12 +1,13 @@
 package com.gateway.commonapi.dto.api;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.gateway.commonapi.utils.enums.TypeEnum;
+import com.gateway.commonapi.utils.enums.ReferenceTypeEnum;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
+
 import javax.validation.constraints.Size;
 
 /**
@@ -25,7 +26,7 @@ public class StopReference {
           name="type",
           example = "GTFS_STOP_ID")
   @JsonProperty("type")
-  private TypeEnum type = null;
+  private ReferenceTypeEnum type = null;
 
   @Schema(
           name="id",
@@ -39,7 +40,7 @@ public class StopReference {
   @JsonProperty("country")
   private String country = null;
 
-  public StopReference type(TypeEnum type) {
+  public StopReference type(ReferenceTypeEnum type) {
     this.type = type;
     return this;
   }
@@ -50,11 +51,11 @@ public class StopReference {
    **/
   @Schema(description = "type of external reference (GTFS, CHB).")
 
-    public TypeEnum getType() {
+    public ReferenceTypeEnum getType() {
     return type;
   }
 
-  public void setType(TypeEnum type) {
+  public void setType(ReferenceTypeEnum type) {
     this.type = type;
   }
 

@@ -1,10 +1,6 @@
 package com.gateway.commonapi.dto.api;
 
 
-import java.io.Serializable;
-import java.sql.Timestamp;
-import java.time.OffsetDateTime;
-import java.util.UUID;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -14,7 +10,10 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 
-import javax.validation.constraints.*;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 /**
  * Asset
@@ -29,20 +28,20 @@ import javax.validation.constraints.*;
 @Validated
 @Schema(description = "Information about an asset")
 @JsonPropertyOrder({
-        "mspId", "assetId", "assetType", "isReserved",
-        "isReservedFrom", "isReservedTo", "isDisabled", "mileage", "licensePlate","homeStationId","lastReported","planId","overriddenProperties","rentalAndroidUrl","rentalIosUrl","rentalWebUrl"})
+        "partnerId", "assetId", "assetType", "isReserved",
+        "isReservedFrom", "isReservedTo", "isDisabled", "mileage", "licensePlate", "homeStationId", "lastReported", "planId", "overriddenProperties", "rentalAndroidUrl", "rentalIosUrl", "rentalWebUrl"})
 public class Asset implements Serializable {
 
-    @JsonProperty("mspId")
+    @JsonProperty("partnerId")
     @NotNull
-    @Schema(description = "MSP Identifier",
+    @Schema(description = "partner Identifier",
             example = "b814c97e-df56-4651-ac50-11525537964f")
-    private UUID mspId;
+    private UUID partnerId;
 
     @JsonProperty("assetId")
     @NotNull
     @Schema(description = "Asset Identifier",
-            example= "Bike1111")
+            example = "Bike1111")
     private String assetId = null;
 
     @JsonProperty("assetType")
@@ -106,7 +105,7 @@ public class Asset implements Serializable {
     @JsonProperty("lastReported")
     @Schema(description = "The last time this vehicle reported its status to the operator's backend",
             example = "1609866109")
-    private Timestamp lastReported = null;
+    private Integer lastReported = null;
 
     @JsonProperty("planId")
     @Schema(description = "The plan_id of the pricing plan this vehicle is eligible for as described in system_pricing_plans.json",
@@ -132,25 +131,25 @@ public class Asset implements Serializable {
     private String rentalWebUrl = null;
 
     /**
-     * Deep link for booking a asset
-     *
+     * Deep link for booking an asset
+     * <p>
      * Use getActions().getAction(ActionType.BOOK_asset) to getBookDeeplink.
      */
     @Schema(
-            name="bookDeeplink",
-            description="Deep link to book a asset in the station",
+            name = "bookDeeplink",
+            description = "Deep link to book a asset in the station",
             example = "https://book/Bike1111")
     @JsonProperty("bookDeeplink")
     private String bookDeeplink;
 
     /**
      * Deep link for using a
-     *
-     *  Use getActions().getAction(ActionType.USE_asset) to getUseDeeplink.
+     * <p>
+     * Use getActions().getAction(ActionType.USE_asset) to getUseDeeplink.
      */
     @Schema(
-            name="useDeeplink",
-            description="Deep link to use a asset in the station",
+            name = "useDeeplink",
+            description = "Deep link to use a asset in the station",
             example = "https://use/Bike1111")
     @JsonProperty("useDeeplink")
     private String useDeeplink;
@@ -161,8 +160,8 @@ public class Asset implements Serializable {
     }
 
 
-    public Asset(UUID mspId, String assetId, String assetType, Boolean isReserved) {
-        this.mspId = mspId;
+    public Asset(UUID partnerId, String assetId, String assetType, Boolean isReserved) {
+        this.partnerId = partnerId;
         this.assetId = assetId;
         this.assetType = assetType;
         this.isReserved = isReserved;

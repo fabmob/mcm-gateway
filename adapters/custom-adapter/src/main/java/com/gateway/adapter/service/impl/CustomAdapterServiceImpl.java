@@ -20,13 +20,13 @@ public class CustomAdapterServiceImpl implements CustomAdapterService {
 
     /**
      * @param params       List of parameters
-     * @param mspActionId  action identifier
-     * @param mspId        Msp identifier
+     * @param partnerActionId  action identifier
+     * @param partnerId        Partner identifier
      * @param originalBody
-     * @return list of objects returned by the msp
+     * @return list of objects returned by the Partner
      */
     @Override
-    public List<Object> adaptOperation(Map<String, String> params, UUID mspActionId, UUID mspId, Map<String, Object> originalBody) throws IOException, IntrospectionException {
+    public List<Object> adaptOperation(Map<String, String> params, UUID partnerActionId, UUID partnerId, Map<String, Object> originalBody) throws IOException, IntrospectionException {
         List<Object> mocklist = new ArrayList<>();
         mocklist.add(this.createMockResponse());
         return mocklist;

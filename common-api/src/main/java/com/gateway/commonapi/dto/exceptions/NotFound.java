@@ -3,7 +3,6 @@ package com.gateway.commonapi.dto.exceptions;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 
 @Data
@@ -34,6 +33,7 @@ public class NotFound extends GenericError {
     }
 
     @Schema(example = "404")
+    @Override
     public Integer getStatus() {
         return this.status;
     }

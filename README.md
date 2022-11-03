@@ -2,27 +2,43 @@
 
 
 
-![Cas d'usage stationnement](docs/assets/cas-usage-stationnement.png)
-
+![schema-global](docs/assets/shema_global_gateway.png)
 
 pour générer les classes Java sur la base d'une connexion à la base de données
 
 `mvn antrun:run@hbm2java`
 
+# Installation de l'environnement
+
+Suivre les instructions d'installation du fichier docs > "Installation_Environnement.docx"
 
 # Lancement de data-api
 
-afin de lancer data-api surchargez le parametre `--DATABASE_PASSWORD=[mon_password]`
+Avec l'utilisateur postgres :
 
++ créer une database nommée 'gateway' (avec l'owner postgres), puis créer dans cette base un schéma nommé 'msp' et un
+  schéma nommé 'configuration'. Il s'agit de la base de dév local.
++ créer une database nommée 'gateway-tests' (avec l'owner postgres), puis créer dans cette base un schéma nommé 'msp' et
+  un schéma nommé 'configuration'. Il s'agit de la base utilisée par les tests d'intégration lancés localement.
+
+Afin de lancer data-api surchargez le parametre `--DATABASE_PASSWORD=[mon_password]`
+
+NB :
+
++ Le schema msp contient les tables du data-mapping détaillées dans README_DATAMAPPING.md
++ Le schema configuration contient les données de configuration telle que le table gateway_params stockant les divers
+  paramètres de la Gateway. Le paramètre GATEWAY_ACTIVATION de cette table indique si le cache est actif ou non et peut
+  prendre la valeur soit 'true' soit 'false'
 
 # Tests
+
 ## Lancement des tests
 
 Au niveau du pom parent lancer install, elle lancera les phases test et verify respectivement pour les TU et TI.
 
 `mvn clean install`
 
-**Dans le fichier maven settings.xml de C:/Users/login/.m2/settings.xml définir les login et mot de passe de la bdd locale.**
+**Dans le fichier maven settings.xml de C:/Users/login/.m2/settings.xml, définir les login et mot de passe de la bdd locale et le répertoire ou point de montage des mocks API.**
 
 
 ```xml
@@ -31,9 +47,12 @@ Au niveau du pom parent lancer install, elle lancera les phases test et verify r
 	
       <gateway.database.username>postgres</gateway.database.username>
       <gateway.database.password>*****</gateway.database.password>
+
+      <gateway.service.mockapi.dir>*****/../******</gateway.service.mockapi.dir>
 ```
 
-Dans les fichiers application.yml, les balises du type @gateway.database.password@ seront remplacés par leurs valeurs du fait de présence dans le pom.xml des élements suivants:
+Dans les fichiers application.yml, les balises du type @gateway.database.password@ seront remplacés par leurs valeurs du
+fait de présence dans le pom.xml des élements suivants:
 
 ```xml
  <resources>
@@ -43,7 +62,9 @@ Dans les fichiers application.yml, les balises du type @gateway.database.passwor
     </resource>
 </resources> 
 ```
+
 et
+
 ```xml
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
@@ -58,31 +79,119 @@ et
 </plugin>
 ```
 
-## Publication des rapports sonar
-
-Afin de récupérer un token sonar, se connecter sous sonar grace au compte gitlab https://sonarqube-dev.cicd.moncomptemobilite.fr/
-
-Aller dans My Account > Security > Generate Token : entrer un nom de token et valider. Une clé sera indiquée à bien conserver car elle ne sera plus affichée.
-
-Placer dans votre settings.xml de maven partie properties
-
-```
-    <sonar.host.url>https://sonarqube-dev.cicd.moncomptemobilite.fr</sonar.host.url>
-    <sonar.login>__ici__valeur__du__token__</sonar.login>
-```
-Pour lancer l'analyse et publication des rapports sonar:
-`mvn sonar:sonar`
-
-Dans les logs vous sera indiqué l'url de sonarqube avec le résultat de votre rapport.
-
-Exemple de lien de rapport: https://sonarqube-dev.cicd.moncomptemobilite.fr/code?id=com.gateway%3Aparent
 
 # Logs
 
 Afin d'afficher les logs de requête de BDD passer le paramètre suivant au lancement `--SHOW_SQL=[true|false]`
 
-
 # Exceptions
+
+### Normes codes retours
+
+Les endpoints exposés par la Gateway dans le module api sont divisés en 2 catégories : ceux qui suivent le standard TOMP et ceux qui respectent le standard COVOITURAGE.
+
+
+| Catégorisation des enpoints      | endpoints                                            | Norme des réponses |
+|----------------------------------|------------------------------------------------------| -------------------|
+| Information voyageur             | POST /partners/around-me                                 | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/vehicle-types                      | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/system-pricing-plan                | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/stations-status                    | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/stations                           | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/available-assets                   | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/assets                             | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}/areas/{areaType}                   | TOMP v1.3.0        |
+|                                  | GET /partners/global-view                                | TOMP v1.3.0        |
+|                                  | GET /partners/{partnerId}                                    | TOMP v1.3.0        |
+|                                  | GET /partners                                            | TOMP v1.3.0        |
+| covoiturage Information Voyageur | GET /partners/{partnerId}/carpooling/passenger_regular_trips | Covoiturage        |
+|                                  | GET /partners/{partnerId}/carpooling/passenger-journeys      | Covoiturage        |
+|                                  | GET /partners/{partnerId}/carpooling/driver_regular_trips    | Covoiturage        |
+|                                  | GET /partners/{partnerId}/carpooling/driver-journeys         | Covoiturage        |
+| covoiturage reservation          | POST /carpooling/bookings/{bookingId}                | Covoiturage        |
+|                                  | PATCH /carpooling/bookings/{bookingId}               | Covoiturage        |
+|                                  | GET /carpooling/bookings/{bookingId}                 | Covoiturage        |
+| covoiturage messagerie           | POST /carpooling/messages                            | Covoiturage        |
+| covoiturage status               | GET /carpooling/status                               | Covoiturage        |
+| covoiturage WebHook              | POST /carpooling/booking_events                      | Covoiturage        |
+
+Les exceptions retournées doivent alors se conformer à la norme du standard suivi. En ce sens le UserContext expose deux variables outputStandard (standard suivi) et validCodes (codes retours supportés) qui sont affectés au niveau du APIController selon les normes des endpoints.
+AU sein de le Gateway des erreurs au format propre à la Gateway sont soulevées (GenericError), puis au niveau du ResponseEntityExceptionHandler les retours sont construits en fonction du outputStandard, validCodes du enpoint afin de convertir l'exception soulevée au format attendu : Gateway (GenericError), TOMP (TompError) ou COVOITURAGE (CarpoolError).
+
+Types d'erreurs par norme :
+
+<table>
+<tr>
+<td> Norme </td> <td> Format </td>
+</tr>
+<tr>
+<td> Gateway </td>
+<td>
+
+```json
+{
+  "status": int,
+  "errorCode": int,
+  "label": string,
+  "description": string,
+  "timestamp": "2020-04-28T00:00:00.000Z",
+  "callId": "ee507da7-fc0b-464a-a2ee-25847fa6a073"
+}
+```
+</td>
+</tr>
+<tr>
+<td> Covoiturage </td>
+<td>
+
+```json
+{
+  "error": "string"
+}
+```
+
+</td>
+</tr>
+<tr>
+<td> TOMP v1.3.0</td>
+<td>
+
+```json
+{
+  "errorcode": 0,
+  "type": "string",
+  "title": "string",
+  "status": 0,
+  "detail": "string",
+  "instance": "string"
+}
+```
+
+</td>
+</tr>
+<tr>
+<td> GBFS v2.3 </td>
+<td>
+
+</td>
+</tr>
+</table>
+
+
+Matching des champs au format Gateway vers TOMP et vers TOMP enrichi : 
+
+| Format Gateway | Format TOMP | Format TOMP enrichi |
+|----------------|-------------| --------------------|
+| status         | status      | status              |
+| errorCode      | errorcode   | errorcode           |
+| label          | title       | title               |
+| description    | detail      | detail              |
+| **???**        | type        | type                |
+| callId         | instance    | instance            |
+| timestamp      | N/A         | timestamp           |
+
+
+### Gestion des exceptions
 
 La gestion des exceptions se fait de manière centralisée dans le module common-api.
 
@@ -94,6 +203,8 @@ S'ils sont spécifiés lorsque les exceptions sont levées, errorCode, label et 
 
 Pour chaque code status http que nous souhaitons implémenté, une classe d'exception existe ainsi que son dto d'erreur.
 
+Le ResponseEntityExceptionHandler contrôle les exceptions catchées, le outputstandard et les validCodes du context afin de convertir les erreurs au format attendu.
+
 Lors de la levée d'une de nos exceptions à n'importe quelle couche du code (controller, service, utilitaire, ...) on peut définir le message et la classe d'erreur correspondant. L'exception sera catchée par le module centralisé de gestion des exceptions et contruira la réponse DTO basée sur l'exception reçue.
 
 Le controller devra définir les Schemas utilisées pour les code d'erreur. Cela permet notamment d'avoir une doc swagger avec l'object exact correspondant au code d'erreur qu'on souhaite gérer.
@@ -103,11 +214,11 @@ Lors de la réception de l'exception, on vérifie la présence ou non d'un heade
 Pour cela tout appel à un web service doit se faire avec un RestTemplate et en retransmettant le correlation id s'il existe.
 Exemple :
 ```java
-// get the correlationId of the current thread and forward as http header
+// get the CORRELATION_ID of the current thread and forward as http header
         UserContext userContext = new ThreadLocalUserSession().get();
-                String correlationId = userContext.getContextId();
+                String CORRELATION_ID = userContext.getContextId();
                 HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+                httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, CORRELATION_ID);
                 HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
                 
             .../...
@@ -117,13 +228,13 @@ Exemple :
         } catch (NotFoundException e) {
             log.error("No metadata for MSP identifier {}", mm.getMspId(), e);
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
             throw new BadGatewayException(MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         } catch (Exception e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
             throw new UnavailableException(MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         }
 ```
@@ -131,6 +242,7 @@ Exemple :
 _ExceptionUtils.getMappedGatewayRuntimeException_ est très important, c'est ce qui permet de convertir les exceptions liées à l'appel REST effectué en tant que client à une des exceptions custom et la rendre ainsi "catchable" et donc gérer une réponse retranscrite dans le bon format.
 
 Exemple de levée d'une exception:
+
 ```java
 throw new BadGatewayException(MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMeta));
 ```
@@ -149,6 +261,7 @@ Exemple de levée d'une exception avec un objet complet.
    throw new BadRequestException(errorBody);
 ```
 
+Lorsque la Gateway reçoit une erreur du partenaire interrogé, celle-ci est remontée jusqu'à api telle quelle (si le standard est suivi) ou transformée si besoin.
 
 
 
@@ -186,8 +299,8 @@ Exemple de levée d'une exception avec un objet complet.
    * Utiliser au maximum le niveau debug pour les logs, info avec parcimonie, warn et error que pour des cas d'erreurs ou de risque d'instabillité nécessitant d'être traité. En production les logs debug voire info ne seront pas générés.
    * Ne jamais logger d'information utilisateur, apiKey, mot de passe ou information sensible sans la masquer
 
-
 ### Web services
+
 |Sujet| Convention cible                            |
 |:----|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 |Langue| Anglais partout préconisé                            |
@@ -221,19 +334,32 @@ Prérequis local
   </pre>
 
 - aller sur http://localhost:9010/ avec un navigateur web. Lors de la première connection vous aurez à definir un mot de passe pour admin.
-- Charger l'image redis dans portainer et lancer son run
-
-Sous Ubuntu, lancer les commandes : 
-docker pull redis:6.2-alpine
-docker run -d --name redis-gateway -p 6379:6379 redis:6.2-alpine
+- Charger l'image redis dans portainer et lancer son run, sous Ubuntu, lancer les commandes :
+  <pre>
+  docker pull redis:6.2-alpine
+  docker run -d --name redis-gateway -p 6379:6379 redis:6.2-alpine
+  </pre>
 
 Dans portainer.io:
 
-Aller dans Images > Vérifier que l'image existe
+Aller dans Home > local > Images > Vérifier que l'image existe
 
 ![image redis](docs/assets/portainer-image-redis.png)
 
 Une fois l'image chargée, aller dans Container et vérifier que le container a bien été rajouté
 
 ![run container](docs/assets/portainer-container-run.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
 

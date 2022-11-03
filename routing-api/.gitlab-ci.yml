@@ -1,8 +1,12 @@
+include:
+  - local: "routing-api/.gitlab-ci/helm.yml"
+
 .routing-api-base:
   variables:
     MODULE_NAME: routing-api
     MODULE_PATH: ${MODULE_NAME}
     NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/adoptopenjdk:11-jre-hotspot
+
 
 .routing_api_init_vars: &routing_api_init_vars |
   export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
@@ -14,7 +18,11 @@
 .routing-api-build: &routing-api-build |
   echo "VERSION=$VERSION"
   envsubst < settings.xml
-  mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$VERSION
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
   cd routing-api
   cat pom.xml | egrep "version"
   envsubst < ../settings.xml
@@ -26,24 +34,28 @@ routing_api_build:
     - .build-job
     - .no-needs
     - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/routing-api
   script:
     - *routing_api_init_vars
     - *routing-api-build
   artifacts:
     paths:
       - routing-api/target
-  needs: [ "deploy-nexus" ]
+  needs: [ "deploy-nexus", "check-if-release-version" ]
 
 routing_api_image_build:
   extends:
     - .routing-api-base
     - .image-job
+  environment:
+    name: iamge/${CI_BUILD_REF_SLUG}/routing-api
   script:
     - *routing_api_init_vars
     - |
       cd routing-api
       image
-  needs: [ "routing_api_build" ]
+  needs: [ "routing_api_build" , "check-if-release-version" ]
 
 
 routing_api_preview_deploy:
@@ -53,18 +65,8 @@ routing_api_preview_deploy:
   script:
     - *routing_api_init_vars
     - |
-      wait_pod default-adapter
-      wait_pod custom-adapter
-      wait_pod data-api
-      set -x
-      KUBERNETES_DATA_API_NAMESPACE=$(pod_namespace data-api)
-      KUBERNETES_DEFAULT_ADAPTER_NAMESPACE=$(pod_namespace default-adapter)
-      KUBERNETES_CUSTOM_ADAPTER_NAMESPACE=$(pod_namespace custom-adapter)
-      export KUBERNETES_DATA_API_NAMESPACE
-      export KUBERNETES_DEFAULT_ADAPTER_NAMESPACE
-      export KUBERNETES_CUSTOM_ADAPTER_NAMESPACE
       deploy
-  needs: [ "routing_api_image_build"]
+  needs: [ "routing_api_image_build", "check-if-release-version" ]
   environment:
     on_stop: routing_api_preview_cleanup
 

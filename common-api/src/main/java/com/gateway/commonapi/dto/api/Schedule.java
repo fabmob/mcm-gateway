@@ -11,6 +11,7 @@ import lombok.extern.jackson.Jacksonized;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.Serializable;
 import java.util.List;
 
 @Slf4j
@@ -20,7 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Validated
 @JsonPropertyOrder({"passengerPickupDay", "passengerPickupTimeOfDay", "JourneySchedules"})
-public class Schedule {
+public class Schedule implements Serializable {
 
     @Schema(description = "Day of week of the passenger pick-up.\n" +
             "ENUM \"MON, TUE, WED, THU, FRI, SAT, SUN\"",
@@ -35,7 +36,7 @@ public class Schedule {
 
     @Schema(name = "JourneySchedules")
     @JsonProperty("JourneySchedules")
-    private List<JourneySchedule> JourneySchedules;
+    private List<JourneySchedule> journeySchedules;
 
 
 }

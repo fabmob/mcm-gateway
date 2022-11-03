@@ -11,7 +11,7 @@ public interface AdaptersService {
      * Add a new AdaptersDTO
      *
      * @param adaptersDTO AdaptersDTO object
-     * @return AdaptersDTO informations for the AdaptersDTO added
+     * @return AdaptersDTO information for the AdaptersDTO added
      */
     public AdaptersDTO addAdapters(AdaptersDTO adaptersDTO);
 
@@ -30,10 +30,10 @@ public interface AdaptersService {
     public void deleteAdapters(UUID id);
 
     /**
-     * Retrieve a AdaptersDTO informations.
+     * Retrieve a AdaptersDTO information.
      *
      * @param id Identifier of the AdaptersDTO
-     * @return AdaptersDTO informations for the AdaptersDTO
+     * @return AdaptersDTO information for the AdaptersDTO
      * @throws NotFoundException not found object
      */
     public AdaptersDTO getAdaptersFromId(UUID id) throws NotFoundException;

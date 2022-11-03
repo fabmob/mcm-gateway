@@ -1,29 +1,7 @@
 package com.gateway.dataapi.rest.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.gateway.commonapi.dto.data.DataMapperDTO;
-import com.gateway.commonapi.dto.exceptions.BadGateway;
-import com.gateway.commonapi.dto.exceptions.BadRequest;
-import com.gateway.commonapi.dto.exceptions.GenericError;
-import com.gateway.commonapi.dto.exceptions.NotFound;
-import com.gateway.commonapi.dto.exceptions.Unauthorized;
+import com.gateway.commonapi.dto.exceptions.*;
 import com.gateway.dataapi.service.DataMapperService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,9 +9,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-import static com.gateway.commonapi.utils.ControllerMessageDict.*;
-import static com.gateway.dataapi.util.constant.DataApiPathDict.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static com.gateway.commonapi.constants.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.DataApiPathDict.*;
 
 @RequestMapping(DATA_MAPPER_BASE_PATH)
 @RestController
@@ -43,7 +30,7 @@ public class DataMapperController {
     private static final String DELETE_DATAMAPPER = "*************Delete DataMapper *************";
     private static final String ADD_NEW_DATAMAPPER = "************* ADD NEW DataMapper *************";
     private static final String GET_DATAMAPPER_BY_ID = "************* Get DataMapper By Id *************";
-    private static final String GET_ALL_DATAMAPPER_OR_BY_MSPACTION_ID = "************* Get All DataMapper Or Get By MspActionsId *************";
+    private static final String GET_ALL_DATAMAPPER_OR_BY_PARTNERACTION_ID = "************* Get All DataMapper Or Get By PartnerActionsId *************";
     private static final String UPDATE_DATAMAPPER = "************* Update DataMapper *************";
 
     @Autowired
@@ -105,7 +92,7 @@ public class DataMapperController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All DataMapper or Get By MspActionsId", description = "Description the liste of DataMappers", tags = {
+    @Operation(summary = "Get All DataMapper or Get By PartnerActionsId", description = "Returns the list of DataMappers", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response Ok"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -115,10 +102,10 @@ public class DataMapperController {
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = DATA_MAPPERS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<List<DataMapperDTO>> getAllDataMapper(
-            @RequestParam(name = "mspActionId", required = false) UUID mspActionId) {
-        log.info(GET_ALL_DATAMAPPER_OR_BY_MSPACTION_ID);
-        if (mspActionId != null) {
-            List<DataMapperDTO> mappers = dataMapperService.getByMspActionId(mspActionId);
+            @RequestParam(name = "partnerActionId", required = false) UUID partnerActionId) {
+        log.info(GET_ALL_DATAMAPPER_OR_BY_PARTNERACTION_ID);
+        if (partnerActionId != null) {
+            List<DataMapperDTO> mappers = dataMapperService.getByPartnerActionId(partnerActionId);
             return new ResponseEntity<>(mappers, HttpStatus.OK);
         }
         List<DataMapperDTO> mappers = dataMapperService.getAllDataMappers();

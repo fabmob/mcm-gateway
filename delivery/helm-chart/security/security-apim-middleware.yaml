@@ -1,0 +1,25 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: security-apim
+spec:
+  headers:
+    accessControlAllowCredentials: true
+    accessControlAllowHeaders:
+      - Authorization
+      - X-Requested-With
+      - Content-Type
+      - if-match
+    accessControlAllowMethods:
+      - OPTIONS
+      - GET
+      - PUT
+      - POST
+      - PATCH
+      - DELETE
+    accessControlAllowOriginList:
+      - https://${APIM_PORTAL_FQDN}
+      - https://${APIM_CONSOLE_FQDN}
+      - https://${APIM_GATEWAY_FQDN}
+    accessControlMaxAge: 100
+    addVaryHeader: true

@@ -20,21 +20,21 @@ public class VehicleAssets implements Serializable {
 
     @Schema(
             name = "iconUrl",
-            description = "Maximum time in minutes that a vehicle can be reserved before a rental begins")
+            description = "URL pointing to the location of a graphic icon file representing the vehicle type")
     @JsonProperty("iconUrl")
     private String iconUrl;
 
 
     @Schema(
             name = "iconUrlDark",
-            description = "Maximum time in minutes that a vehicle can be reserved before a rental begins")
+            description = "URL pointing to the location of a graphic icon file representing this vehicle type in dark mode")
     @JsonProperty("iconUrlDark")
     private String iconUrlDark;
 
 
     @Schema(
             name = "iconLastModified",
-            description = "Maximum time in minutes that a vehicle can be reserved before a rental begins")
+            description = "Date that indicates the last time any included vehicle icon images were modified or updated")
     @JsonProperty("iconLastModified")
     private Date iconLastModified;
 }

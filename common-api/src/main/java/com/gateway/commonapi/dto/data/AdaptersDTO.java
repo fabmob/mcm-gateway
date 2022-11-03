@@ -14,7 +14,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Schema(name="AdaptersDTO",description =  "Information about Adaptes")
+@Schema(name = "AdaptersDTO", description = "Information about Adapters")
 public class AdaptersDTO {
 
     @Schema(name = "adapterId",

@@ -1,8 +1,6 @@
 package com.gateway.database.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.GenericGenerator;
@@ -14,15 +12,18 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode(exclude = "partnerMeta")
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "price_list", schema = "msp")
-@FilterDef(name="filtre", parameters=@ParamDef( name="listType", type="string" ))
+@FilterDef(name = "filtre", parameters = @ParamDef(name = "listType", type = "string"))
 public class PriceList implements java.io.Serializable {
     @GenericGenerator(name = "generator", strategy = "foreign", parameters = @org.hibernate.annotations.Parameter(name = "property", value = "mspMeta"))
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "price_list_id")
     private UUID priceListId;
 
@@ -32,9 +33,9 @@ public class PriceList implements java.io.Serializable {
     @Column(name = "comment", length = 255)
     private String comment;
 
-    @OneToOne(fetch=FetchType.LAZY, mappedBy="priceList")
+    @OneToOne(fetch = FetchType.LAZY, mappedBy = "priceList")
     @PrimaryKeyJoinColumn
-    private MspMeta mspMeta;
+    private PartnerMeta partnerMeta;
 
 
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = false, mappedBy = "priceListForDuration", cascade = CascadeType.PERSIST)
@@ -49,14 +50,13 @@ public class PriceList implements java.io.Serializable {
     private UUID fkMspMeta;
 
 
-    public MspMeta getMspMeta() {
-        return this.mspMeta;
+    public PartnerMeta getPartnerMeta() {
+        return this.partnerMeta;
     }
 
-    public void setMspMeta(MspMeta mspMeta) {
-        this.mspMeta = mspMeta;
+    public void setPartnerMeta(PartnerMeta mspMeta) {
+        this.partnerMeta = mspMeta;
     }
-
 
 
     /**
@@ -71,7 +71,7 @@ public class PriceList implements java.io.Serializable {
     @Column(name = "out_Of_Bound_Fee")
     private Long outOfBoundFee;
 
-    @Column(name="fk_msp_meta")
+    @Column(name = "fk_msp_meta")
     public UUID getFkMspMeta() {
         return this.fkMspMeta;
     }
@@ -79,7 +79,6 @@ public class PriceList implements java.io.Serializable {
     public void setFkMspMeta(UUID fkMspMeta) {
         this.fkMspMeta = fkMspMeta;
     }
-
 
 
 }

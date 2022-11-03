@@ -9,7 +9,7 @@ import java.util.List;
 
 @Mapper
 public interface CacheParamMapper {
-    @Mapping(target = "mspId", source = "cacheParamPK.msp.mspId")
+    @Mapping(target = "partnerId", source = "cacheParamPK.partner.partnerId")
     @Mapping(target = "actionType", source = "cacheParamPK.actionType")
     CacheParamDTO mapEntityToDTO(CacheParam source);
 
@@ -17,7 +17,7 @@ public interface CacheParamMapper {
 
     List<CacheParam> mapDtoToEntity(List<CacheParamDTO> source);
 
-    @Mapping(target = "cacheParamPK.msp.mspId", source = "mspId")
+    @Mapping(target = "cacheParamPK.partner.partnerId", source = "partnerId")
     @Mapping(target = "cacheParamPK.actionType", source = "actionType")
     CacheParam mapDtoToEntity(CacheParamDTO source);
 }

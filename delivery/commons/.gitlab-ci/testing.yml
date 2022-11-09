@@ -1,0 +1,86 @@
+
+.testing-env-vars:
+  variables:
+    LANDSCAPE: "testing"
+    IMAGE_TAG_NAME: ${CI_COMMIT_REF_SLUG}
+    landscape_subdomain: "testing.${BASE_DOMAIN}"
+    SECRET_NAME: ${MODULE_NAME}-tls
+    CLUSTER_ISSUER: clusterissuer-mcm-dev
+    ADMIN_FQDN: admin-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    ANTIVIRUS_FQDN: antivirus-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    API_FQDN: api-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    ADMIN_BUS_FQDN: admin-bus-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    S3_FQDN: s3.testing.${BASE_DOMAIN}
+    IDP_FQDN: idp-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    MATOMO_FQDN: analytics-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    VAULT_FQDN: vault-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    WEBSITE_FQDN: website-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    SIMULATION_MAAS_FQDN: simulation-maas-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    MAILHOG_FQDN: mailhog-${CI_COMMIT_REF_SLUG}.testing.${BASE_DOMAIN}
+    IDP_MCM_IDENTITY_PROVIDER_ID: ${PPRD_IDP_MCM_IDENTITY_PROVIDER_ID}
+    IDP_MCM_IDENTITY_PROVIDER_SECRET: ${PPRD_IDP_MCM_IDENTITY_PROVIDER_SECRET}
+
+.testing-deploy-tags:
+  tags:
+    - os:linux
+    - platform:testing
+    - task:deploy
+
+.testing-image-job:
+  extends:
+    - .testing-env-vars
+    - .image-job
+
+.testing-deploy-job:
+  stage: deploy-testing
+  extends:
+    - .deploy-job
+    - .testing-env-vars
+    - .testing-deploy-tags
+  environment:
+    deployment_tier: testing
+
+.testing-undeploy-job:
+  extends:
+    - .undeploy-job
+    - .testing-env-vars
+    - .testing-deploy-tags
+  environment:
+    deployment_tier: testing
+
+# CLEAN UP JOBS
+.testing_cleanup_mongo: &testing_cleanup_mongo |
+  echo "MONGO CLEANING START"
+  mongosh "mongodb+srv://${TESTING_MONGO_HOST}" --username ${TESTING_MONGO_SERVICE_USER} --password ${TESTING_MONGO_SERVICE_PASSWORD} --tls --eval "db=db.getSiblingDB('${TESTING_MONGO_DB_NAME}'); db.getCollectionNames().forEach(function(c) { if (c.indexOf('system.') == -1) db[c].deleteMany({}); }); quit(0);"
+  echo "MONGO CLEANING STOP"
+
+mongo_testing_clean_data:
+  stage: utils
+  extends:
+    - .commons
+    - .test-job-tags
+  image: ${KUBETOOLS_IMAGE_TAGNAME}
+  script:
+    - *testing_cleanup_mongo
+
+.testing_cleanup_s3: &testing_cleanup_s3 |
+  echo "S3 CLEANING START"
+  /bin/sh -c "
+  bash +o history;
+  chmod +x /usr/bin/mc;
+  until (mc alias set s3alias https://serveur-${S3_FQDN} ${TESTING_S3_ROOT_USER} ${TESTING_S3_ROOT_PASSWORD} --api S3v4) do echo '...waiting...' && sleep 1; done;
+  until (mc admin info s3alias) do echo '...waiting...' && sleep 1; done;
+  mc rb --force --dangerous s3alias;
+  bash -o history;
+  "
+  echo "S3 CLEANING STOP"
+
+s3_testing_clean_data:
+  stage: utils
+  extends:
+    - .commons
+    - .testing-env-vars
+    - .test-job-tags
+  image: ${NEXUS_DOCKER_REPOSITORY_URL}/minio/mc:RELEASE.2022-04-16T21-11-21Z
+  script:
+    - *testing_cleanup_s3

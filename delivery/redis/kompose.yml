@@ -1,0 +1,27 @@
+version: '3'
+
+services:
+  redis:
+    image: ${REDIS_IMAGE_NAME}
+    build:
+      context: .
+      dockerfile: ./redis-dockerfile.yml
+      args:
+        BASE_REDIS_IMAGE_NAME: ${BASE_REDIS_IMAGE_NAME}
+    environment:
+      - POSTGRES_USER=${DATABASE_USER_NAME}
+      - POSTGRES_PASSWORD=${DATABASE_USER_PWD}
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_SERVICE_USER=${DB_SERVICE_USER}
+      - POSTGRES_SERVICE_PASSWORD=${DB_SERVICE_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+#    volumes:
+#      -  redis_volume:/var/lib/postgresql/data
+    ports:
+      - '6379'
+    labels:
+      - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+      - 'kompose.service.type=clusterip'
+
+#volumes:
+#  redis_volume:

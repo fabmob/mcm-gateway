@@ -1,0 +1,11 @@
+{
+  "dataMapperId": "231866de-4e4f-4ab7-948b-372ce1acaef2",
+  "internalField": "ID_STATION",
+  "externalField": "StationID",
+  "isArray": 0,
+  "format": null,
+  "timezone": "",
+  "containedValue": null,
+  "defaultValue": null,
+  "partnerActionId": "e222f848-0f53-46fd-97fa-6b1f9f3db265"
+}

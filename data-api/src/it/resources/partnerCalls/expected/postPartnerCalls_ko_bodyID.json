@@ -1,0 +1,8 @@
+{
+    "status": 400,
+    "errorCode": 400,
+    "label": "Bad Request",
+    "description": "Body with id c961e161-f1d0-4312-b09c-06cadd006a47 should not be provided",
+    "timestamp": "2022-04-26T09:54:45.713Z",
+    "callId": "ce2ba12b-04f5-4d7a-8631-86b71a21841c"
+}

@@ -1,0 +1,22 @@
+{
+  "partnerType": "MSP",
+  "logoUrl": "patchedLogoURL",
+  "priceList":{
+    "duration": [
+      {
+        "lowerPriceLimit": 12211,
+        "upperPriceLimit": 22,
+        "fixedFare": 3,
+        "farePerUnit": 4,
+        "unit": 5
+      },
+      {
+        "lowerPriceLimit": 123,
+        "upperPriceLimit": 2,
+        "fixedFare": 3,
+        "farePerUnit": 4,
+        "unit": 5
+      }
+    ]
+  }
+}

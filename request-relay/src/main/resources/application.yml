@@ -1,0 +1,47 @@
+server:
+  port: 8085
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+  error:
+    whitelabel.enabled: false
+
+logging:
+  level:
+    com:
+      gateway: DEBUG
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+springdoc:
+  api-docs:
+    path: /data-api
+  swagger-ui:
+    path: /api-docs.html
+
+spring:
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+
+  appli:
+    use:
+      cache: ${USE_CACHE:true}
+
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"

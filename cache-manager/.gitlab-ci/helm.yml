@@ -1,0 +1,5 @@
+cache_manager_image_push:
+  extends:
+    - .helm-push-image-job
+    - .cache-manager-base
+  needs: [ "cache_manager_image_build", "check-if-release-version" ]

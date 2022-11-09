@@ -1,0 +1,16 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: apim-console
+spec:
+  entryPoints:
+    - web
+  routes:
+    - kind: Rule
+      match: Host(`${APIM_CONSOLE_FQDN}`)
+      middlewares:
+        - name: security-apim
+      services:
+        - kind: Service
+          name: graviteeio-apim3x-ui
+          port: 8002

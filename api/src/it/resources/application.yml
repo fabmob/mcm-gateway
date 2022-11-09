@@ -1,0 +1,75 @@
+server:
+  port: 8080
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+
+springdoc:
+  api-docs:
+    path: /api
+  swagger-ui:
+    path: /api-docs.html
+
+logging:
+  level:
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+
+spring:
+  application:
+    name: api
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  profiles:
+    active: test
+  data:
+    rest:
+      basePath: #/api
+      detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+  main:
+    # To be removed if circular dependencies can be resolved in this project's services
+    allow-circular-references: true
+
+appli:
+  use:
+    cache: ${USE_CACHE:true}
+---
+
+spring:
+  profiles: test
+security:
+  disabled: true
+
+---
+
+spring:
+  profiles: prod
+security:
+  disabled: false
+
+
+---
+
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+    routingapi:
+      baseurl: "http://${ROUTING_API_HOST:localhost}:8082"

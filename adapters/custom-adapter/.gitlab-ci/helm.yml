@@ -1,0 +1,5 @@
+custom_adapter_image_push:
+  extends:
+    - .helm-push-image-job
+    - .custom-adapter-base
+  needs: [ "custom_adapter_image_build", "check-if-release-version" ]

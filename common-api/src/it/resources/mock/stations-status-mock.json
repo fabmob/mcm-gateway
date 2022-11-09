@@ -1,0 +1,27 @@
+[
+  {
+    "partnerId": "00000000-0000-0000-0000-000000000002",
+    "stationId": "ST400",
+    "numAssetsAvailable": 12,
+    "numAssetsAvailableType": [
+      {
+        "vehicleTypeId": "Mechanical",
+        "count": 8
+      }
+    ],
+    "numAssetsDisabled": 0,
+    "numDocksAvailable": 10,
+    "assetsDocksAvailable": [
+      {
+        "count": 8
+      }
+    ],
+    "numDocksDisabled": 0,
+    "isInstalled": true,
+    "isRenting": true,
+    "isReturning": true,
+    "bookDeeplink": "https://station/asset/book",
+    "useDeeplink": "https://station/asset/use",
+    "lastReported": 1646302112
+  }
+]

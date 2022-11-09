@@ -1,0 +1,8 @@
+{
+  "status": 404,
+  "errorCode": 404,
+  "label": "Not Found",
+  "description": "The requested resource Adapter with id 3b7238e0-adc7-4dfd-9d52-9fc42c024bc9 was not found",
+  "timestamp": "2022-07-12T15:03:27.480+02:00",
+  "callId": "d9da9507-9023-42ef-953e-2be1048bb8d5"
+}

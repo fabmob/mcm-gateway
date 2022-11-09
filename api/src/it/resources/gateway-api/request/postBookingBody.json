@@ -1,0 +1,47 @@
+{
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "driver": {
+    "id": "user987654",
+    "operator": "'carpool.mycity.com",
+    "alias": "JeanD",
+    "firstName": "Jean",
+    "lastName": "Dupond",
+    "grade": 4,
+    "picture": "carpool.mycity.com/user/user987654/picture.jpg",
+    "gender": "F",
+    "verifiedIdentity": true
+  },
+  "passenger": {
+    "id": "user987654",
+    "operator": "'carpool.mycity.com",
+    "alias": "JeanD",
+    "firstName": "Jean",
+    "lastName": "Dupond",
+    "grade": 4,
+    "picture": "carpool.mycity.com/user/user987654/picture.jpg",
+    "gender": "F",
+    "verifiedIdentity": true
+  },
+  "passengerPickupDate": 0,
+  "passengerPickupLat": 2.293444,
+  "passengerPickupLng": 48.858997,
+  "passengerDropLat": 1.443332,
+  "passengerDropLng": 43.604583,
+  "passengerPickupAddress": "Pont d'Iéna, Paris",
+  "passengerDropAddress": "Place du Capitole, Toulouse",
+  "status": "WAITING_CONFIRMATION",
+  "duration": 700000,
+  "distance": 700000,
+  "webUrl": "carpool.mycity.com/booking/booking00321",
+  "price": {
+    "type": "PAYING",
+    "amount": 15.3,
+    "currency": "EUR"
+  },
+  "car": {
+    "model": "Model Y",
+    "brand": "Tesla"
+  },
+  "driverJourneyId": "Journey00001",
+  "passengerJourneyId": "Journey00435"
+}

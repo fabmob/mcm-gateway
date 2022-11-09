@@ -1,0 +1,39 @@
+server:
+  port: 8085
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+
+logging:
+  level:
+    com:
+      gateway: DEBUG
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+    routingapi:
+      baseurl: "http://${ROUTING_API_HOST:localhost}:8082"

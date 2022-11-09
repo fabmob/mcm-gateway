@@ -1,0 +1,600 @@
+include:
+  - local: "delivery/commons/kubetools/.gitlab-ci.yml"
+  - local: "delivery/commons/sonarqube/.gitlab-ci.yml"
+
+validate_env:
+  stage: .pre
+  image: ubuntu:20.04
+  extends:
+    - .trigger-condition
+  script:
+    - |
+      echo "*************************************** log"
+      env
+      if [ -z ${BASE_DOMAIN} ]; then echo "BASE_DOMAIN must be set"; exit 1; fi
+      
+.cd-to-module: &cd-to-module |
+  echo "--------------------->MODULE_NAME=${MODULE_NAME}"
+  echo "pwd=`pwd`"
+  export MODULE_PATH=${MODULE_PATH:-${MODULE_NAME}}
+  [ "${GIT_STRATEGY}" != "none" ] && [ "${MODULE_PATH}" != "" ] && cd ${MODULE_PATH}
+
+.commons:
+  variables:
+    GIT_STRATEGY: clone
+    MODULE_NAME: ""
+    MODULE_PATH: ""
+    COMMON_NAME: common
+    #DOCKER_TLS_CERTDIR: ""
+    #DOCKER_DRIVER: overlay2
+    KUBETOOLS_IMAGE_TAGNAME: ${CI_REGISTRY}/${CI_PROJECT_PATH}/kubetools:${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_ID}
+    IMAGE_PULL_SECRET_PREFIX: gitlab-registry
+    PROXY_IMAGE_PULL_SECRET_PREFIX: nexus-registry
+    GITLAB_PROJECT_PATH: ${CI_PROJECT_PATH}
+    GITLAB_BRANCH: ${CI_COMMIT_REF_NAME}
+    GITLAB_URL: ${CI_SERVER_URL}
+    BRANCH_NAME: ${CI_COMMIT_REF_SLUG}
+    IMAGE_TAG_NAME: ${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_ID}
+    REGISTRY_USER: ${CI_REGISTRY_USER}
+    REGISTRY_PASSWORD: ${CI_REGISTRY_PASSWORD}
+    REGISTRY_BASE_NAME: ${CI_REGISTRY_IMAGE}
+    REGISTRY_URL: ${CI_REGISTRY}
+    NEXUS_DOCKER_REGISTRY_URL: ${NEXUS_DOCKER_REGISTRY}
+    NEXUS_USER_NAME: ${NEXUS_USER_NAME}
+    NEXUS_USER_PWD: ${NEXUS_USER_PWD}
+    BUILD_IMAGE_JAVA_NAME: maven:3-jdk-11
+    VERIFY_IMAGE_NAME: ${CI_REGISTRY_IMAGE}/mcm-verify:${CI_COMMIT_REF_SLUG}-${CI_PIPELINE_ID}
+    DEV_KUBE_CONTEXT: "mcm/std-maas/gateway:devmcm"
+    PPRD_KUBE_CONTEXT: "mcm/std-maas/gateway:preprodmcm"
+    NEXUS_URL: ${NEXUS_URL}
+    SONAR_URL: ${SONAR_URL}
+  before_script:
+    - *cd-to-module
+
+.no-git-clone:
+  variables:
+    GIT_STRATEGY: none
+
+.no-dependencies:
+  dependencies: []
+
+# pas de stage en prérequis
+.no-needs:
+  needs: []
+
+.manual:
+  when: manual
+
+.trigger-condition:
+#  when: manual
+#  needs: []
+  script: |
+    echo "when: manual"
+
+.deactivate:
+#  when: manual
+  script: |
+    echo "when: manual"
+
+# si plusieurs only sur un job, il faut les cumuler sur une classe qu'on étend car ils s'overrident.
+.only-master:
+  only:
+    refs:
+      - master
+
+.only-develop:
+  only:
+    refs:
+      - develop
+
+# Testing suppose to be ref on master and created by tag. Seul les tags RC devraient être poussés en testing
+.only-testing:
+  only:
+    refs:
+      - tags
+
+# nomscript : alias
+.predicate-skip-tests-verify-yes: &predicate-skip-tests-verify-yes $SKIP_TEST == "yes"
+
+# tous les jobs avec except-skip-tests seront exclus si SKIP_TEST = yes
+.except-skip-tests:
+  except:
+    variables:
+      - *predicate-skip-tests-verify-yes
+
+
+.predicate-clean-yes: &predicate-clean-yes $CLEAN_DATA == "yes"
+
+.only-clean:
+  only:
+    variables:
+      - *predicate-clean-yes
+
+.except-clean:
+  except:
+    variables:
+      - *predicate-clean-yes
+
+.except-clean-or-skip:
+  except:
+    variables:
+      - *predicate-clean-yes
+      - *predicate-skip-tests-verify-yes
+
+# Helper templates to specify intents of jobs, and select appropriate runners
+
+# permet de viser le runner à utilise sur gitlab
+.build-job-tags:
+  tags:
+    - os:linux
+    - task:build
+
+.image-job-tags:
+  tags:
+    - os:linux
+    - task:image
+
+.test-job-tags:
+  tags:
+    - os:linux
+    - task:test
+
+.preview-deploy-tags:
+  tags:
+    - os:linux
+    - platform:dev
+    - task:deploy
+
+.testing-deploy-tags:
+  tags:
+    - os:linux
+    - platform:testing
+    - task:deploy
+
+.preprod-deploy-tags:
+  tags:
+    - os:linux
+    - platform:preprod
+    - task:deploy
+
+.build-job:
+  extends:
+    - .commons
+    - .build-job-tags
+    - .except-clean
+    - .envsubst
+    - .trigger-condition
+  stage: build
+  image: ${BUILD_IMAGE_JAVA_NAME}
+  script:
+    - set -x
+    - echo '${SONAR_URL}' | envsubst
+
+.install-envsubst: &install-envsubst |
+    echo "Installation of envsubst command with apt-get install gettext-base"
+    apt-get update && apt-get install -y gettext-base jq
+
+.envsubst:
+  before_script:
+    - *install-envsubst
+
+
+# se connecte au registry de gitlab et de nexus
+.declare-image-functions: &declare-image-functions |
+  function image {
+    set -x
+    docker login -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} ${REGISTRY_URL}
+    docker login -u ${NEXUS_USER_NAME} -p ${NEXUS_USER_PWD} ${NEXUS_DOCKER_REGISTRY_URL}
+    echo "DOCKER-COMPOSE!"
+    docker-compose --file ${COMPOSE_FILENAME} build
+    docker-compose --file ${COMPOSE_FILENAME} push
+  }
+
+.pre-image-job:
+  extends:
+    - .commons
+    - .image-job-tags
+    - .except-clean
+    - .trigger-condition
+  stage: pre-image
+  variables:
+    COMPOSE_FILENAME: kompose.yml
+  image: tiangolo/docker-with-compose:2021-09-18
+  before_script:
+    - *cd-to-module
+    - *declare-image-functions
+  script:
+    - |
+      image
+
+# image, job contenant les variables, les tags pour les images. Job pour recréer des images provenant de docker pour changer port ou autres
+.image-job:
+  extends:
+    - .commons
+    - .image-job-tags
+    - .trigger-condition
+  stage: image
+  variables:
+    COMPOSE_FILENAME: kompose.yml
+  image: ${NEXUS_DOCKER_REGISTRY_URL}/tiangolo/docker-with-compose:2021-09-18
+  before_script:
+    - *cd-to-module
+    - *declare-image-functions
+  script:
+    - |
+      image
+
+.test-job:
+  stage: test
+  extends:
+    - .commons
+    - .test-job-tags
+    - .except-clean-or-skip
+    - .trigger-condition
+  # artefacts: passer des choses buildées d'un job à un autre. Le job qui a besoin d'un artefact doit avoir une dependance needs vers celui qui exporte l'artefact
+  artifacts:
+    paths:
+      - ${MODULE_PATH:-${MODULE_NAME}}/junit.xml
+      - ${MODULE_PATH:-${MODULE_NAME}}/coverage
+    when: always
+    reports:
+      junit:
+        - ${MODULE_PATH:-${MODULE_NAME}}/junit.xml
+
+.verify-job:
+  extends:
+    - .commons
+    - .test-job-tags
+    - .except-clean-or-skip
+    - .trigger-condition
+  image: ${VERIFY_IMAGE_NAME}
+  stage: verify
+  variables:
+    SONAR_SOURCES: .
+    SONAR_EXCLUSIONS: "sonar.exclusions=**/node_modules/**,dist/**,databaseConfig/**,public/**,coverage/**,**/__tests__/**,**.yml,**.json,**.md,eslintrc.js"
+    SONAR_CPD_EXCLUSIONS: "**/__tests__/**,src/datasources/**,src/models/**,src/repositories/**"
+  needs: ["sonarqube-verify-image-build"]
+  script:
+    - |
+      cd /opt/mcm-verify/
+      ./verify.sh
+  artifacts:
+    paths:
+      - ${MODULE_PATH:-${MODULE_NAME}}/sonarqube_quality_gate_report
+      - ${MODULE_PATH:-${MODULE_NAME}}/sonarqube_issues
+
+.verify-all-script: &verify-all-script /opt/mcm-verify/convert_sonarqube_issues.sh
+
+#verify_all:
+#  extends:
+#    - .commons
+#    - .test-job-tags
+#    - .except-clean-or-skip
+#  stage: verify_all
+#  image: ${VERIFY_IMAGE_NAME}
+#  script:
+#    - *verify-all-script
+#  artifacts:
+#    paths:
+#      - gl-code-quality-report.json
+#    reports:
+#      codequality: gl-code-quality-report.json
+
+.cleanup_postgres-gateway: &cleanup_postgres-gateway |
+  echo "POSTGRES IDP CLEANING START"
+  echo ${BRANCH_NAME}
+  IDP_POD_NAME=$(kubectl get pods -o wide -A | grep ${BRANCH_NAME} | grep idp | awk '{ print $2 }')
+  IDP_NAMESPACE=$(kubectl get pods -o wide -A | grep ${BRANCH_NAME} | grep idp | awk '{ print $1 }')
+  echo "INIT CONNECTION"
+  kubectl exec $IDP_POD_NAME -n $IDP_NAMESPACE -c idp -- sh -c \
+  "/opt/jboss/keycloak/bin/kcadm.sh config credentials --server http://localhost:8080/auth --realm master --user ${KEYCLOAK_USER} --password ${KEYCLOAK_PASSWORD}"
+  echo "---------"
+  echo "GET USERS"
+  USER_LIST_ID=$(kubectl exec $IDP_POD_NAME -n $IDP_NAMESPACE -c idp -- sh -c "/opt/jboss/keycloak/bin/kcadm.sh get users -r mcm --fields id" | jq -r '.[] | .id')
+  echo $USER_LIST_ID
+  if [ -z "$USER_LIST_ID" ]
+  then
+    echo "No user to delete"
+  else
+    echo "---------"
+    echo "DELETE USERS"
+    for i in $USER_LIST_ID
+    do
+      $(kubectl exec $IDP_POD_NAME -n $IDP_NAMESPACE -c idp -- sh -c "/opt/jboss/keycloak/bin/kcadm.sh delete users/$i -r mcm")
+    done
+  fi
+  echo "---------"
+  echo "GET GROUPS"
+  GROUP_LIST_ID=$(kubectl exec $IDP_POD_NAME -n $IDP_NAMESPACE -c idp -- sh -c "/opt/jboss/keycloak/bin/kcadm.sh get groups -r mcm" | jq -r '.[] | select( .name == "entreprises" or .name == "collectivités") | .subGroups | .[] | .id')
+  echo $GROUP_LIST_ID
+  if [ -z "$GROUP_LIST_ID" ]
+  then
+    echo "No group to delete"
+  else
+    echo "---------"
+    echo "DELETE GROUPS"
+    for i in $GROUP_LIST_ID
+    do
+      $(kubectl exec $IDP_POD_NAME -n $IDP_NAMESPACE -c idp -- sh -c "/opt/jboss/keycloak/bin/kcadm.sh delete groups/$i -r mcm")
+    done
+  fi
+  echo "POSTGRES IDP CLEANING STOP"
+
+.postgres-clean-data:
+  stage: prime_preview
+  extends:
+    - .commons
+    - .test-job-tags
+    - .trigger-condition
+  image: ${KUBETOOLS_IMAGE_TAGNAME}
+  script:
+    - *cleanup_postgres-gateway
+
+# landscape preview testing preprod. Tous les fqdn
+.preview-env-vars:
+  variables:
+    LANDSCAPE: "preview-gw"
+    landscape_subdomain: "preview${BASE_DOMAIN}"
+    SECRET_NAME: ${MODULE_NAME}-tls
+    CLUSTER_ISSUER: clusterissuer-mcm-maas-dev
+    DATA_API_FQDN: data-api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    API_FQDN: api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    DEFAULT_ADAPTER_FQDN: default-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    CUSTOM_ADAPTER_FQDN: custom-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    GENERIC_ADAPTER_HOST: generic-adapter-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    ROUTING_API_FQDN: routing-api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    REQUEST_RELAY_FQDN: request-relay-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    POSTGRES_FQDN: postgresgateway-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${CI_COMMIT_REF_SLUG}.preview${BASE_DOMAIN}
+
+.testing-env-vars:
+  variables:
+    LANDSCAPE: "testing-gw"
+    landscape_subdomain: "testing.${BASE_DOMAIN}"
+    SECRET_NAME: ${MODULE_NAME}-tls
+    CLUSTER_ISSUER: clusterissuer-mcm-maas-dev
+    DATA_API_FQDN: data-api-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    API_FQDN: api-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    DEFAULT_ADAPTER_FQDN: default-adapter-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    CUSTOM_ADAPTER_FQDN: custom-adapter-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    ROUTING_API_FQDN: routing-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    REQUEST_RELAY_FQDN: request-relay-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${CI_COMMIT_REF_SLUG}.testing${BASE_DOMAIN}
+
+#TODO switch to TAG VAR - digit
+.preprod-env-vars:
+  variables:
+    LANDSCAPE: "preprod-gw"
+    landscape_subdomain: "preprod.${BASE_DOMAIN}"
+    SECRET_NAME: ${MODULE_NAME}-tls
+    CLUSTER_ISSUER: clusterissuer-mcm-maas-preprod
+    DATA_API_FQDN: data-api-${URL_TAG}.preprod.${BASE_DOMAIN}
+    API_FQDN: api-${URL_TAG}.preprod.${BASE_DOMAIN}
+    DEFAULT_ADAPTER_FQDN: default-adapter-${URL_TAG}.preprod.${BASE_DOMAIN}
+    ROUTING_API_FQDN: routing-${URL_TAG}.testing${BASE_DOMAIN}
+    REQUEST_RELAY_FQDN: request-relay-${URL_TAG}.preprod.${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api-${URL_TAG}.preprod.${BASE_DOMAIN}
+    CACHE_MANAGER_FQDN: cache-manager-${URL_TAG}.preprod.${BASE_DOMAIN}
+
+# le clean se lance au bout de 3j en dev
+.auto-stop-preview:
+  environment:
+    auto_stop_in: 3 days
+
+.auto-stop-testing:
+  environment:
+    auto_stop_in: 1 week
+
+.declare-deployment-functions: &declare-deployment-functions |
+  function set_cluster_context {
+    if [[ "$CI_JOB_NAME" == *"_preview"* ||  "$CI_JOB_NAME" == *"_testing"* ]]; then kubectl config use-context "$DEV_KUBE_CONTEXT"; fi
+    if [[ "$CI_JOB_NAME" == *"_preprod"* ]]; then kubectl config use-context "$PPRD_KUBE_CONTEXT"; fi
+    if [[ "$CI_JOB_NAME" == *"_prod"* ]]; then kubectl config use-context "$PROD_KUBE_CONTEXT"; fi
+  }
+  
+  function get_cluster_context {
+    kubectl config get-contexts
+  }
+  
+  function deploy {
+    env 
+    if [[ ! $NEW_RELEASE_VERSION =~ ^[0-9]+[\.\-][0-9]+[\.\-][0-9]+$ ]]
+    then
+      set_cluster_context
+      get_cluster_context
+  
+      echo "deploying: ${MODULE_NAME} for ${CI_ENVIRONMENT_TIER}, subdomain ${LANDSCAPE}..."
+      # CREATE NAMESPACE ENV
+      NAMESPACE="${MODULE_NAME}-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}"
+      echo "This is your namespace: ${NAMESPACE}"
+  
+      # DELETE EXISTING NAMESPACES 
+      RES=`kubectl get namespaces | grep "^${NAMESPACE} " -c` > /dev/null 2>&1 || FAILED=true
+      echo "namespace ${NAMESPACE} trouve $RES fois"
+  
+      if [ "$RES" != "0" ]
+      then
+        kubectl delete namespace ${NAMESPACE}
+      else
+        echo "else"
+      fi
+  
+      kubectl create namespace ${NAMESPACE} --dry-run=client -o yaml | kubectl apply -f -
+  
+      export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+      export PROXY_IMAGE_PULL_SECRET_NAME=${PROXY_IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+      kubectl create secret docker-registry ${GITLAB_IMAGE_PULL_SECRET_NAME} --docker-server="$CI_REGISTRY" --docker-username="$CI_DEPLOY_USER" --docker-password="$CI_DEPLOY_PASSWORD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client --namespace=${NAMESPACE} | kubectl apply -f -
+      kubectl create secret docker-registry ${PROXY_IMAGE_PULL_SECRET_NAME} --docker-server="$NEXUS_DOCKER_REGISTRY_URL" --docker-username="$NEXUS_USER_NAME" --docker-password="$NEXUS_USER_PWD" --docker-email="$GITLAB_USER_EMAIL" -o yaml --dry-run=client --namespace=${NAMESPACE} | kubectl apply -f -
+  
+      chmod 777 /usr/local/bin/a
+      chmod 777 /usr/local/bin/k
+      mkdir -p ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE} && ENV_PATH=${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env KOMPOSE_FILE=$1 k | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml
+      echo "Special condition for ${MODULE_NAME}"
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/template.yml | envsubst | tee ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
+      kubectl apply -f ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml --namespace=${NAMESPACE}
+  
+      cat ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/params.env | envsubst > ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/values.env
+    else
+      echo "Nothing to deploy here, helm deployment will do it instead
+    fi
+  }
+  # fonction de nettoyage invoquée par gitlab au bout de la durée d'expiration définie
+  # idéalement in faudrait pouvoir supprimer le namespace avec invocation du clear cluster cache plutot que se baser sur le resources.yml
+  function undeploy {
+    export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+    export PROXY_IMAGE_PULL_SECRET_NAME=${PROXY_IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+    kubectl delete -f ${CI_PROJECT_DIR}/${MODULE_PATH}/k8s/${LANDSCAPE}/resources.yml
+    kubectl delete secret ${GITLAB_IMAGE_PULL_SECRET_NAME}
+    kubectl delete secret ${PROXY_IMAGE_PULL_SECRET_NAME}
+  }
+  # récupère le nom de naspace pour une branche donnée
+  function pod_namespace {
+    service_name=$1
+    kubectl get pods -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME}-${LANDSCAPE} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep $service_name | awk '{ print $1 }' | head -n 1
+  }
+
+  function config_volume {
+    echo "configuring volume"
+    service_name=$1
+    PV_CHECK=$(kubectl get pv -o wide --all-namespaces | grep -- -`echo ${BRANCH_NAME}-${LANDSCAPE} | sed -E "s/[^-]+-(feature-|fix-)?([^_-]*).*/\2/"`- | grep "${BRANCH_NAME}-${LANDSCAPE}/postgres-volume" | awk '{ print $1 }' | head -n 1)
+    if [ $PV_CHECK != "" ]
+    then
+        echo "### Patch the persistent volume to retain than delete for $1 ###"
+        kubectl patch pv $PV_CHECK -p '{"spec":{"persistentVolumeReclaimPolicy":"Retain"}}'
+    fi
+  }
+  function delete_volume {
+    service_name=$1
+    PV_TO_DELETE=$(kubectl get pv -o wide --all-namespaces | grep $(pod_namespace $1) | awk '{ print $$service_name }')
+    if [ $PV_TO_DELETE != "" ]
+    then
+        echo "### Patch the persistent volume to delete than retain for $1 ###"
+        kubectl patch pv $PV_TO_DELETE -p '{"spec":{"persistentVolumeReclaimPolicy":"Delete"}}'
+    fi
+  }
+  function wait_pod {
+    while [[ $(pod_namespace $1) == "" ]]
+    do
+      echo "Wait $1 try"
+      sleep 10
+    done
+  }
+
+.deploy-job:
+  extends:
+    - .commons
+    - .except-clean
+    - .no-dependencies
+    - .trigger-condition
+  image: ${KUBETOOLS_IMAGE_TAGNAME}
+  before_script:
+    - *cd-to-module
+    - *declare-deployment-functions
+    - *declare-image-functions
+  script:
+    - |
+      deploy
+  artifacts:
+    paths:
+      - ${MODULE_PATH:-${MODULE_NAME}}/k8s/${LANDSCAPE}
+    reports:
+      dotenv: ${MODULE_PATH:-${MODULE_NAME}}/deployment.env
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}-${LANDSCAPE}/${MODULE_NAME}
+    url: ${ENV_URL}
+
+.declare-pod-functions:
+  before_script:
+    - *declare-deployment-functions
+
+.preview-deploy-job:
+  stage: deploy-preview
+  extends:
+    - .deploy-job
+    - .preview-env-vars
+    - .preview-deploy-tags
+    - .auto-stop-preview
+    - .trigger-condition
+  variables:
+    LANDSCAPE: preview-gw
+  environment:
+    deployment_tier: development
+ # environment:
+ #   name: maas-dev
+
+.testing-deploy-job:
+  stage: deploy-testing
+  extends:
+    - .deploy-job
+    - .testing-env-vars
+    - .testing-deploy-tags
+    - .auto-stop-testing
+    - .only-testing
+    - .preprod-deploy-tags
+    - .manual
+    - .trigger-condition
+  environment:
+    deployment_tier: testing
+
+.preprod-deploy-job:
+  stage: deploy-preprod
+  extends:
+    - .deploy-job
+    - .preprod-env-vars
+    - .preprod-deploy-tags
+    - .manual
+    - .trigger-condition
+  environment:
+    deployment_tier: production
+
+.undeploy-job:
+  stage: cleanup
+  extends:
+    - .commons
+    - .no-git-clone
+    - .manual
+    - .except-clean
+  image: ${KUBETOOLS_IMAGE_TAGNAME}
+  before_script:
+    - *cd-to-module
+    - *declare-deployment-functions
+  script:
+    - |
+      undeploy
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}-${LANDSCAPE}/${MODULE_NAME}
+    action: stop
+
+.preview-undeploy-job:
+  extends:
+    - .undeploy-job
+    - .preview-env-vars
+    - .preview-deploy-tags
+  variables:
+    LANDSCAPE: preview-gw
+  environment:
+    deployment_tier: development
+
+.testing-undeploy-job:
+  extends:
+    - .undeploy-job
+    - .testing-env-vars
+    - .testing-deploy-tags
+    - .only-testing
+  environment:
+    deployment_tier: testing
+
+.preprod-undeploy-job:
+  extends:
+    - .undeploy-job
+    - .preprod-env-vars
+    - .preprod-deploy-tags
+  environment:
+    deployment_tier: production
+
+

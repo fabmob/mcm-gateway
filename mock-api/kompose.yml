@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  mock-api:
+    image: ${MOCK_API_IMAGE_NAME}
+    build:
+      context: .
+      dockerfile: mock-api-dockerfile.yml
+      args:
+        MAVEN_IMAGE_NAME: ${BASE_MOCK_API_IMAGE_NAME}
+    ports:
+      - '8084'
+    environment:
+      - SERVICE_BASE_PATH=${MOCK_API_FQDN}
+      - MOCK_RESPONSES_DIRECTORY=${COMPUTED_MOCK_RESPONSES_DIRECTORY}
+      - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+      - MAAS_API_CACHE_PORT=6379
+      - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+      - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
+    labels:
+      - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+      - 'kompose.service.type=clusterip'      
+      - 'kompose.volume.size=350Mi'
+      - 'kompose.volume.storage-class-name=azurefile-csi-mock'
+      - 'kompose.volume.type=persistentVolumeClaim'
+    volumes:
+      - mock-api-responses-volume:/mocks
+  #    networks:
+  #      - web-nw
+
+volumes:
+    mock-api-responses-volume:
+
+networks:
+  web-nw:

@@ -1,0 +1,11 @@
+{
+  "url": "http://demo.io/mockedmsp",
+  "method": "POST",
+  "body": "{\"refreshToken\": \"ZENPARK_REFRESH_TOKEN\"}",
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    }
+  ]
+}

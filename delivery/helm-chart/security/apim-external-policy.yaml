@@ -1,0 +1,13 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: apim-external-policy
+spec:
+  podSelector:
+    matchLabels:
+      visibility: external
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              com.mcm.maas.ingress: 'true'

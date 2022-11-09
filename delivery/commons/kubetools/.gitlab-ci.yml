@@ -1,0 +1,49 @@
+commons-kubetools-image:
+  extends:
+    - .image-job
+  stage: prepare
+  variables:
+    MODULE_NAME: kubetools
+    MODULE_PATH: delivery/commons/kubetools
+
+
+check-if-release-version:
+  stage: prepare
+  script: |
+    set -x
+    echo "a"
+    if [[ "$CI_COMMIT_BRANCH"  == release/* ]] 
+    then
+      if [[ "$CI_COMMIT_BRANCH"  =~ release\/[0-9]+\.[0-9]+\.[xyz] ]]
+      then
+          export MAJOR_MINOR_VERSION=`echo "$CI_COMMIT_BRANCH" | sed -E "s/release\/([0-9]+\.[0-9]+)\..*/\1/g"`
+          echo "MAJOR_MINOR_VERSION=$MAJOR_MINOR_VERSION"
+    
+          apt update >/dev/null 2> /dev/null
+          apt install -y jq >/dev/null 2> /dev/null
+    
+          echo "Check nexus for next patch version"
+          LAST_VERSION=`curl -v  -u ${NEXUS_ROOT_USER}:${NEXUS_ROOT_PASSWORD}  --request GET  "${NEXUS_URL}/service/rest/v1/search?repository=gateway-maven-releases&sort=version&maven.groupId=com.gateway&version=${MAJOR_MINOR_VERSION}.*" | jq '.items[0].version'  | sed -E "s/\"//g"`
+          echo "Last version found from nexus release: $LAST_VERSION"
+          if [[ "$LAST_VERSION" == "null" ]]
+          then
+            export PATCH_VERSION=0
+          else
+            echo "inside else"
+            export PATCH_VERSION=$((`echo $LAST_VERSION | sed -E "s/[0-9]+\.[0-9]+\.([0-9]+).*/\1/g"`+1))
+          fi
+          export NEW_RELEASE_VERSION=${MAJOR_MINOR_VERSION}.${PATCH_VERSION}
+      else
+        echo "Release branch does not match requirement release/x.y.z where x and y are two numbers and z the char value x, y or z"
+        exit -1
+      fi
+    else 
+      echo "not a release branch"
+    fi
+    echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION" >> release_vers.env
+    echo "PATCH_VERSION=$PATCH_VERSION" >> patch_vers.env
+  artifacts:
+    reports:
+      dotenv:
+        - release_vers.env
+        - patch_vers.env

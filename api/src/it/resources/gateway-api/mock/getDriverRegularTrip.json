@@ -1,0 +1,64 @@
+[
+  {
+    "distance": 700000,
+    "driverArrivalLng": 43.604584,
+    "dropoffToArrivalWalkingPolyline": "eqciGqwxGRo@",
+    "driverDepartureAddress": "Pont d'Iéna, Paris",
+    "departureToPickupWalkingPolyline": "c}eiHct~LzCgG",
+    "operator": "carpool.mycity.com",
+    "passengerDropAddress": "Place du Capitole, Toulouse",
+    "passengerPickupAddress": "Pont d'Iéna, Paris",
+    "duration": 25200,
+    "journeyPolyline": "wweiH_|~L`dmQjjdEx`sLkg^",
+    "car": {
+      "model": "Model Y",
+      "brand": "Tesla"
+    },
+    "dropoffToArrivalWalkingDistance": 50,
+    "schedules": [
+      {
+        "passengerPickupTimeOfDay": "07:30:00",
+        "passengerPickupDay": "MON",
+        "JourneySchedules": [
+          {
+            "driverDepartureDate": 1655452466,
+            "webUrl": "carpool.mycity.com\/journey\/journey123456",
+            "id": "journey012345",
+            "passengerPickupDate": 1655452466,
+            "type": "PLANNED"
+          }
+        ]
+      }
+    ],
+    "driverArrivalLat": 1.443332,
+    "preferences": {
+      "music": true,
+      "luggageSize": 3,
+      "smoking": false,
+      "animals": false,
+      "isTalker": true
+    },
+    "passengerDropLng": 43.604584,
+    "driverArrivalAddress": "Place du Capitole, Toulouse",
+    "passengerDropLat": 1.443332,
+    "departureToPickupWalkingDuration": 60,
+    "passengerPickupLng": 48.858997,
+    "driverDepartureLat": 2.293444,
+    "driver": {
+      "firstName": "Jean",
+      "lastName": "Dupond",
+      "gender": "M",
+      "grade": 4,
+      "alias": "JeanD",
+      "id": "user987654",
+      "verifiedIdentity": true,
+      "operator": "carpool.mycity.com",
+      "picture": "carpool.mycity.com\/user\/user987654\/picture.jpg"
+    },
+    "departureToPickupWalkingDistance": 50,
+    "passengerPickupLat": 2.293444,
+    "webUrl": "carpool.mycity.com\/driverJourney\/12345678",
+    "dropoffToArrivalWalkingDuration": 60,
+    "driverDepartureLng": 48.858997
+  }
+]

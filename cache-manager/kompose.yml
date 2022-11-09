@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  cache-manager:
+     image: ${CACHE_MANAGER_IMAGE_NAME}
+     build:
+       context: .
+       dockerfile: cache-manager-dockerfile.yml
+       args:
+         MAVEN_IMAGE_NAME: ${BASE_CACHE_MANAGER_IMAGE_NAME}
+     environment:
+       - SERVICE_BASE_PATH=${CACHE_MANAGER_FQDN}
+       - DATA_API_HOST=data-api.data-api-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - ROUTING_API_HOST=routing-api.routing-api-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_PORT=6379
+       - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
+     ports:
+       - '8086'
+     labels:
+       - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+       - 'kompose.service.type=clusterip'
+ #    networks:
+ #      - web-nw
+
+#networks:
+#  web-nw:

@@ -1,0 +1,8 @@
+{
+  "status": 409,
+  "errorCode": 409,
+  "label": "Conflict",
+  "description": "The MSP with id 6c317901-749f-4d7d-82bb-afdc737b26b3 does not handle this feature : PING",
+  "timestamp": "2022-10-05T15:11:11.777+02:00",
+  "callId": "8690391b-ae0a-4b08-9811-c5239e848bb8"
+}

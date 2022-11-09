@@ -1,0 +1,87 @@
+include:
+  - local: "mock-api/.gitlab-ci/helm.yml"
+
+.mock-api-base:
+  variables:
+    MODULE_NAME: mock-api
+    MODULE_PATH: ${MODULE_NAME}
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/adoptopenjdk:11-jre-hotspot
+    GITLAB_MOCK_RESPONSES_DIRECTORY: ${MOCK_RESPONSES_DIRECTORY_OVERRIDE}
+
+.mock_api_init_vars: &mock_api_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export MOCK_API_IMAGE_NAME=${REGISTRY_BASE_NAME}/mock-api:${IMAGE_TAG_NAME}
+  export BASE_MOCK_API_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  export VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+  export COMPUTED_MOCK_RESPONSES_DIRECTORY=${GITLAB_MOCK_RESPONSES_DIRECTORY:-/mocks}
+
+.mock-api-build: &mock-api-build |
+  set -x
+  envsubst < settings.xml
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
+  cd mock-api
+  envsubst < ../settings.xml
+  mvn clean install -s ../settings.xml -DskipTests
+
+mock_api_build:
+  extends:
+    - .mock-api-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/mock-api
+  script:
+    - *mock_api_init_vars
+    - *mock-api-build
+  artifacts:
+    paths:
+      - mock-api/target
+  needs: [ "deploy-nexus", "check-if-release-version" ]
+
+mock_api_image_build:
+  extends:
+    - .mock-api-base
+    - .image-job
+  #    - .except-clean
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/mock-api
+  script:
+    - *mock_api_init_vars
+    - |
+      #set -x
+      cd mock-api
+      pwd
+      image
+  needs: [ "mock_api_build" , "check-if-release-version" ]
+
+
+mock_api_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .mock-api-base
+  script:
+    - *mock_api_init_vars
+    - |
+      set -x
+      echo " --------- Deploiement en cours ... ---------"
+      deploy
+  needs: [ "mock_api_image_build" , "check-if-release-version" ]
+  environment:
+    on_stop: mock_api_preview_cleanup
+
+
+mock_api_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .mock-api-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

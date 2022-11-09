@@ -1,0 +1,83 @@
+include:
+  - local: "adapters/custom-adapter/.gitlab-ci/helm.yml"
+
+.custom-adapter-base:
+  variables:
+    MODULE_NAME: custom-adapter
+    MODULE_PATH: adapters/${MODULE_NAME}
+    NEXUS_MAVEN_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/library/maven:3-jdk-11
+
+
+.custom_adapter_init_vars: &custom_adapter_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export CUSTOM_ADAPTER_IMAGE_NAME=${REGISTRY_BASE_NAME}/custom-adapter:${IMAGE_TAG_NAME}
+  export BASE_CUSTOM_ADAPTER_IMAGE_NAME=${NEXUS_MAVEN_IMAGE_NAME}
+  export MODULE_NAME=${MODULE_NAME}
+  export MODULE_PATH=${MODULE_PATH}
+  echo "BASE_CUSTOM_ADAPTER_IMAGE_NAME=$BASE_CUSTOM_ADAPTER_IMAGE_NAME"
+  echo "MODULE_PATH=${MODULE_PATH}"
+  echo "MODULE_NAME=${MODULE_NAME}"
+  export VERSION=`cat pom.xml | grep "<groupId>com.gateway</groupId>" -C 3 | grep -E  "<version>.*</version>" -o | head -1 | sed -E "s/<version>(.*)<\/version>/\1/g" | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+
+.custom-adapter-build: &custom-adapter-build |
+  envsubst < settings.xml
+  # if release version we change pom version with the new version
+  if [ ! -z $NEW_RELEASE_VERSION ]
+  then
+    mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+  fi
+  cd adapters/custom-adapter
+  envsubst < ../../settings.xml
+  mvn clean install -s ../../settings.xml -DskipTests --batch-mode
+
+custom_adapter_build:
+  extends:
+    - .custom-adapter-base
+    - .build-job
+    - .no-needs
+    - .envsubst
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/custom-adapter
+  script:
+    - *custom_adapter_init_vars
+    - *custom-adapter-build
+  artifacts:
+    paths:
+      - adapters/custom-adapter/target
+  needs: [ "deploy-nexus", "check-if-release-version" ]
+
+custom_adapter_image_build:
+  extends:
+    - .image-job
+    - .custom-adapter-base
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/custom-adapter
+  script:
+    - *custom_adapter_init_vars
+    - |
+      image
+  needs: [ "custom_adapter_build" , "check-if-release-version" ]
+
+
+custom_adapter_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .custom-adapter-base
+  script:
+    - *custom_adapter_init_vars
+    - |
+      deploy
+  needs: [ "custom_adapter_image_build", "check-if-release-version" ]
+  environment:
+    on_stop: custom_adapter_preview_cleanup
+
+
+custom_adapter_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .custom-adapter-base
+  script:
+    - |
+      undeploy
+      
+      #TODO artifact entre ressource.yml deploiement et undeploy

@@ -1,0 +1,48 @@
+[
+  {
+    "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+    "isVirtualStation": true,
+    "rentalWebUrl": null,
+    "regionId": "XX",
+    "name": "Trocadero",
+    "vehicleTypeCapacity": null,
+    "isUnderground": true,
+    "isSidewalkParking": true,
+    "isStreetParking": true,
+    "capacity": 50,
+    "isValet": null,
+    "physicalAddress": {
+      "country": "France",
+      "areaReference": "Smallcity, Pinetree county",
+      "province": "string",
+      "streetAddress": "example street 18, 2nd floor, 18-B33",
+      "city": "Paris",
+      "street": "string",
+      "postalCode": "75001",
+      "houseNumber": 40,
+      "addressAdditionalInfo": "string",
+      "state": "string",
+      "houseNumberAddition": "BIS"
+    },
+    "rentalIosUrl": null,
+    "vehicleCapacity": null,
+    "stationArea": null,
+    "stationId": "400",
+    "rentalAndroidUrl": null,
+    "isParkingLot": true,
+    "coordinates": {
+      "lng": 6.169639,
+      "alt": 0,
+      "lat": 0
+    },
+    "isParkingHoop": true,
+    "isChargingStation": null,
+    "rentalMethods": [
+      "CREDITCARD",
+      "ACCOUNTNUMBER"
+    ],
+    "shortName": "Island Central",
+    "crossStreet": "Cross street",
+    "contactPhone": "+33102030405"
+  }
+]

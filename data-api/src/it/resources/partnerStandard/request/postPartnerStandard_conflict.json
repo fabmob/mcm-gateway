@@ -1,0 +1,9 @@
+{
+  "standardName": "FNMS",
+  "isActive": false,
+  "versionStandard": "V1.2",
+  "versionDataMapping": "V1.2",
+  "partnerId": "6c317901-749f-4d7d-82bb-afdc737b26b3",
+  "partnerActionsId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756",
+  "adaptersId": "40142f60-9694-479f-a6cd-28b199b5e240"
+}

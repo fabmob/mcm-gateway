@@ -1,0 +1,13 @@
+[
+  {
+    "dataMapperId": "0e51c003-6222-449d-9f08-20a7e2b8d94d",
+    "internalField": "ADDRESS",
+    "externalField": "stationNo:005->40 rue Dussoubs, 75002 Paris;",
+    "isArray": 0,
+    "format": null,
+    "timezone": "",
+    "containedValue": null,
+    "defaultValue": null,
+    "partnerActionId": "5e71dcb3-ca60-4a2a-9896-c509ad1ca756"
+  }
+]

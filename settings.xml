@@ -1,0 +1,41 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd">
+
+    <servers>
+        <server>
+            <id>gateway-maven-snapshots</id>
+            <username>${NEXUS_USER_NAME}</username>
+            <password>${NEXUS_USER_PWD}</password>
+        </server>
+        <server>
+            <id>gateway-maven-releases</id>
+            <username>${NEXUS_USER_NAME}</username>
+            <password>${NEXUS_USER_PWD}</password>
+        </server>
+    </servers>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+
+            <properties>
+                <!--CONFIG GLOBALE -->
+                <test.database.url>jdbc:postgresql://localhost:5432/gateway-tests</test.database.url>
+                <test.database.username>postgres</test.database.username>
+                <test.database.password>postgres</test.database.password>
+
+                <gateway.database.url>jdbc:postgresql://localhost:5432/gateway</gateway.database.url>
+                <gateway.database.username>postgres</gateway.database.username>
+                <gateway.database.password>postgres</gateway.database.password>
+                <gateway.database.host>nonrenseigne</gateway.database.host>
+
+                <sonar.host.url>${SONAR_URL}</sonar.host.url>
+                <sonar.login>${SONAR_TOKEN}</sonar.login>
+            </properties>
+        </profile>
+    </profiles>
+</settings>

@@ -1,0 +1,81 @@
+server:
+  port: 8081
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+  error:
+    whitelabel.enabled: false
+
+springdoc:
+  api-docs:
+    path: /data-api
+  swagger-ui:
+    path: /api-docs.html
+
+
+logging:
+  level:
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    com:
+      gateway: DEBUG
+    root: INFO
+
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  application:
+    name: data-api
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  profiles:
+    active: test
+  data:
+    rest:
+      base-path: #/v1
+      detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+  main:
+    # To be removed if circular dependencies can be resolved in this project's services
+    allow-circular-references: true
+
+---
+
+spring:
+  profiles: test
+security:
+  disabled: true
+
+---
+
+spring:
+  profiles: prod
+security:
+  disabled: false
+
+---
+
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+    routingapi:
+      baseurl: "http://${ROUTING_API_HOST:localhost}:8082/v1/route"
+    cachemanager:
+      baseUrl: "http://${CACHE_MANAGER_HOST:localhost}:8086/v1/cache"

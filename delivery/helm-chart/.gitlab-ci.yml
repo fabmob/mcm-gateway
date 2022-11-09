@@ -1,0 +1,88 @@
+# STANDALONE GITLAB CI FOR DEPLOYMENT PURPOSES IN PREPROD & PROD
+
+# Include needed gitlab-ci files
+include:
+  - local: ".gitlab-ci/deploy.yml"
+
+
+.ops_pipeline_condition:
+  rules:
+    - if: '"${OPS_PIPELINE_CONDITION}" == "true"'
+      when: manual
+    - if: '"${OPS_PIPELINE_CONDITION}" == "false"'
+      when: never
+
+.dev_pipeline_condition:
+  rules:
+    - if: '"${DEV_PIPELINE_CONDITION}" == "true"'
+      when: manual
+    - if: '"${DEV_PIPELINE_CONDITION}" == "false"'
+      when: never
+
+stages:
+  - deploy-preview
+  - deploy-testing
+  - deploy-preprod
+  - deploy-production
+
+
+# Init base variables
+.helm-chart-base:
+  variables:
+    LANDSCAPE: 'testing-gw'
+    PROXY_IMAGE_PULL_SECRET_PREFIX: nexus-registry
+    PROXY_IMAGE_PULL_SECRET_HANDOVER_PREFIX: nexus-registry-handover
+    NEXUS_DOCKER_REGISTRY_URL: ${NEXUS_DOCKER_REGISTRY}
+    NEXUS_USER_NAME: ${NEXUS_USER_NAME}
+    NEXUS_USER_PWD: ${NEXUS_USER_PWD}
+    NEXUS_ROOT_USER: ${NEXUS_ROOT_USER}
+    NEXUS_ROOT_PASSWORD: ${NEXUS_ROOT_PASSWORD}
+    NEXUS_HELM_REGISTRY: ${NEXUS_HELM_REPOSITORY_URL}
+    NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL: ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}
+    NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL: ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL}
+    DEV_KUBE_CONTEXT: "mcm/std-maas/helm-gateway:devmcm"
+    PPRD_KUBE_CONTEXT: "mcm/std-maas/infrastructure:mcmpreprod"
+    PROD_KUBE_CONTEXT: "mcm/std-maas/infrastructure:mcmprod"
+
+# pas de stage en prérequis
+.no-needs:
+  needs: []
+
+.always:
+  when: always
+
+.manual:
+  when: manual
+
+# Tags to used the good runner gitlab
+.helm-deploy-preview-tags:
+  tags:
+    - os:linux
+    - platform:testing
+    - task:deploy
+
+.helm-deploy-testing-tags:
+  tags:
+    - os:linux
+    - platform:testing
+    - task:deploy
+
+.helm-deploy-preprod-tags:
+  tags:
+    - os:linux
+    - platform:preprod
+    - task:deploy
+
+.helm-deploy-production-tags:
+  tags:
+    - os:linux
+    - platform:production
+    - task:deploy
+
+
+# Tags to used the good runner gitlab
+.helm-test-tags:
+  tags:
+    - os:linux
+    - platform:testing
+    - task:test

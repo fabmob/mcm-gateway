@@ -1,0 +1,34 @@
+version: '3'
+
+services:
+  data-api:
+     image: ${DATA_API_IMAGE_NAME}
+     build:
+       context: .
+       dockerfile: ./data-api-dockerfile.yml
+       args:
+         MAVEN_IMAGE_NAME: ${BASE_DATA_API_IMAGE_NAME}
+     environment:
+       - DATABASE_USERNAME=${DATABASE_USER_NAME}
+       - DATABASE_PASSWORD=${DATABASE_USER_PWD}
+       - DATABASE_HOST=postgresgateway.postgresgateway-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - CACHE_MANAGER_HOST=cache-manager.cache-manager-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_HOST=redis.redis-${CI_COMMIT_REF_SLUG}-${LANDSCAPE}.svc.cluster.local
+       - MAAS_API_CACHE_PORT=6379
+       - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
+       - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
+       - SERVICE_BASE_PATH=${DATA_API_FQDN}
+     ports:
+       - '8081'
+     labels:
+       - 'kompose.image-pull-secret=${GITLAB_IMAGE_PULL_SECRET_NAME}'
+       - 'kompose.service.type=clusterip'
+#     networks:
+#       - web-nw
+
+volumes:
+  postgres_api_data:
+
+# web network pour cloisonner une application
+#networks:
+#  web-nw:

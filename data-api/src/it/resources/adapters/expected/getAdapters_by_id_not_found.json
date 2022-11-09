@@ -1,0 +1,8 @@
+{
+  "callId": "abb5c250-d06f-416c-9de9-6748ac6828cb",
+  "errorCode": 404,
+  "description": "The requested resource Adapter with id FAKE_UUID was not found",
+  "label": "Not Found",
+  "status": 404,
+  "timestamp": "2022-04-11T16:26:52.634Z"
+}

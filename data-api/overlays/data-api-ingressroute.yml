@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: data-api
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${DATA_API_FQDN}`)
+      middlewares:
+        - name: data-api-headers-middleware
+        - name: data-api-ratelimit-middleware
+        - name: data-api-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: data-api
+          port: 8081
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

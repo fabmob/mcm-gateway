@@ -1,0 +1,12 @@
+commonAnnotations:
+  app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+  app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+  kubernetes.io/ingress.class: traefik
+
+resources:
+  - redis-ingressroute.yml
+  # - redis-certificate.yml
+  - redis-headers-middleware.yml
+  - redis-ratelimit-middleware.yml
+  - redis-inflightreq-middleware.yml
+

@@ -1,0 +1,65 @@
+.redis-base:
+  variables:
+    MODULE_NAME: redis
+    MODULE_PATH: delivery/${MODULE_NAME}
+    NEXUS_REDIS_IMAGE_NAME: ${NEXUS_DOCKER_REGISTRY}/redis:6.2-alpine
+    KUBERNETES_GATEWAY_REDIS_NAMESPACE: ${KUBERNETES_GATEWAY_REDIS_NAMESPACE}
+
+.redis_init_vars: &redis_init_vars |
+  export GITLAB_IMAGE_PULL_SECRET_NAME=${IMAGE_PULL_SECRET_PREFIX}-${MODULE_NAME}
+  export REDIS_IMAGE_NAME=${REGISTRY_BASE_NAME}/redis:${IMAGE_TAG_NAME}
+  export BASE_REDIS_IMAGE_NAME=${NEXUS_REDIS_IMAGE_NAME}
+  export REDIS_IMAGE_NAME=${REGISTRY_BASE_NAME}/redis:${IMAGE_TAG_NAME}
+  export MODULE_NAME=$MODULE_NAME
+  export MODULE_PATH=$MODULE_PATH
+
+
+redis_build:
+  extends:
+    - .redis-base
+    - .build-job
+    - .no-needs
+    - .trigger-condition
+  environment:
+    name: ${CI_BUILD_REF_SLUG}/redis
+  script:
+    - *redis_init_vars
+
+
+redis_image_build:
+  extends:
+    - .image-job
+    - .redis-base
+    - .trigger-condition
+  environment:
+    name: image/${CI_BUILD_REF_SLUG}/redis
+  script:
+    - *redis_init_vars
+    - |
+      image
+  needs: [ "redis_build" , "check-if-release-version" ]
+
+
+redis_preview_deploy:
+  extends:
+    - .preview-deploy-job
+    - .redis-base
+    - .trigger-condition
+  script:
+    - *redis_init_vars
+    - |
+      set -x
+      deploy
+  needs: [ "redis_image_build", "commons-kubetools-image", "check-if-release-version" ]
+  environment:
+    on_stop: redis_preview_cleanup
+
+
+redis_preview_cleanup:
+  extends:
+    - .preview-undeploy-job
+    - .redis-base
+  script:
+    - |
+      undeploy
+      #TODO artifact entre ressource.yml deploiement et undeploy

@@ -1,0 +1,9 @@
+ARG MAVEN_IMAGE_NAME
+
+FROM ${MAVEN_IMAGE_NAME}
+
+COPY target/cache-manager*.jar /cache-manager.jar
+
+EXPOSE 8086
+
+CMD java -jar cache-manager.jar

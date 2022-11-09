@@ -1,0 +1,29 @@
+{
+  "from": {
+    "id": "user987654",
+    "operator": "'carpool.mycity.com",
+    "alias": "JeanD",
+    "firstName": "Jean",
+    "lastName": "Dupond",
+    "grade": 4,
+    "picture": "carpool.mycity.com/user/user987654/picture.jpg",
+    "gender": "F",
+    "verifiedIdentity": true
+  },
+  "to": {
+    "id": "user987654",
+    "operator": "'carpool.mycity.com",
+    "alias": "JeanD",
+    "firstName": "Jean",
+    "lastName": "Dupond",
+    "grade": 4,
+    "picture": "carpool.mycity.com/user/user987654/picture.jpg",
+    "gender": "F",
+    "verifiedIdentity": true
+  },
+  "message": "Hello world ! :)",
+  "recipientCarpoolerType": "PASSENGER",
+  "driverJourneyId": "Journey00001",
+  "passengerJourneyId": "Journey00435",
+  "bookingId": "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+}

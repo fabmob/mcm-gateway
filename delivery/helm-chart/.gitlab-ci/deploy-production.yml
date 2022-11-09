@@ -1,0 +1,121 @@
+# --- Function helpers to deploy and wait for module dependencies---
+.env_production:
+  environment:
+    name: $CI_COMMIT_REF_SLUG-$LANDSCAPE/$MODULE_NAME
+
+.helm-deploy-production-job:
+  extends:
+    - .helm-deploy-job
+    - .helm-deploy-production-tags
+    - .ops_pipeline_condition
+    - .no-needs
+    - .env_production
+  when: manual
+  variables:
+    LANDSCAPE: production-gw
+    OPS_PIPELINE_CONDITION: "true"
+
+api_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: api
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+data_api_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: data-api
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+routing_api_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: routing-api
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+request_relay_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: request-relay
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+default_adapter_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: default-adapter
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+custom_adapter_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-preprod-job
+  variables:
+    MODULE_NAME: custom-adapter
+  script:
+    - |
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+cache_manager_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-production-job
+  variables:
+    MODULE_NAME: cache-manager
+  script:
+    - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+gravitee_apim_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-production-job
+  variables:
+    MODULE_NAME: gravitee-apim
+  script:
+    - |
+      set -x
+      . env/deployment.env
+      get_release_name
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+dkron_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-production-job
+  variables:
+    MODULE_NAME: dkron
+  script:
+    - |
+      get_release_name
+      . env/.env.production
+      helm_deploy $MODULE_NAME

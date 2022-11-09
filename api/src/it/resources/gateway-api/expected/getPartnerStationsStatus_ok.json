@@ -1,0 +1,27 @@
+[
+  {
+    "partnerId": "87930fdf-34c1-41c9-885e-6ce66505b598",
+    "stationId": "400",
+    "numAssetsAvailable": 12,
+    "numAssetsAvailableType": null,
+    "numAssetsDisabled": 0,
+    "assetsDocksAvailable": null,
+    "numDocksAvailable": 10,
+    "numDocksDisabled": 0,
+    "isInstalled": true,
+    "isRenting": true,
+    "isReturning": true,
+    "actions": [
+      {
+        "type": "BOOK_VEHICLE",
+        "deeplink": "string",
+        "apiCall": "string",
+        "webview": "string",
+        "url": "string"
+      }
+    ],
+    "bookDeeplink": "string",
+    "useDeeplink": "string",
+    "lastReported": 1646302112
+  }
+]

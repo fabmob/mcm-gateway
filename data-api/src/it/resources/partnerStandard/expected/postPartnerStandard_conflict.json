@@ -1,0 +1,8 @@
+{
+  "callId": "FAKE_UUID",
+  "errorCode": 409,
+  "description": "The MSP with id FAKE_UUID does not handle this feature : PING",
+  "label": "Conflict",
+  "status": 409,
+  "timestamp": "2080-01-01T00:00:00.154+01:00"
+}

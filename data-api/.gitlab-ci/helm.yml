@@ -1,0 +1,5 @@
+data_api_image_push:
+  extends:
+    - .helm-push-image-job
+    - .data-api-base
+  needs: [ "data_api_image_build", "check-if-release-version" ]

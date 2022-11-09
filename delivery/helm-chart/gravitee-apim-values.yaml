@@ -1,0 +1,165 @@
+#apim:
+jdbc:
+  driver: https://jdbc.postgresql.org/download/postgresql-42.2.23.jar
+  url: jdbc:postgresql://${GRAVITEE_DATABASE_SERVER}/${GRAVITEE_DATABASE_NAME}
+  username: ${GRAVITEE_DATABASE_USER_NAME}
+  password: ${GRAVITEE_DATABASE_USER_PWD}
+management:
+  type: jdbc
+ratelimit:
+  type: jdbc
+
+
+es:
+  #enabled: false
+  endpoints:
+    - http://elasticsearch-gravitee.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+
+portal:
+  image:
+    repository: graviteeio/apim-portal-ui
+    tag: 3.18.11
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: false
+    path: /
+    hosts:
+      - ${APIM_PORTAL_FQDN}
+
+ui:
+  image:
+    repository: graviteeio/apim-management-ui
+    tag: 3.18.11
+  replicaCount: 1
+  autoscaling:
+    enabled: false
+  ingress:
+    enabled: false
+    path: /
+    hosts:
+      - ${APIM_CONSOLE_FQDN}
+  companyName: Mon Compte Mobilité
+  title: Management UI
+  managementTitle: API Management Std MaaS | Mon Compte Mobilité
+  documentationLink: https://github.com/fabmob/Gateway
+
+api:
+  image:
+    repository: graviteeio/apim-management-api
+    tag: 3.18.11
+  replicaCount: 2
+  autoscaling:
+    enabled: false
+    # minReplicas: 1
+    #    maxReplicas: 3
+    #    targetAverageUtilization: 50
+    #    targetMemoryAverageUtilization: 80
+  resources:
+    requests:
+      cpu: 500m
+      memory: 128Mi
+  logging:
+    debug: true
+    stdout:
+      json: false
+      encoderPattern: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    file:
+      enabled: true
+      rollingPolicy: |
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${gravitee.management.log.dir}/gravitee_%d{yyyy-MM-dd}.log</fileNamePattern>
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+      encoderPattern: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%n"
+    graviteeLevel: DEBUG
+    jettyLevel: INFO
+  ingress:
+    management:
+      enabled: false
+      path: /management
+      hosts:
+        - ${APIM_FQDN}
+    portal:
+      enabled: false
+      path: /portal
+      hosts:
+        - ${APIM_FQDN}
+  user:
+    login:
+      # Create a default application when user connects to the portal for the very first time (default true)
+        defaultApplication: false
+    # Password complexity validation policy
+    # Applications should enforce password complexity rules to discourage easy to guess passwords.
+    # Passwords should require a minimum level of complexity that makes sense for the application and its user population.
+    password:
+      policy:
+        # Regex pattern for password validation (default to OWASP recommendations).
+        # 8 to 32 characters, no more than 2 consecutive equal characters, min 1 special characters (@ & # ...), min 1 upper case character.
+        pattern: ^(?:(?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))(?!.*(.)\1{2,})[A-Za-z0-9!~<>,;:_\-=?*+#."'&§`£€%°()\\\|\[\]\-\$\^\@\/]{8,32}$
+
+
+gateway:
+  image:
+    repository: graviteeio/apim-gateway
+    tag: 3.18.11
+  policy:
+    api-key:
+      header: X-API-KEY
+  replicaCount: 2
+  autoscaling:
+    enabled: false
+    # minReplicas: 1
+    #    maxReplicas: 3
+    #    targetAverageUtilization: 50
+    #    targetMemoryAverageUtilization: 80
+  resources:
+    requests:
+      cpu: 500m
+      memory: 128Mi
+  logging:
+    debug: true
+  ingress:
+    enabled: false
+    metadata:
+      name: gateway-ingress
+    path: /
+    hosts:
+      - ${APIM_GATEWAY_FQDN}
+    #tls:
+    #  - hosts:
+    #      - ${APIM_GATEWAY_FQDN}
+    #    secretName: gateway-tls-certs
+  reporters:
+    elasticsearch:
+      enabled: true
+
+
+smtp:
+  enabled: true
+  host: ${GRAVITEE_SMTP_HOST}
+  port: ${GRAVITEE_SMTP_PORT}
+  from: ${GRAVITEE_SMTP_FROM}
+  username: ${GRAVITEE_SMTP_USERNAME}
+  password: ${GRAVITEE_SMTP_PASSWORD}
+  subject: "${GRAVITEE_SMTP_SUBJECT_PATTERN}"
+  properties:
+    auth: true
+    starttlsEnable: false
+    ssl.trust: smtp.sendgrid.net
+
+notifiers:
+  smtp:
+    enabled: true
+    host: ${email.host}
+    subject: ${email.subject}
+    port: ${email.port}
+    from: ${email.from}
+    username: ${email.username}
+    password: ${email.password}
+
+
+

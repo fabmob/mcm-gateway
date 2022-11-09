@@ -1,0 +1,12 @@
+commonAnnotations:
+  app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+  app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+  kubernetes.io/ingress.class: traefik
+
+resources:
+  - postgresgateway-ingressroute.yml
+  # - postgresgateway-certificate.yml
+  - postgresgateway-headers-middleware.yml
+  - postgresgateway-ratelimit-middleware.yml
+  - postgresgateway-inflightreq-middleware.yml
+

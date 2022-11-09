@@ -1,0 +1,126 @@
+default:
+  image: maven:3-jdk-11
+  services:
+    - name: postgres:13-alpine
+      entrypoint: ["docker-entrypoint.sh"]
+      command: ["postgres"]
+    - name: redis:6.2-alpine
+variables:
+  POSTGRES_TESTS_DB: "gateway-tests"
+  POSTGRES_DB: "gateway-tests"
+  POSTGRES_USER: ${POSTGRES_TEST_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD}
+  POSTGRES_HOST_AUTH_METHOD: trust
+  PGDATA: "/var/lib/postgresql/data"
+  POSTGRES_INITDB_ARGS: "--encoding=UTF8 --data-checksums"
+  MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end"
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_TESTS_OPTS: "-Dtest.database.url=jdbc:postgresql://localhost:5432/$POSTGRES_TESTS_DB -Dtest.database.username=${POSTGRES_TEST_USER} -Dtest.database.password=${POSTGRES_TEST_PASSWORD}"
+  SONAR_PROJECT_KEY: "com.gateway"
+  SONAR_PROJECT_NAME: "Gateway\ :\ global $CI_COMMIT_BRANCH"
+
+# Cache the Maven repository so that each job does not have to download it.
+cache:
+  key: mavenrepo
+  paths:
+    - .m2/repository/
+    - target/
+
+gateway-build:
+  stage: build
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}-${LANDSCAPE}/gateway-build
+  extends:
+    - .envsubst
+    - .trigger-condition
+    - .build-job-tags
+  script: |
+    env
+    # replace vars in settings.xml 
+    envsubst < settings.xml
+    mvn --version
+    echo "PATCH_VERSION=$PATCH_VERSION"
+    echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+    if [[ -z $NEW_RELEASE_VERSION ]]
+    then
+      echo "no version"
+    else 
+      mvn -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+    fi
+    cat pom.xml
+    pwd
+    mvn -s settings.xml clean install -DskipTests -B
+  artifacts:
+    paths:
+      - .m2/repository
+  needs: ["check-if-release-version"]
+
+deploy-nexus:
+  stage: build
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}-${LANDSCAPE}/deploy-nexus
+  extends:
+    - .envsubst
+    - .trigger-condition
+    - .build-job-tags
+  script: |
+    ls
+    cat pom.xml | egrep "version" | head -10
+    envsubst < settings.xml
+    pwd
+    ls
+    echo "CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME"
+    echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+    BRANCH_NAME=`echo $CI_COMMIT_REF_NAME | sed -E 's/[-_/]/-/'`
+    VERSION=`mvn help:evaluate -Dexpression=project.version -q -DforceStdout  | sed -E "s/-SNAPSHOT/-${BRANCH_NAME}-SNAPSHOT/g"`
+    
+    MAVEN_REPOSITORY_ID=gateway-maven-snapshots
+    if [[ ! -z $NEW_RELEASE_VERSION ]]
+    then
+      VERSION=$NEW_RELEASE_VERSION
+      MAVEN_REPOSITORY_ID=gateway-maven-releases
+    fi
+    export VERSION
+    
+    # if release version we change pom version with the new version
+    if [ ! -z $NEW_RELEASE_VERSION ]
+    then
+      mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
+    fi
+    mvn deploy --batch-mode -s settings.xml -DskipTests -DnewVersion=${VERSION} -DrepositoryId=$MAVEN_REPOSITORY_ID
+  artifacts:
+    paths:
+      - .m2/repository
+  needs: ["gateway-build","check-if-release-version"]
+
+
+gateway_tests:
+  stage: test
+  environment:
+    name: ${CI_COMMIT_REF_SLUG}-${LANDSCAPE}/gateway-tests
+  services:
+    - postgres:13-alpine
+    - redis
+  extends:
+    - .envsubst
+    - .trigger-condition
+    - .deactivate
+    - .build-job-tags
+  script: |
+    set -x
+    SONAR_PROJECT_KEY="com.gateway:"`echo $CI_COMMIT_BRANCH | sed "s/\([^/]*\/\)\([^_]*\).*/\2/g"`
+    envsubst < settings.xml
+    echo "--------- settings.xml ---------"
+    cat settings.xml
+    mvn clean install -DskipTests -s settings.xml
+    mvn $MAVEN_CLI_OPTS $MAVEN_TESTS_OPTS test verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_URL -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.projectName="$SONAR_PROJECT_NAME"
+  needs: [ "deploy-nexus", "check-if-release-version" ]
+  artifacts:
+    reports:
+      junit:
+        - "target/surefire-reports/TEST-*.xml"
+        - "*/target/surefire-reports/TEST-*.xml"
+        - "*/*/target/surefire-reports/TEST-*.xml"
+        - "target/failsafe-reports/TEST-*.xml"
+        - "*/target/failsafe-reports/TEST-*.xml"
+        - "*/*/target/failsafe-reports/TEST-*.xml"

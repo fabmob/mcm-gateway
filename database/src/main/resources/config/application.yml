@@ -1,0 +1,74 @@
+logging:
+  level:
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+springdoc:
+  api-docs:
+    path: /database
+  swagger-ui:
+    path: /api-docs.html
+
+spring:
+  application:
+    name: database
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  profiles:
+    active: test
+  datasource:
+    continue-on-error: true
+    hikari:
+      minimumIdle: 3
+      connectionTimeout: 30000
+      maximumPoolSize: 12
+      idleTimeout: 30000
+      poolName: PerimGabaritHikariCP
+      maxLifetime: 2000000
+    initialization-mode: always
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:5432/gateway
+    password: ${DATABASE_PASSWORD:@gateway.database.password@}
+    username: ${DATABASE_USERNAME:@gateway.database.username@}
+
+  jpa:
+    show-sql: ${SHOW_SQL:false}
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        default_schema: msp
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
+  data:
+    rest:
+      basePath: #/api
+      detection-strategy: all
+
+---
+
+spring:
+  profiles: test
+security:
+  disabled: true
+
+---
+
+spring:
+  profiles: prod
+security:
+  disabled: false
+
+
+---
+
+gateway:
+  service:
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"

@@ -1,0 +1,8 @@
+{
+  "status":404,
+  "errorCode":404,
+  "label":"Not Found",
+  "description":"The requested resource Gateway Param with paramKey test was not found",
+  "timestamp":"2022-09-14T12:27:35.023+02:00",
+  "callId":"a1701ec2-20ab-440f-b3af-f064c86c4976"
+}

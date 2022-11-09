@@ -1,0 +1,29 @@
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: default-adapter
+spec:
+  entryPoints:
+    - web
+    # - websecure
+  routes:
+    - match: Host(`${DEFAULT_ADAPTER_FQDN}`)
+      middlewares:
+        - name: default-adapter-headers-middleware
+        - name: default-adapter-ratelimit-middleware
+        - name: default-adapter-inflightreq-middleware
+      kind: Rule
+      services:
+        - kind: Service
+          name: default-adapter
+          port: 8090
+  # tls:
+  #   secretName: ${SECRET_NAME} # api-tls # cert-dev
+  #   domains:
+  #     - main: ${BASE_DOMAIN}
+  #       sans:
+  #         - '*.preview.${BASE_DOMAIN}'
+  #         - '*.testing.${BASE_DOMAIN}'
+
+
+#exposition des services par association d'un fqdn et ip Custom ressource definition

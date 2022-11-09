@@ -1,0 +1,156 @@
+services:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: request-relay
+        app.gateway.com/service-type: internal-service
+      name: request-relay
+    spec:
+      ports:
+        - name: "8085"
+          port: 8085
+          targetPort: 8085
+      selector:
+        io.kompose.service: request-relay
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+
+networkPolicies:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: deny-internal-services-nw
+    spec:
+      podSelector: { }
+      policyTypes:
+        - Ingress
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: internal-services-nw
+    spec:
+      podSelector:
+        matchLabels:
+          visibility: internal
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  com.mcm.maas.internal: "true"
+
+deployments:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: request-relay
+      name: request-relay
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          io.kompose.service: request-relay
+      strategy: {}
+      template:
+        metadata:
+          annotations:
+            app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+            app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+            kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+            kompose.service.type: clusterip
+            kubernetes.io/ingress.class: traefik
+          labels:
+            io.kompose.service: request-relay
+            visibility: internal
+        spec:
+          containers:
+            env:
+              SERVICE_BASE_PATH: ${REQUEST_RELAY_FQDN}
+              MAAS_API_CACHE_SSL: true
+              MAAS_API_CACHE_HOST: ${MAAS_API_CACHE_HOST}
+              MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
+              MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
+              MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+            image: ${REQUEST_RELAY_IMAGE_NAME}
+            name: request-relay
+            ports:
+              - containerPort: 8085
+            resources: {}
+          imagePullSecrets:
+            - name: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+          restartPolicy: Always
+    status: {}
+
+middlewares:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: request-relay-headers-middleware
+    spec:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Port: "443"
+          X-Forwarded-Proto: https
+
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: request-relay-inflightreq-middleware
+    spec:
+      inFlightReq:
+        amount: 100
+
+#  - metadata:
+#      annotations:
+#        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+#        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+#        kubernetes.io/ingress.class: traefik
+#      name: request-relay-ratelimit-middleware
+#    spec:
+#      rateLimit:
+#        average: 30
+#        burst: 50
+#        period: 1m
+#        sourceCriterion:
+#          ipStrategy:
+#            depth: 2
+
+ingressRoutes:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: request-relay
+    spec:
+      entryPoints:
+        - web
+      routes:
+        - kind: Rule
+          match: Host(`${REQUEST_RELAY_FQDN}`)
+          middlewares:
+            - name: request-relay-headers-middleware
+#            - name: request-relay-ratelimit-middleware
+            - name: request-relay-inflightreq-middleware
+          services:
+            - kind: Service
+              name: request-relay
+              port: 8085

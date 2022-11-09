@@ -1,0 +1,9 @@
+ARG MAVEN_IMAGE_NAME
+
+FROM ${MAVEN_IMAGE_NAME}
+
+COPY target/mock-api*.jar /mock-api.jar
+
+EXPOSE 8084
+
+CMD java -jar mock-api.jar

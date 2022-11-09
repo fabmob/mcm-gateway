@@ -1,0 +1,74 @@
+server:
+  port: 8091
+  shutdown: "graceful"
+  servlet:
+    context-path: /v1
+  error:
+    whitelabel.enabled: false
+
+springdoc:
+  api-docs:
+    path: /adapters
+  swagger-ui:
+    path: /api-docs.html
+
+logging:
+  level:
+    com:
+      gateway: DEBUG
+    org:
+      springframework: INFO
+      springframework.security: INFO
+      springframework.web: INFO
+      springframework.scheduling.concurrent: WARN
+    root: INFO
+
+
+spring:
+  application:
+    name: routing
+  lifecycle:
+    timeout-per-shutdown-phase: "10s"
+  profiles:
+    active: test
+  data:
+    rest:
+      basePath: #/api
+      detection-strategy: all
+  redis:
+    ssl: ${MAAS_API_CACHE_SSL:false}
+    password: ${MAAS_API_CACHE_PASSWORD:}
+    host: ${MAAS_API_CACHE_HOST:localhost}
+    port: ${MAAS_API_CACHE_PORT:6379}
+    connection-timeout: 30
+    keys:
+      prefix: ${MAAS_API_CACHE_KEYS_PREFIX:local}
+    repositories:
+      enabled: 'false'
+  cache:
+    type: redis
+
+---
+
+spring:
+  profiles: test
+security:
+  disabled: true
+
+---
+
+spring:
+  profiles: prod
+security:
+  disabled: false
+
+
+---
+
+gateway:
+  service:
+    requestRelay:
+      url: "http://${REQUEST_RELAY_HOST:localhost}:8085/v1/request-relay"
+      isMocked: false
+    dataapi:
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"

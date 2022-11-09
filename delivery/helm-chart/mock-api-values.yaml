@@ -1,0 +1,183 @@
+services:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+        kompose.volume.size: 350Mi
+        kompose.volume.storage-class-name: azurefile-csi-mock
+        kompose.volume.type: persistentVolumeClaim
+      labels:
+        io.kompose.service: mock-api
+        app.gateway.com/service-type: internal-service
+      name: mock-api
+    spec:
+      ports:
+        - name: "8084"
+          port: 8084
+          targetPort: 8084
+      selector:
+        io.kompose.service: mock-api
+      type: ClusterIP
+    status:
+      loadBalancer: {}
+
+persistentVolumeClaim:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+      labels:
+        io.kompose.service: mock-api-responses-volume
+      name: mock-api-responses-volume
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 350Mi
+      storageClassName: azurefile-csi-mock
+
+networkPolicies:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: deny-internal-services-nw
+    spec:
+      podSelector: { }
+      policyTypes:
+        - Ingress
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: internal-services-nw
+    spec:
+      podSelector:
+        matchLabels:
+          visibility: internal
+      ingress:
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  com.mcm.maas.internal: "true"
+
+deployments:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+        kompose.service.type: clusterip
+        kubernetes.io/ingress.class: traefik
+      labels:
+        io.kompose.service: mock-api
+      name: mock-api
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          io.kompose.service: mock-api
+      strategy: {}
+      template:
+        metadata:
+          annotations:
+            app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+            app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+            kompose.image-pull-secret: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+            kompose.service.type: clusterip
+            kubernetes.io/ingress.class: traefik
+          labels:
+            io.kompose.service: mock-api
+            visibility: internal
+        spec:
+          containers:
+            env:
+              SERVICE_BASE_PATH: ${MOCK_API_FQDN}
+              MOCK_RESPONSES_DIRECTORY: ${COMPUTED_MOCK_RESPONSES_DIRECTORY}
+              MAAS_API_CACHE_SSL: true
+              MAAS_API_CACHE_HOST: ${MAAS_API_CACHE_HOST}
+              MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
+              MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
+              MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+            image: ${MOCK_API_IMAGE_NAME}
+            name: mock-api
+            ports:
+              - containerPort: 8084
+            resources: {}
+            volumeMounts:
+                - mountPath: /mocks
+                  name: mock-api-responses-volume
+          imagePullSecrets:
+            - name: ${PROXY_HANDOVER_IMAGE_PULL_SECRET_NAME}
+          restartPolicy: Always
+          volumes:
+          - name: mock-api-responses-volume
+            persistentVolumeClaim:
+              claimName: mock-api-responses-volume
+    status: {}
+
+middlewares:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: mock-api-headers-middleware
+    spec:
+      headers:
+        customRequestHeaders:
+          X-Forwarded-Port: "443"
+          X-Forwarded-Proto: https
+
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: mock-api-inflightreq-middleware
+    spec:
+      inFlightReq:
+        amount: 100
+
+#  - metadata:
+#      annotations:
+#        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+#        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+#        kubernetes.io/ingress.class: traefik
+#      name: mock-api-ratelimit-middleware
+#    spec:
+#      rateLimit:
+#        average: 30
+#        burst: 50
+#        period: 1m
+#        sourceCriterion:
+#          ipStrategy:
+#            depth: 2
+
+ingressRoutes:
+  - metadata:
+      annotations:
+        app.gitlab.com/app: ${CI_PROJECT_PATH_SLUG}
+        app.gitlab.com/env: ${CI_ENVIRONMENT_SLUG}
+        kubernetes.io/ingress.class: traefik
+      name: mock-api
+    spec:
+      entryPoints:
+        - web
+      routes:
+        - kind: Rule
+          match: Host(`${MOCK_API_FQDN}`)
+          middlewares:
+            - name: mock-api-headers-middleware
+#            - name: mock-api-ratelimit-middleware
+            - name: mock-api-inflightreq-middleware
+          services:
+            - kind: Service
+              name: mock-api
+              port: 8084

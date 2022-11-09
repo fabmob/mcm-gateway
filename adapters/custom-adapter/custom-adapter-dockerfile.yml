@@ -1,0 +1,9 @@
+ARG MAVEN_IMAGE_NAME
+
+FROM ${MAVEN_IMAGE_NAME}
+
+COPY target/custom-adapter*.jar /custom-adapter.jar
+
+EXPOSE 8091
+
+CMD java -jar custom-adapter.jar

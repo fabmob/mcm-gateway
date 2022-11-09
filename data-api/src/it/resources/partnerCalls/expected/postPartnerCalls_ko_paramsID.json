@@ -1,0 +1,8 @@
+{
+  "status": 400,
+  "errorCode": 400,
+  "label": "Bad Request",
+  "description": "Params with id 7c2ba609-213c-448a-a51c-d108c8e4f51d should not be provided",
+  "timestamp": "2022-04-26T11:11:24.872Z",
+  "callId": "878da00a-45a8-4b5b-8ecb-bc769ace474d"
+}

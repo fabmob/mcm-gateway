@@ -1,0 +1,648 @@
+.helm-base:
+  variables:
+    # TODO CHANGE IF PPRD OR PRD => A METTRE DANS LE .env
+    # variabiliser le landscape
+    LANDSCAPE: 'testing'
+    API_FQDN: api.${BASE_DOMAIN}
+    DATA_API_FQDN: data-api.${BASE_DOMAIN}
+    ROUTING_API_FQDN: routing-api.${BASE_DOMAIN}
+    REQUEST_RELAY_FQDN: request-relay.${BASE_DOMAIN}
+    DEFAULT_ADAPTER_FQDN: default-adapter.${BASE_DOMAIN}
+    MOCK_API_FQDN: mock-api.${BASE_DOMAIN}
+    NEXUS_DOCKER_REGISTRY_URL: ${NEXUS_DOCKER_REGISTRY}
+    NEXUS_ROOT_USER: ${NEXUS_ROOT_USER}
+    NEXUS_ROOT_PASSWORD: ${NEXUS_ROOT_PASSWORD}
+    NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL: ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}
+    NEXUS_HELM_REGISTRY: ${NEXUS_HELM_REPOSITORY_URL}
+    HANDOVER_PROJECT_ID: ${HANDOVER_PROJECT_ID}
+
+.declare-helm-functions: &declare-helm-functions |
+  function get_rc_name {
+    echo "### GET RC NAME FROM CI_BUILD_REF_SLUG ###"
+
+    echo "CI_COMMIT_REF_SLUG=$CI_COMMIT_REF_SLUG"
+
+    RESET='\033[0m'
+    B_PINK='\033[1;35m'
+    B_YELLOW='\033[1;33m'
+  
+    echo -e "${B_YELLOW}"
+    echo "TRIGGER PAYLOAD"
+    cat $TRIGGER_PAYLOAD
+    if [ -z $TRIGGER_PAYLOAD ]
+    then
+      echo "empty payload from trigger event"
+      export RC_VERSION=${CI_BUILD_REF_SLUG}-${CI_PIPELINE_ID}
+    fi
+    echo -e "${RESET}"
+  }
+
+  function get_release_name {
+    echo "### get_release_name ###"
+    if [ -z "$NEW_RELEASE_VERSION" ]
+    then
+      export RELEASE_VERSION=${CI_COMMIT_REF_SLUG}
+      # default char version for feature and fix branches
+      export HELM_CHART_VERSION=0.0.4
+    else
+      export RELEASE_VERSION=${NEW_RELEASE_VERSION}
+      export HELM_CHART_VERSION=${NEW_RELEASE_VERSION}
+    fi
+    echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+    echo "********** release version = $NEW_RELEASE_VERSION"
+  }
+
+  function get_release_name_slug {
+    echo "### get_release_name_slug  ###"
+  
+    # TRIGGER_RELEASE=0 -> Prod
+    if [ ! -z "$NEW_RELEASE_VERSION" ]
+    then
+      export TRIGGER_RELEASE=-1
+      export COMMIT_HANDOVER_BRANCH_NAME=release-$NEW_RELEASE_VERSION
+    else 
+      export TRIGGER_RELEASE=0
+      export RELEASE_VERSION_SLUG=${CI_BUILD_REF_SLUG}
+      export COMMIT_HANDOVER_BRANCH_NAME=$RELEASE_VERSION_SLUG
+    fi
+    echo "TRIGGER_RELEASE=$TRIGGER_RELEASE"
+    env | sort
+  }
+
+  function push_to_gitlab {
+    get_release_name
+    get_release_name_slug
+    echo "RELEASE_VERSION_SLUG=$RELEASE_VERSION_SLUG"
+
+    # by default it's not and ops pipeline
+    OPS_PIPELINE_VALUE=0
+    if [ "$1" == "ops" ]
+    then
+      # if calling this function with "ops" string that means that we need to create de ops pipeline
+      OPS_PIPELINE_VALUE=1
+    fi
+    
+     # define if its an pipeline for ops or for dev, default value is dev
+    echo -e "$B_YELLOW*********************** OPS_PIPELINE_VALUE= $OPS_PIPELINE_VALUE*************** $RESET"
+    if [ "$OPS_PIPELINE_VALUE" == "1" ]
+    then
+      OPS_PIPELINE_CONDITION=true
+      DEV_PIPELINE_CONDITION=false
+      # override handover vars with ops 
+      HANDOVER_GITLAB_EMAIL=${INFRA_HANDOVER_GITLAB_EMAIL}
+      HANDOVER_GITLAB_TARGET_BRANCH=${INFRA_HANDOVER_GITLAB_TARGET_BRANCH}
+      HANDOVER_GITLAB_TOKEN=${INFRA_HANDOVER_GITLAB_TOKEN}
+      HANDOVER_GITLAB_URL=${INFRA_HANDOVER_GITLAB_URL}
+      HANDOVER_GITLAB_USERNAME=${INFRA_HANDOVER_GITLAB_USERNAME}
+      HANDOVER_PROJECT_ID=${INFRA_HANDOVER_PROJECT_ID}
+    else
+      OPS_PIPELINE_CONDITION=false
+      DEV_PIPELINE_CONDITION=true
+    fi
+  
+    echo "### CREATE FOLDER TO PUSH TO GITLAB ###"
+    mkdir handover
+
+    echo "### GIT CLONE DISTANT REPO ###"
+    git clone "https://${HANDOVER_GITLAB_USERNAME}:${HANDOVER_GITLAB_TOKEN}@${HANDOVER_GITLAB_URL}" handover
+
+    echo "### GO TO HANDOVER FOLDER ###"
+    cd handover
+
+
+    # Remote:
+
+    echo -e "$B_YELLOW ******************** ${RELEASE_VERSION_SLUG} $RESET"
+    # TODO: lorsque c'est la première fois qu'on pousse le tag, cette condition ne fonctionne pas
+
+    check_branch=$(git ls-remote --heads origin ${COMMIT_HANDOVER_BRANCH_NAME})
+    # do check 
+    if [[ -z ${check_branch} ]]; then
+      echo "remote: branch do not exist" > /dev/null 2>&1
+    else
+      echo "remote: branch exist, removing it" > /dev/null 2>&1
+      git push origin --delete  ${COMMIT_HANDOVER_BRANCH_NAME}
+    fi
+    
+    # on tire la branche depuis celle qui sera utilisé pour le merge
+    git checkout ${HANDOVER_GITLAB_TARGET_BRANCH}
+  
+    echo "### GIT CREATE BRANCH ${COMMIT_HANDOVER_BRANCH_NAME}###"
+    git checkout -b ${COMMIT_HANDOVER_BRANCH_NAME}
+
+    echo "### GIT PUSH CREATE REMOTE ###"
+    git push --set-upstream origin ${COMMIT_HANDOVER_BRANCH_NAME}
+
+    echo "# CREATE NEEDED DIRECTORY IF NOT EXISTING"
+    [[ ! -d .gitlab-ci ]] && mkdir .gitlab-ci
+    [[ ! -d test ]] && mkdir test
+    [[ ! -d reports ]] && mkdir reports
+    [[ ! -d configs ]] && mkdir configs
+
+    RESET='\033[0m'
+    B_PINK='\033[1;35m'
+    B_YELLOW='\033[1;33m'
+
+    echo "We are on folder `pwd`"
+    echo -e "$B_PINK"
+    ls
+    echo -e "$RESET"
+  
+    echo "### CP GITLAB CI HELM TO OUTPUT DIRECTORY ###"
+    cat ../delivery/helm-chart/.gitlab-ci.yml | sed "s/\${DEV_PIPELINE_CONDITION\}/$DEV_PIPELINE_CONDITION/" | sed "s/\${OPS_PIPELINE_CONDITION\}/$OPS_PIPELINE_CONDITION/" > .gitlab-ci.yml
+    
+
+    echo "### CP GITLAB FOLDER HELM TO OUTPUT DIRECTORY ###"
+    cp -rT ../delivery/helm-chart/.gitlab-ci .gitlab-ci
+  
+    echo "### CP ENV FOLDER ###"
+    mkdir -p env
+    cp ../delivery/commons/.gitlab-ci/.env.* env/.
+  
+    mkdir -p security/ingress
+    cp -rT ../delivery/helm-chart/security security
+  
+    # set the version of the release and chart in an env file that is commited
+    echo "GATEWAY_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
+    echo "GATEWAY_CHART_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
+    if [[ $RELEASE_VERSION =~ ^[0-9]+[\.\-][0-9]+[\.\-][0-9]+$ ]]
+    then
+      echo "IS_RELEASE=true" >> env/deployment.env
+    else
+      echo "IS_RELEASE=false" >> env/deployment.env
+    fi
+    #echo "### CP AGENTS FOLDER ###"
+    #mkdir -p agents
+    #cp -r ../delivery/commons/.gitlab-ci/agents .gitlab-ci/.
+
+    echo "### CP TEST FOLDER HELM TO OUTPUT DIRECTORY ###"
+    if [ -d ../delivery/helm-chart/test ]
+    then
+      cp -rT ../delivery/helm-chart/test test
+    else
+      echo "No folder test exists in `pwd`/../delivery/helm-chart/test"
+    fi
+
+    echo "### CP SCRIPT FOLDER HELM TO OUTPUT DIRECTORY ###"
+    cp -rT ../delivery/helm-chart/scripts scripts
+
+    ls -ltR
+
+    echo -e "${B_YELLOW}"
+    cat $TRIGGER_PAYLOAD
+    if [ -z $TRIGGER_PAYLOAD ]
+    then
+      echo "empty payload from trigger event"
+    fi
+    echo -e "${RESET}"
+
+    echo "### GET ALL ARTIFACTS FROM RELEASE  ###"
+    for link in $(cat $TRIGGER_PAYLOAD | jq -c '.assets.links | map({url: .url, name: .name}) | .[]')
+    do
+      echo "### DOWNLOAD ARTIFACTS ###"
+      echo $link
+      curl $(echo $link | jq -r '.url') -o "reports/"$(echo $link | jq -r '.name')"-${RELEASE_VERSION_SLUG}.zip" -H "JOB-TOKEN: ${CI_JOB_TOKEN}" -L
+    done
+
+    pwd
+    echo "### GIT ADD CHANGES ###"
+    git add .
+
+    echo "### SHOW CHANGES ###"
+    git status
+
+    echo "### GIT COMMIT CHANGES ###"
+    git -c user.name=${HANDOVER_GITLAB_USERNAME} -c user.email=${HANDOVER_GITLAB_EMAIL} commit -m "Pipeline commit ${RELEASE_VERSION}"
+
+    echo "### GIT PUSH AND MR ###"
+    git push -o merge_request.create -o merge_request.remove_source_branch -o merge_request.target=${HANDOVER_GITLAB_TARGET_BRANCH} -o ci.skip
+     
+  
+  }
+
+  function push_images_to_nexus {
+    # transfert docker images from gitlab to nexus repo
+  
+    echo "NEW_RELEASE_VERSION that will be used: ${NEW_RELEASE_VERSION}"
+  
+    if [ ! -z $PATCH_VERSION ]
+    then
+      IMAGE_TAG_VERSION=$PATCH_VERSION
+      RELEASE_VERSION=`echo $CI_BUILD_REF_SLUG | sed -E "s/(.*)\-([0-9]+)\-([0-9]+)\-(.*)/\1-\2.\3.\4/"`
+    else
+      IMAGE_TAG_VERSION=latest
+    fi
+    echo "IMAGE_TAG_VERSION=$IMAGE_TAG_VERSION"
+  
+    echo "### PULL IMAGE FROM GITLAB REGISTRY ###"
+    docker login -u ${REGISTRY_USER} -p ${REGISTRY_PASSWORD} ${REGISTRY_URL}
+    docker image pull ${CI_REGISTRY_IMAGE}/${MODULE_NAME}:${RC_VERSION}
+
+    echo "### LOGIN TO NEXUS ###"
+    docker login -u ${NEXUS_ROOT_USER} -p ${NEXUS_ROOT_PASSWORD} ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}
+
+    echo "### TAG GITLAB IMAGES FOR NEXUS ###"
+    docker tag ${CI_REGISTRY_IMAGE}/${MODULE_NAME}:${RC_VERSION} ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION}
+    docker tag ${CI_REGISTRY_IMAGE}/${MODULE_NAME}:${RC_VERSION} ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:latest
+
+    echo "### PUSH IMAGES TO NEXUS REGISTRY ###"
+    docker push ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION}
+    docker push ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:latest
+  }
+
+
+   function push_images_to_ops_release_nexus {
+    
+    # transfert docker images from nexus standard folder to nexus ops folder in order to separate image matching a delivered version than other that can be cleaned
+    echo "NEW_RELEASE_VERSION that will be used: ${NEW_RELEASE_VERSION}"
+  
+    if [ ! -z $PATCH_VERSION ]
+    then
+      IMAGE_TAG_VERSION=$PATCH_VERSION
+      RELEASE_VERSION=`echo $CI_BUILD_REF_SLUG | sed -E "s/(.*)\-([0-9]+)\-([0-9]+)\-(.*)/\1-\2.\3.\4/"`
+    else
+      IMAGE_TAG_VERSION=latest
+    fi
+    echo "IMAGE_TAG_VERSION=$IMAGE_TAG_VERSION"
+  
+    echo "### LOGIN TO NEXUS ###"
+    docker login -u ${NEXUS_ROOT_USER} -p ${NEXUS_ROOT_PASSWORD} ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}
+    
+    MODULE_NAMES="api cache-manager custom-adapter data-api default-adapter mock-api request-relay routing-api"
+    for MODULE_NAME in `echo $MODULE_NAMES`
+    do  
+      echo "TRANSFERING ${MODULE_NAME}....."
+      docker pull ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION}
+      docker pull ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:latest
+    
+      echo "### TAG GITLAB IMAGES FOR NEXUS ###"
+      echo "### PUSH IMAGES TO NEXUS REGISTRY ###"
+      docker tag ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:latest ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL}/gateway-ops/${RELEASE_VERSION}/${MODULE_NAME}:latest
+      docker push ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL}/gateway-ops/${RELEASE_VERSION}/${MODULE_NAME}:latest
+ 
+      docker tag ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}/gateway/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION} ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL}/gateway-ops/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION}
+      docker push ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_RELEASE_URL}/gateway-ops/${RELEASE_VERSION}/${MODULE_NAME}:${IMAGE_TAG_VERSION}
+  
+    done;
+  }
+
+  function apply_pprd_env {
+    # APPLY ENV VALUES
+    #    echo " *************** apply variables of preprod environment"
+    source delivery/commons/.gitlab-ci/.env.preprod
+    }
+
+    function apply_testing_env {
+    # APPLY ENV VALUES
+    #    echo " *************** apply variables of testing environment"
+    source delivery/commons/.gitlab-ci/.env.testing
+  }
+  
+  function apply_chart_env {
+    # APPLY ENV VALUES
+    #    echo " *************** apply variables of testing environment"
+    source delivery/commons/.gitlab-ci/.env.chart
+  }
+
+  function clear_env_vars {
+    # unset variables when creating the chart not to replace variables in it but postpone to deployment phase
+    unset API_FQDN
+    unset DATA_API_FQDN
+    unset ROUTING_API_FQDN
+    unset REQUEST_RELAY_FQDN
+    unset DEFAULT_ADAPTER_FQDN
+    unset CUSTOM_ADAPTER_FQDN
+    unset MOCK_API_FQDN
+    unset CACHE_MANAGER_FQDN
+    unset DKRON_FQDN
+    unset APIM_CONSOLE_FQDN
+    unset APIM_GATEWAY_FQDN
+    unset APIM_PORTAL_FQDN
+    unset APIM_FQDN
+    unset CUSTOM_ADAPTER_IMAGE_NAME
+    unset API_IMAGE_NAME
+    unset DATA_API_IMAGE_NAME
+    unset ROUTING_API_IMAGE_NAME
+    unset REQUEST_RELAY_IMAGE_NAME
+    unset DEFAULT_ADAPTER_IMAGE_NAME
+    unset CACHE_MANAGER_IMAGE_NAME
+    unset MOCK_API_IMAGE_NAME
+    unset DATABASE_HOST
+    unset DATABASE_USER_PWD
+    unset DATABASE_USER_NAME
+    unset BASE_KUBE_NAMESPACE
+    unset MAAS_API_CACHE_HOST
+    unset MAAS_API_CACHE_PORT
+    unset MAAS_API_CACHE_KEYS_PREFIX
+    unset MAAS_API_CACHE_PASSWORD
+    unset BASE_KUBE_NAMESPACE_WITH_BRANCH
+    unset GRAVITEE_DATABASE_NAME
+    unset GRAVITEE_DATABASE_USER_NAME
+    unset GRAVITEE_DATABASE_USER_PWD
+    unset GRAVITEE_DATABASE_SERVER
+    unset GRAVITEE_DATABASE_NAME
+    unset GRAVITEE_SMTP_PORT
+    unset GRAVITEE_SMTP_HOST
+    unset GRAVITEE_SMTP_FROM
+    unset GRAVITEE_SMTP_ENABLED
+    unset GRAVITEE_SMTP_USERNAME
+    unset GRAVITEE_SMTP_PASSWORD
+    unset GRAVITEE_SMTP_SUBJECT_PATTERN
+  }
+
+  function install_gravitee {
+    # ****************** gravitee ****************
+    mkdir gravitee
+    cd gravitee
+
+    # HELM ADD REPO
+    helm repo add Gaetway-Helm-chart-repo ${NEXUS_HELM_REGISTRY} --username "$NEXUS_USER_NAME" --password "$NEXUS_USER_PWD"
+
+    # delete helm namespace
+    echo "******* ${B_YELLOW} delete helm namespace -f ${RESET}"
+
+    RES=`kubectl get namespaces | grep ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE} -c` > /dev/null 2>&1 || FAILED=true
+    echo "namespace ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE} trouve $RES fois"
+
+    if [ "$RES" != "0" ]
+    then
+      kubectl delete namespace ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE}
+    fi
+
+    echo "******* ${B_YELLOW}install the chart from the Helm repo with the release name graviteeio-apim3x -f ${RESET}"
+    helm install graviteeio-apim3x graviteeio/apim3 --create-namespace --namespace ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE}
+
+    # echo "******* ${B_YELLOW}Add the Gravitee.io Helm charts repo ... -f ${RESET}"
+    helm repo add graviteeio https://helm.gravitee.io
+
+    # package this chart directory into a chart archive
+    helm package .
+
+    echo " *******  ${B_YELLOW} install the chart using the chart archive ... -f ${RESET}"
+    helm install apim3-3.0.0.tgz
+
+    echo "******* ${B_YELLOW}install postgreSQL-f ${RESET}"
+    helm install --set postgresqlUsername=postgres --set postgresqlPassword=postgres --set postgresqlDatabase=graviteeapim postgres-apim bitnami/postgresql:11.16.0
+
+    cd ..
+    # ****************** end gravitee ****************
+  }
+
+  function push_package_to_nexus {
+    RESET='\033[0m'
+    B_PINK='\033[1;35m'
+    B_YELLOW='\033[1;33m'
+
+    echo "__________________________________________________________________"
+    echo "... push_package_to_nexus ...."
+    echo ### push configMap on nexus ###
+    echo "${B_PINK}# Is a release candidate - create and push configMap on nexus # apply -f - ${RESET}"
+    # Loops to create configMap in helm template
+
+    echo "****************** user = ${NEXUS_ROOT_USER}"
+    echo "****************** password = ${NEXUS_ROOT_PASSWORD}"
+    echo "****************** NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL = ${NEXUS_DOCKER_REGISTRY_HANDOVER_GATEWAY_URL}"
+
+    # duplicate the helm-chart folder locally to iterate over files without loosing env variable templates
+    cp -r delivery/helm-chart delivery/helm-chart-template
+    # remove chart-template file not to package it 
+    rm delivery/helm-chart/Chart-template.yaml
+
+    if [ "$1" == "ops" ]
+    then
+      ENV_LIST="preprod production"
+    else
+      # iterate over all env for which we want to generate charts. Define set of charts regarding if it's a release or not
+      ENV_LIST="preview testing"
+    fi
+  
+    echo "/!\\ Preparing chart"
+    ls -ltR
+    
+    set -x
+    for ENVIRONMENT in `echo $ENV_LIST`
+    do  
+        . delivery/commons/.gitlab-ci/.env.${ENVIRONMENT}
+        # SUBSTITUTE VARIABLES FOR ALL *-VALUES FILES
+        for FILE in delivery/helm-chart-template/*-values.yaml
+        do
+          clear_env_vars
+          envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < $FILE > delivery/helm-chart/`basename $FILE`
+        done
+  
+        echo "Creating chart for env ${ENVIRONMENT}"
+        envsubst < delivery/helm-chart-template/Chart-template.yaml > delivery/helm-chart/Chart.yaml
+        
+        echo "Chart description for env ${ENVIRONNEMENT}"
+        cat  delivery/helm-chart/Chart.yaml
+
+        echo "PUSH chart gateway-${LANDSCAPE_ENV}/gateway-${LANDSCAPE_ENV}-${HELM_CHART_VERSION}.tgz to nexus registry"
+
+        helm package delivery/helm-chart --app-version ${CI_BUILD_REF_SLUG} --version ${HELM_CHART_VERSION} -d gateway-${LANDSCAPE_ENV}
+        curl -v --upload-file gateway-${LANDSCAPE_ENV}/gateway-${LANDSCAPE_ENV}-${HELM_CHART_VERSION}.tgz -u ${NEXUS_ROOT_USER}:${NEXUS_ROOT_PASSWORD} ${NEXUS_HELM_REGISTRY}/
+    done;
+    }
+
+    function check_helm_branch_condition {
+       # if we are on develop branch or trigger branch we push chart
+
+      echo "********************* ci_commit_branch=$CI_COMMIT_BRANCH"
+      # cases for which we deploy the pipeline to gateway-helm repo
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" || "$CI_COMMIT_BRANCH" =~ "release/" || "$CI_COMMIT_BRANCH" =~ "00-gravitee" || "$CI_COMMIT_BRANCH" =~ "300-"  || "$TRIGGER_RELEASE" == "0" ]]
+      then
+        export SKIP_HELM_STUFF=0
+      else
+        export SKIP_HELM_STUFF=1
+      fi
+    }
+
+.helm-push-image-job:
+  extends:
+    - .commons
+    - .image-job-tags
+  stage: helm-push-image
+  image: ${NEXUS_DOCKER_REGISTRY_URL}/tiangolo/docker-with-compose:2021-09-18
+  before_script:
+    - *declare-helm-functions
+    - |
+      echo "NEXUS_DOCKER_REGISTRY_URL=$NEXUS_DOCKER_REGISTRY_URL"
+      echo "image=${NEXUS_DOCKER_REGISTRY_URL}/tiangolo/docker-with-compose:2021-09-18"
+  script: |
+      check_helm_branch_condition
+      if [[ $SKIP_HELM_STUFF -eq 0 ]]
+      then
+        apk add jq
+        cd ${MODULE_PATH}
+        get_rc_name
+        get_release_name
+        echo "push images to nexus"
+        push_images_to_nexus
+      else
+        echo "/!\\ helm-push-image-job skipped due to check_helm_branch_condition !!"
+      fi
+  needs: [ "check-if-release-version" ]
+
+# Job to push the gitlab ci and artifacts to cloud repository
+helm_gitlab:
+  stage: helm-gitlab
+  extends:
+    - .helm-base
+    - .trigger-condition
+  image:
+    name: alpine/git:v2.32.0
+    entrypoint: [ "" ]
+  before_script:
+    - *declare-helm-functions
+  needs: ["helm_package", "check-if-release-version"]
+  script:
+    - |
+      check_helm_branch_condition
+      if [[ $SKIP_HELM_STUFF -eq 0 ]]
+      then
+        apk add jq curl
+        get_release_name
+        get_release_name_slug
+        apply_pprd_env
+        push_to_gitlab
+      else
+        echo "helm_gitlab skipped due to check_helm_branch_condition"
+      fi
+
+# Job to push the repository of helm template and configMaps on nexus
+helm_package:
+  stage: helm-package
+  extends:
+    - .helm-base
+    - .no-needs
+  image: dtzar/helm-kubectl
+  before_script:
+    - *declare-helm-functions
+  script:
+    - |
+      set -x
+      check_helm_branch_condition
+      if [[ $SKIP_HELM_STUFF -eq 0 ]]
+      then
+        get_release_name
+        get_release_name_slug
+        apply_chart_env
+        push_package_to_nexus
+      else
+        echo "helm_package skipped due to check_helm_branch_condition"
+      fi
+  needs: [ "check-if-release-version", "api_image_push", "cache_manager_image_push", "custom_adapter_image_push", "data_api_image_push", "default_adapter_image_push", "mock_api_image_push", "request_relay_image_push", "routing_api_image_push" ]
+  #needs: [ "check-if-release-version"]
+
+
+deliver-image-nexus-ops:
+  stage: deliver-to-ops
+  environment:
+    name: ${CI_JOB_NAME}
+  extends:
+    - .commons
+    - .image-job-tags
+    - .no-needs
+    - .envsubst
+  before_script:
+    - *declare-helm-functions
+  when: manual
+  image: ${NEXUS_DOCKER_REGISTRY_URL}/tiangolo/docker-with-compose:2021-09-18
+  needs: [ "check-if-release-version", "helm_gitlab" ]
+  script:
+    - |
+      env
+      echo "pushing manifests to ops git repository"
+      echo "gateway release"
+      echo "helm chart release"
+      apk add jq curl
+      cat /etc/*-release
+      apk add gettext
+      check_helm_branch_condition
+      get_release_name
+      
+      echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+      echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+      set -x
+      
+      echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"
+      RES=`echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"`
+      if [[ "$RES" != "0" ]]
+      then
+        get_release_name_slug
+        push_images_to_ops_release_nexus
+      else
+        echo "step skipped due to check_helm_branch_condition"
+      fi
+
+deliver-chart-helm-ops:
+  stage: deliver-to-ops
+  environment:
+    name: ${CI_JOB_NAME}
+  extends:
+    - .commons
+    - .envsubst
+  when: manual
+  image: ${NEXUS_DOCKER_REGISTRY_URL}/dtzar/helm-kubectl
+  before_script:
+    - *declare-helm-functions
+  needs: [ "check-if-release-version", "deliver-image-nexus-ops"]
+  script:
+    - |
+      env
+      echo "pushing manifests to ops git repository"
+      echo "gateway release"
+      echo "helm chart release"
+      apk add jq curl
+      cat /etc/*-release
+      apk add gettext
+      check_helm_branch_condition
+      get_release_name
+      
+      echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+      echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+      set -x
+      
+      echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"
+      RES=`echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"`
+      if [[ "$RES" != "0" ]]
+      then
+        push_package_to_nexus ops
+      else
+        echo "step skipped due to check_helm_branch_condition"
+      fi
+
+deliver-preprod-pipeline:
+  stage: deliver-to-ops
+  environment:
+    name: ${CI_JOB_NAME}
+  extends:
+    - .commons
+    - .envsubst
+  when: manual
+  image: alpine/git:v2.32.0
+  before_script:
+    - *declare-helm-functions
+  needs: [ "check-if-release-version", "deliver-chart-helm-ops" ]
+  script:
+    - |
+      env
+      echo "pushing manifests to ops git repository"
+      apk add jq curl
+      apk add gettext
+      check_helm_branch_condition
+      get_release_name
+      
+      echo "NEW_RELEASE_VERSION=$NEW_RELEASE_VERSION"
+      echo "HELM_CHART_VERSION=$HELM_CHART_VERSION"
+      set -x
+      
+      echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"
+      RES=`echo $NEW_RELEASE_VERSION | egrep "([0-9]+\.[0-9]+)\.([0-9]+)$"`
+      if [[ "$RES" != "0" ]]
+      then
+        # push pipeline
+        push_to_gitlab ops
+      else
+        echo "helm_gitlab skipped due to check_helm_branch_condition"
+      fi
+      

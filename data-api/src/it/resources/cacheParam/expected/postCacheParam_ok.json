@@ -1,0 +1,8 @@
+{
+  "partnerId": "b814c97e-df56-4651-ac50-11525537964f",
+  "actionType": "STATION_SEARCH",
+  "softTTL": 300,
+  "cacheParamId": "FAKE_UUID",
+  "hardTTL": 600,
+  "refreshCacheDelay": 500
+}

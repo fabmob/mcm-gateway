@@ -1,0 +1,8 @@
+{
+  "errorcode": 500,
+  "type": "noType",
+  "title": "",
+  "status": 500,
+  "detail": "400 BAD_REQUEST",
+  "instance": "Gateway"
+}

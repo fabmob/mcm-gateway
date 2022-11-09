@@ -1,0 +1,9 @@
+{
+    "callId": "8699b693-c365-40f2-bff0-c7fad6cc2488",
+    "errorCode": 404,
+    "description": "The requested resource Token with id FAKE_UUID was not found",
+    "label": "Not Found",
+    "status": 404,
+    "timestamp": "2022-04-12T00:34:58.675Z"
+  
+}

@@ -47,6 +47,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_ERROR_TITLE;
+
 @Slf4j
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:errors.properties")
@@ -55,6 +57,7 @@ public class ExceptionHandlerTompStandardTest {
     public static final String GATEWAY_ERROR = "Gateway error : ";
     public static final String GATEWAY_ERROR_HAPPEN = "Gateway error happen : ";
     public static final String CONTACT_GATEWAY_SUPPORT = ", contact your Gateway support.";
+    public static final String INTERNAL_SERVER_ERROR = "Internal server error";
 
     @TestConfiguration
     public static class ErrorMessagesConfiguration {
@@ -103,25 +106,25 @@ public class ExceptionHandlerTompStandardTest {
     @Test
     public void testHandleHttpMediaTypeNotAcceptable() {
         response = responseEntityExceptionHandler.handleHttpMediaTypeNotAcceptable(new HttpMediaTypeNotAcceptableException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "MediaType non acceptable", 7500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 7500);
     }
 
     @Test
     public void testHandleHttpMediaTypeNotSupported() {
         response = responseEntityExceptionHandler.handleHttpMediaTypeNotSupported(new HttpMediaTypeNotSupportedException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "MediaType non acceptable", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleBadRequest() {
         response = responseEntityExceptionHandler.handleBadRequest(new BadRequestException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), DEFAULT_EXCEPTION_MESSAGE, "Bad Request", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
     }
 
     @Test
     public void testHandleBadGateway() {
         response = responseEntityExceptionHandler.handleBadGateway(new BadGatewayException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Communication error", 7500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 7500);
 
     }
 
@@ -129,42 +132,42 @@ public class ExceptionHandlerTompStandardTest {
     public void testhandleBindException() {
         response = responseEntityExceptionHandler.handleBindException
                 (new BindException(new BeanPropertyBindingResult(this, "objectName")), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "The format of the request is not the one expected", "", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleBusinessException() {
         response = responseEntityExceptionHandler.handleBusinessException
                 (new BusinessException(new BusinessError(42, "functional label", "functional descriptions")), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "functional descriptions", "functional label", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleConflict() {
         response = responseEntityExceptionHandler.handleConflict
                 (new ConflictException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Conflict", 7500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 7500);
     }
 
     @Test
     public void testHandleConnectException() {
         response = responseEntityExceptionHandler.handleConnectException
                 (new RuntimeException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "ExceptionMessage", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleNoHandlerFoundException() {
         response = responseEntityExceptionHandler.handleNoHandlerFoundException
                 (new NoHandlerFoundException(DEFAULT_EXCEPTION_MESSAGE, "", headers), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unexpected exception catcher", "Internal error", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleNotFound() {
         response = responseEntityExceptionHandler.handleNotFound
                 (new NotFoundException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.NOT_FOUND.value(), DEFAULT_EXCEPTION_MESSAGE, "Not Found", 404);
+        checkErrorResponse(response, HttpStatus.NOT_FOUND.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 404);
     }
 
     @Test
@@ -172,14 +175,14 @@ public class ExceptionHandlerTompStandardTest {
         response = responseEntityExceptionHandler.handleConversionNotSupported
                 (new ConversionNotSupportedException(new PropertyChangeEvent("source", "propertyName",
                         "oldValue", "newValue"), null, null), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Conversion error", "Conversion not supported", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleExceptionInternal() {
         response = responseEntityExceptionHandler.handleExceptionInternal
                 (new NullPointerException(DEFAULT_EXCEPTION_MESSAGE), null, headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "ExceptionMessage", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
@@ -190,35 +193,35 @@ public class ExceptionHandlerTompStandardTest {
 
         response = responseEntityExceptionHandler.handleHttpMessageNotReadable
                 (new HttpMessageNotReadableException(DEFAULT_EXCEPTION_MESSAGE), headers, status, request);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request format is not the expected one", "Bad Request: Invalid Format", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
     }
 
     @Test
     public void testHandleHttpMessageNotWritable() {
         response = responseEntityExceptionHandler.handleHttpMessageNotWritable
                 (new HttpMessageNotWritableException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", "", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleHttpRequestMethodNotSupported() {
         response = responseEntityExceptionHandler.handleHttpRequestMethodNotSupported
                 (new HttpRequestMethodNotSupportedException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Unable to process the requested operation", "Method not supported", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleInternal() {
         response = responseEntityExceptionHandler.handleInternal
                 (new ClassCastException(DEFAULT_EXCEPTION_MESSAGE), status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "ExceptionMessage", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleInternalException() {
         response = responseEntityExceptionHandler.handleInternalException
                 (new InternalException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Internal Server Error", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
 
@@ -226,28 +229,28 @@ public class ExceptionHandlerTompStandardTest {
     public void testHandleMissingServletRequestParameter() {
         response = responseEntityExceptionHandler.handleMissingServletRequestParameter
                 (new MissingServletRequestParameterException(DEFAULT_EXCEPTION_MESSAGE, "String"), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Required request parameter 'ExceptionMessage' for method parameter type String is not present", "", 400);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
     }
 
     @Test
     public void testHandleMissingServletRequestPart() {
         response = responseEntityExceptionHandler.handleMissingServletRequestPart
                 (new MissingServletRequestPartException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Internal Server Error", "", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
     public void testHandleServiceUnavailable() {
         response = responseEntityExceptionHandler.handleServiceUnavailable
                 (new UnavailableException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), DEFAULT_EXCEPTION_MESSAGE, "Service Unavailable", 7500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 7500);
     }
 
     @Test
     public void testHandleServletRequestBindingException() {
         response = responseEntityExceptionHandler.handleServletRequestBindingException
                 (new ServletRequestBindingException(DEFAULT_EXCEPTION_MESSAGE), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "The format of the request is not the one expected", "", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @Test
@@ -260,7 +263,7 @@ public class ExceptionHandlerTompStandardTest {
 
         response = responseEntityExceptionHandler.handleTypeMismatch
                 (exception, headers, status, request);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request has an anomaly", "Type mismatch", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
     }
 
     @Test
@@ -298,7 +301,7 @@ public class ExceptionHandlerTompStandardTest {
     @Test
     public void testHandleMissingPathVariable() {
         response = responseEntityExceptionHandler.handleMissingPathVariable(new MissingPathVariableException("variableName", new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"), -1)), headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "Required URI template variable 'variableName' for method parameter type void is not present", "MissingPathVariableException", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     @SneakyThrows
@@ -308,7 +311,7 @@ public class ExceptionHandlerTompStandardTest {
         response = responseEntityExceptionHandler.handleMethodArgumentNotValid
                 (new MethodArgumentNotValidException(new MethodParameter(this.getClass().getMethod("testHandleMissingPathVariable"), -1), bindingResult),
                         headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), "The invoked method is not allowed", "Unauthorized method", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 500);
     }
 
     private void checkErrorResponse(ResponseEntity<Object> response, Integer expectedStatusCode, String expectedDescription, String expectedLabel, Integer expectedErrorCode) {

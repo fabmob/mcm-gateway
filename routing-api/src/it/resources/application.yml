@@ -66,7 +66,7 @@ security:
 gateway:
   service:
     dataapi:
-      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081${DATA_API_CONTEXT_PATH:/dataapi/v1}"
     adapter:
       default-adapter:
         baseUrl: "http://${GENERIC_ADAPTER_HOST:localhost:8090}"

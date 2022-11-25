@@ -3,6 +3,7 @@ package com.gateway.api.service.cache.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.api.ApiITTestCase;
+import com.gateway.commonapi.cache.GatewayParamStatusManager;
 import com.gateway.commonapi.dto.data.CacheParamDTO;
 import com.gateway.commonapi.utils.cache.impl.CacheServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -22,11 +23,12 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
 
 @Slf4j
-class CacheServiceImplTest extends ApiITTestCase {
+public class CacheServiceImplTest extends ApiITTestCase {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
@@ -36,8 +38,12 @@ class CacheServiceImplTest extends ApiITTestCase {
     @Mock
     private RestTemplate restTemplate;
 
+    @Mock
+    private GatewayParamStatusManager gatewayParamStatusManager;
+
+
     @Test
-    void getCacheParam() throws IOException {
+    public void getCacheParam() throws IOException {
 
         UUID partnerId = UUID.fromString("14390fdf-34c1-41c9-885e-6ce66505b759");
         String actionType = "STATION_SEARCH";
@@ -65,6 +71,17 @@ class CacheServiceImplTest extends ApiITTestCase {
 
     }
 
+    @Test
+    public void getCacheStatusTest() {
+        Mockito.when(gatewayParamStatusManager.getCacheStatus()).thenReturn(true);
+        assertTrue(gatewayParamStatusManager.getCacheStatus());
+    }
+
+    @Test
+    public void useCacheTest() {
+        Mockito.when(gatewayParamStatusManager.getCacheStatus()).thenReturn(true);
+        assertTrue(cacheService.useCache());
+    }
 
     private CacheParamDTO[] creatMockCacheParam() throws IOException {
         CacheParamDTO cacheParam = new CacheParamDTO();

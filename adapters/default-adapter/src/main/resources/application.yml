@@ -74,6 +74,6 @@ gateway:
       url: "http://${REQUEST_RELAY_HOST:localhost}:8085/v1/request-relay"
       isMocked: false
     dataapi:
-      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081${DATA_API_CONTEXT_PATH:/dataapi/v1}"
 
 

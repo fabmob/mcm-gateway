@@ -162,6 +162,9 @@
     mkdir -p security/ingress
     cp -rT ../delivery/helm-chart/security security
   
+    mkdir -p values
+    cp -rT ../delivery/helm-chart/values values
+  
     # set the version of the release and chart in an env file that is commited
     echo "GATEWAY_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
     echo "GATEWAY_CHART_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
@@ -370,7 +373,7 @@
     fi
 
     echo "******* ${B_YELLOW}install the chart from the Helm repo with the release name graviteeio-apim3x -f ${RESET}"
-    helm install graviteeio-apim3x graviteeio/apim3 --create-namespace --namespace ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE}
+    helm install graviteeio-apim3x-${LANDSCAPE_ENV} graviteeio/apim3 --create-namespace --namespace ${CI_COMMIT_REF_SLUG}-${KUBE_NAMESPACE}
 
     # echo "******* ${B_YELLOW}Add the Gravitee.io Helm charts repo ... -f ${RESET}"
     helm repo add graviteeio https://helm.gravitee.io
@@ -448,7 +451,7 @@
 
       echo "********************* ci_commit_branch=$CI_COMMIT_BRANCH"
       # cases for which we deploy the pipeline to gateway-helm repo
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" || "$CI_COMMIT_BRANCH" =~ "release/" || "$CI_COMMIT_BRANCH" =~ "00-gravitee" || "$CI_COMMIT_BRANCH" =~ "300-"  || "$TRIGGER_RELEASE" == "0" ]]
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" || "$CI_COMMIT_BRANCH" =~ "release/"  || "$TRIGGER_RELEASE" == "0" ]]
       then
         export SKIP_HELM_STUFF=0
       else

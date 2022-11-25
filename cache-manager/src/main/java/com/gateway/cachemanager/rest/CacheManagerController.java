@@ -2,7 +2,7 @@ package com.gateway.cachemanager.rest;
 
 import com.gateway.cachemanager.model.PositionsRequest;
 import com.gateway.cachemanager.service.CacheManagerService;
-import com.gateway.commonapi.cache.CacheStatus;
+import com.gateway.commonapi.dto.data.CacheStatusDTO;
 import com.gateway.commonapi.dto.exceptions.*;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.utils.CommonUtils;
@@ -75,9 +75,9 @@ public class CacheManagerController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @GetMapping(value = CACHE_MANAGER_STATUS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CacheStatus> getCacheStatus() {
-        CacheStatus cacheStatus = cacheManagerService.getCacheStatus();
-        return ResponseEntity.ok().body(cacheStatus);
+    public ResponseEntity<CacheStatusDTO> getCacheStatus() {
+        CacheStatusDTO cacheStatusDTO = new CacheStatusDTO(cacheManagerService.getCacheStatus());
+        return ResponseEntity.ok().body(cacheStatusDTO);
     }
 
 
@@ -95,9 +95,9 @@ public class CacheManagerController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @PutMapping(value = CACHE_MANAGER_STATUS_PATH, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CacheStatus> putCacheStatus(@RequestParam(required = true) boolean isEnabled) {
-        CacheStatus cacheStatus = cacheManagerService.putCacheStatus(isEnabled);
-        return ResponseEntity.ok().body(cacheStatus);
+    public ResponseEntity<CacheStatusDTO> putCacheStatus(@RequestParam(required = true) boolean isEnabled) {
+        CacheStatusDTO cacheStatusDTO = new CacheStatusDTO(cacheManagerService.putCacheStatus(isEnabled));
+        return ResponseEntity.ok().body(cacheStatusDTO);
     }
 
 

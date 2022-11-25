@@ -1,5 +1,7 @@
 package com.gateway.dataapi.service.impl;
 
+import com.gateway.commonapi.cache.CacheUtil;
+import com.gateway.commonapi.cache.GatewayParamStatusManager;
 import com.gateway.commonapi.dto.data.GatewayParamsDTO;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.dataapi.model.mapper.GatewayParamsMapper;
@@ -22,17 +24,24 @@ public class GatewayParamsServiceImpl implements GatewayParamsService {
     @Autowired
     private GatewayParamsDatabaseService gatewayParamsDatabaseService;
 
+    @Autowired
+    private CacheUtil cacheUtil;
+    @Autowired
+    private GatewayParamStatusManager gatewayParamStatusManager;
+
     private final GatewayParamsMapper mapper = Mappers.getMapper(GatewayParamsMapper.class);
 
 
     @Override
     public GatewayParamsDTO addGatewayParamsDTO(GatewayParamsDTO gatewayParamsDTO) {
-        if(Objects.equals(gatewayParamsDTO.getParamKey(), CACHE_ACTIVATION) && !Objects.equals(gatewayParamsDTO.getParamValue(), Boolean.TRUE.toString()) && !Objects.equals(gatewayParamsDTO.getParamValue(), Boolean.FALSE.toString()) ){
+        if (Objects.equals(gatewayParamsDTO.getParamKey(), CACHE_ACTIVATION) && !Objects.equals(gatewayParamsDTO.getParamValue(), Boolean.TRUE.toString()) && !Objects.equals(gatewayParamsDTO.getParamValue(), Boolean.FALSE.toString())) {
             throw new BadRequestException(VALID_CACHE_ACTIVATION_VALUES);
-        } else {
-            return mapper.mapEntityToDto(gatewayParamsDatabaseService.addGatewayParams(mapper.mapDtoToEntity(gatewayParamsDTO)));
         }
-
+        GatewayParamsDTO gatewayParamsDTOAfterSave = mapper.mapEntityToDto(gatewayParamsDatabaseService.addGatewayParams(mapper.mapDtoToEntity(gatewayParamsDTO)));
+        if (Objects.equals(gatewayParamsDTO.getParamKey(), CACHE_ACTIVATION)) {
+            gatewayParamStatusManager.synchronizeCacheStatus();
+        }
+        return gatewayParamsDTOAfterSave;
     }
 
     @Override
@@ -49,7 +58,11 @@ public class GatewayParamsServiceImpl implements GatewayParamsService {
 
     @Override
     public GatewayParamsDTO updateGatewayParamsDTO(String paramKey, GatewayParamsDTO gatewayParamsDTO) {
+
         GatewayParams gatewayParam = gatewayParamsDatabaseService.updateGatewayParams(paramKey, mapper.mapDtoToEntity(gatewayParamsDTO));
+        if (Objects.equals(gatewayParamsDTO.getParamKey(), CACHE_ACTIVATION)) {
+            gatewayParamStatusManager.synchronizeCacheStatus();
+        }
         return mapper.mapEntityToDto(gatewayParam);
     }
 

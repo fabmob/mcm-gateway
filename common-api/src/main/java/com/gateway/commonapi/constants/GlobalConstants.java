@@ -15,7 +15,8 @@ public class GlobalConstants {
     public static final String INTERNAL_FIELD = "internalField";
 
     public static final String CACHE_ACTIVATION = "CACHE_ACTIVATION";
-    public static final String CACHE_NOT_ACTIVATED = "Cache not activated";
+    public static final String DEFAULT_VALUE_CACHE_ACTIVATION = "false";
+
     public static final String REFRESH_CACHE_CALL_FAIL = "Fetching data to refresh cache failed - ";
     public static final String INVALID_BODY = "Body is not a valid {0} object";
     public static final String FIRST_PLACEHOLDER = "0";

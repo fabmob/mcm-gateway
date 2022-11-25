@@ -12,5 +12,5 @@ spec:
         - name: security-apim
       services:
         - kind: Service
-          name: graviteeio-apim3x-ui
+          name: graviteeio-apim3x-${LANDSCAPE_ENV}-ui
           port: 8002

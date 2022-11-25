@@ -1,5 +1,6 @@
 package com.gateway.commonapi.exception.handler;
 
+import com.gateway.commonapi.constants.GatewayErrorMessage;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.dto.exceptions.TompError;
 import com.gateway.commonapi.utils.CommonUtils;
@@ -12,21 +13,12 @@ import org.springframework.http.ResponseEntity;
 import java.text.MessageFormat;
 import java.util.List;
 
+import static com.gateway.commonapi.constants.GatewayErrorMessage.*;
+
 @Slf4j
 public class TompErrorConverter {
     private TompErrorConverter() {
     }
-
-    public static final String DEFAULT_TOMP_TYPE = "Technical issue";
-    public static final String DEFAULT_TOMP_INSTANCE = "Gateway callId ";
-    public static final String UNAUTHORIZED_TITLE = "Unauthorized";
-    public static final String FORBIDDEN_TITLE = "Forbidden";
-    public static final String INVALID_TYPE = "Invalid";
-    public static final String DETAIL_MESSAGE_AUTHENTICATION = "The request requires user authentication.";
-    public static final String DETAIL_MESSAGE_FORBIDDEN = "The server understood the request, but is refusing to fulfill it.";
-
-    public static final String TITLE_FORMAT = "Gateway error : {0}";
-    public static final String DETAIL_FORMAT = "Gateway error happen : {0}, contact your Gateway support.";
 
     public static ResponseEntity<Object> getResponseEntityForTompStandard(HttpStatus httpStatus, GenericError bodyGenericError, String rawResponseFromException, HttpStatus rawStatusCodeFromException, RuntimeException exception, List<Integer> validCodes) {
         TompError tompError = new TompError();
@@ -52,8 +44,8 @@ public class TompErrorConverter {
 
             // Init TompError with default values and GenericError data
             tompError.setType(DEFAULT_TOMP_TYPE);
-            tompError.setTitle((exceptionInGatewayFormat) ? bodyGenericError.getLabel() : rawResponseFromException);
-            tompError.setDetail(bodyGenericError.getDescription());
+            tompError.setTitle(GatewayErrorMessage.INTERNAL_ERROR_TITLE);
+            tompError.setDetail(GatewayErrorMessage.INTERNAL_ERROR_DETAIL);
             tompError.setTimestamp(bodyGenericError.getTimestamp());
             tompError.setInstance(DEFAULT_TOMP_INSTANCE + bodyGenericError.getCallId());
 

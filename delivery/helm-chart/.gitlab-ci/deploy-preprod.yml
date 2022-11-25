@@ -143,6 +143,7 @@ dkron_deploy_preprod:
     MODULE_NAME: dkron
   script:
     - |
+      . env/deployment.env
       get_release_name
       . env/.env.preprod
       helm_deploy $MODULE_NAME

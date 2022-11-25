@@ -2,7 +2,6 @@ package com.gateway.commonapi.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.gateway.commonapi.cache.CacheStatus;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.exceptions.CarpoolError;
 import com.gateway.commonapi.dto.exceptions.GenericError;
@@ -263,15 +262,6 @@ public class CommonUtils {
         }
     }
 
-
-    /**
-     * get cache activation status
-     *
-     * @return boolean enabled
-     */
-    public static boolean useCache() {
-        return CacheStatus.getInstance().isEnabled();
-    }
 
     public static boolean shouldPreserveResponseStatus(String outPutStandard) {
         StandardEnum standardEnum = StandardEnum.fromValue(outPutStandard);

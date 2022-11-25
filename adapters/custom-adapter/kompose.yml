@@ -21,6 +21,7 @@ services:
        - MAAS_API_CACHE_PORT=6379
        - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
        - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
+       - DATA_API_CONTEXT_PATH=/dataapi/v1
  #    networks:
  #      - web-nw
 

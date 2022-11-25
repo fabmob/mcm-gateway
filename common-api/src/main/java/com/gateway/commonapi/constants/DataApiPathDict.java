@@ -50,6 +50,9 @@ public final class DataApiPathDict {
     public static final String GATEWAY_PARAM_PATH = "/{paramKey}";
     public static final String GATEWAY_PARAMS_PATH = "";
 
+    public static final String CACHE_ACTIVATION_BASE_PATH = "/CACHE_ACTIVATION";
 
-    private DataApiPathDict() {}
+
+    private DataApiPathDict() {
+    }
 }

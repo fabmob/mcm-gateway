@@ -101,6 +101,7 @@ gravitee_apim_helm_deploy_testing:
     - .no-needs
     - .always
     - .env_testing
+  when: always
   variables:
     MODULE_NAME: gravitee-apim
   script:
@@ -144,6 +145,7 @@ dkron_deploy_testing:
     MODULE_NAME: dkron
   script:
     - |
+      . env/deployment.env
       get_release_name
       . env/.env.testing
       helm_deploy $MODULE_NAME

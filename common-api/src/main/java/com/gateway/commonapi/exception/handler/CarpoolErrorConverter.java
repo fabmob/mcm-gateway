@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.gateway.commonapi.constants.GatewayApiPathDict.CARPOOLING_PATH;
+import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_MESSAGE_ERROR_CARPOOLING;
 
 public class CarpoolErrorConverter {
     private CarpoolErrorConverter() {
@@ -48,7 +49,7 @@ public class CarpoolErrorConverter {
                 response = new ResponseEntity<>(rawResponseFromException, new HttpHeaders(), httpStatus);
             } else {
                 if (rawStatusCodeFromException.value() == 500) {
-                    carpoolError.setError("Internal Server Error: " + rawResponseFromException + ". Please try again later.");
+                    carpoolError.setError(INTERNAL_MESSAGE_ERROR_CARPOOLING);
                 } else {
                     carpoolError.setError(rawResponseFromException);
                 }

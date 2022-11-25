@@ -11,14 +11,39 @@ ratelimit:
 
 
 es:
-  #enabled: false
+  enabled: true
+  cluster: elasticsearch
+  index: gravitee
+  # If the details for security are entered
+  # authentication will be provided for the
+  # elastic search cluster
+  # https://docs.gravitee.io/apim_installguide_repositories_elasticsearch.html#management_api_configuration
+  index_mode: daily # Index mode normal (daily index) vs ILM (managed by ILM)
+  security:
+    enabled: false
   endpoints:
-    - http://elasticsearch-gravitee.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+    - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+  lifecycle:
+    enabled: false
+    policyPropertyName: index.lifecycle.name   #for openDistro, use 'opendistro.index_state_management.policy_id' instead of 'index.lifecycle.name'
+    policies:
+      health: hot_delete_health # ILM policy for the gravitee-health-* indexes
+      monitor: hot_delete_monitor # ILM policy for the gravitee-monitor-* indexes
+      request: hot_delete_request # ILM policy for the gravitee-request-* indexes
+      log: hot_delete_log # ILM policy for the gravitee-log-* indexes
+      # http:
+      # timeout: 10000
+  ssl:
+    enabled: false
+  pipeline:
+    plugins:
+      ingest: geoip, user_agent # geoip and user_agent plugins are enabled by default
+
 
 portal:
   image:
     repository: graviteeio/apim-portal-ui
-    tag: 3.18.11
+    tag: 3.19.1
   replicaCount: 1
   autoscaling:
     enabled: false
@@ -27,11 +52,16 @@ portal:
     path: /
     hosts:
       - ${APIM_PORTAL_FQDN}
+  deployment:
+    labels: { "visibility": "external" }
 
 ui:
+  portal:
+    analytics:
+      enabled: true
   image:
     repository: graviteeio/apim-management-ui
-    tag: 3.18.11
+    tag: 3.19.1
   replicaCount: 1
   autoscaling:
     enabled: false
@@ -43,13 +73,15 @@ ui:
   companyName: Mon Compte Mobilité
   title: Management UI
   managementTitle: API Management Std MaaS | Mon Compte Mobilité
-  documentationLink: https://github.com/fabmob/Gateway
+  documentationLink: https://github.com/fabmob/mcm-gateway
+  deployment:
+    labels: { "visibility": "external" }
 
 api:
   image:
     repository: graviteeio/apim-management-api
-    tag: 3.18.11
-  replicaCount: 2
+    tag: 3.19.1
+  replicaCount: 1
   autoscaling:
     enabled: false
     # minReplicas: 1
@@ -60,6 +92,15 @@ api:
     requests:
       cpu: 500m
       memory: 128Mi
+  reporters:
+    file:
+      enabled: true
+      endpoints:
+        - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+      output: json
+      request:
+        include:
+          - "*"
   logging:
     debug: true
     stdout:
@@ -100,12 +141,21 @@ api:
         # Regex pattern for password validation (default to OWASP recommendations).
         # 8 to 32 characters, no more than 2 consecutive equal characters, min 1 special characters (@ & # ...), min 1 upper case character.
         pattern: ^(?:(?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))(?!.*(.)\1{2,})[A-Za-z0-9!~<>,;:_\-=?*+#."'&§`£€%°()\\\|\[\]\-\$\^\@\/]{8,32}$
+  deployment:
+    labels: { "visibility": "external" }
+  containers:
+    - name: downloadFile
+      command:
+        - |
+          echo "Hello, World!"
+          touch /tmp/titi
+          wget -O /opt/graviteeio-management-api/templates/images/mob.jpeg https://media-exp1.licdn.com/dms/image/C4E0BAQGjm1JoC3plUA/company-logo_200_200/0/1608647485892?e=2147483647&v=beta&t=8am8tz2_IEY-O5lSKtMxr9nCpAU2s1KzM_oKT2nvo5I
 
 
 gateway:
   image:
     repository: graviteeio/apim-gateway
-    tag: 3.18.11
+    tag: 3.19.1
   policy:
     api-key:
       header: X-API-KEY
@@ -134,8 +184,30 @@ gateway:
     #      - ${APIM_GATEWAY_FQDN}
     #    secretName: gateway-tls-certs
   reporters:
-    elasticsearch:
+    file:
       enabled: true
+      endpoints:
+        - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+      output: json
+      request:
+        include:
+          - "*"
+      #log:
+      #  exclude: "*"
+      #node:
+      #  exclude: "*"
+      #healthcheck:
+      #  exclude: "*"
+  deployment:
+    labels: { "visibility": "external" }
+
+
+analytics:
+  type: elasticsearch
+  elasticsearch:
+    endpoints:
+      - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+
 
 
 smtp:

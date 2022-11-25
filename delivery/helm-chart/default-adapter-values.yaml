@@ -88,6 +88,7 @@ deployments:
               MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
               MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
               USE_CACHE: false
+              DATA_API_CONTEXT_PATH: "/dataapi/v1"
             image: ${DEFAULT_ADAPTER_IMAGE_NAME}
             name: default-adapter
             ports:

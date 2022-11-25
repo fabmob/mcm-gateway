@@ -2,7 +2,7 @@ server:
   port: 8080
   shutdown: "graceful"
   servlet:
-    context-path: /v1
+    context-path: ${API_CONTEXT_PATH:/api/v1}
   error:
     whitelabel.enabled: false
 
@@ -71,6 +71,6 @@ security:
 gateway:
   service:
     dataapi:
-      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081${DATA_API_CONTEXT_PATH:/dataapi/v1}"
     routingapi:
       baseurl: "http://${ROUTING_API_HOST:localhost}:8082/v1/route"

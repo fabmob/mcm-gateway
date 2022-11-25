@@ -1,6 +1,7 @@
 package com.gateway.dataapi.rest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gateway.commonapi.cache.GatewayParamStatusManager;
 import com.gateway.commonapi.constants.DataApiPathDict;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.WsTestUtil;
@@ -16,7 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -32,6 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.nio.charset.StandardCharsets;
 
 import static com.gateway.commonapi.constants.DataApiPathDict.PARAM_KEY;
+import static org.mockito.Mockito.doNothing;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 class GatewayParamsControllerTest extends DataApiITCase {
@@ -44,11 +48,16 @@ class GatewayParamsControllerTest extends DataApiITCase {
     public static final String GTW_PARAMS_EXPECTED_POST_OK_JSON = "gatewayParams/expected/postGatewayParams.json";
     public static final String GTW_PARAMS_UPDATE_JSON = "gatewayParams/request/updateGatewayParams.json";
 
+    @Value("${gateway.service.dataapi.baseUrl}")
+    private String uri;
     /*
      * Mock MVC
      */
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private GatewayParamStatusManager gatewayParamStatusManager;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -72,11 +81,11 @@ class GatewayParamsControllerTest extends DataApiITCase {
      *
      * @throws Exception
      */
-   @Test
+    @Test
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testGetAllGatewayParams() throws Exception {
-        testHttpRequestWithExpectedResult(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH , HttpMethod.GET, HttpStatus.OK, null,
+        testHttpRequestWithExpectedResult(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH, HttpMethod.GET, HttpStatus.OK, null,
                 GTW_PARAMS_EXPECTED_GET_ALL, JsonResponseTypeEnum.JSON_ARRAY,
                 "Test get list of Gateway Params", true, false, null);
     }
@@ -90,7 +99,7 @@ class GatewayParamsControllerTest extends DataApiITCase {
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testGetGatewayParamById() throws Exception {
-        final String paramKey = "TestKey";
+        final String paramKey = "CACHE_ACTIVATION";
         final String unknownKey = "test";
         testHttpRequestWithExpectedResult(
                 CommonUtils.placeholderFormat(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH + DataApiPathDict.GATEWAY_PARAM_PATH, PARAM_KEY, paramKey), HttpMethod.GET,
@@ -115,7 +124,6 @@ class GatewayParamsControllerTest extends DataApiITCase {
         testHttpRequestWithExpectedResult(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH, HttpMethod.POST, HttpStatus.CREATED,
                 GTW_PARAMS_EXPECTED_POST_OK_JSON, GTW_PARAMS_EXPECTED_POST_OK_JSON,
                 JsonResponseTypeEnum.JSON_OBJECT, "Test to create Gateway Params", true, false, null);
-
     }
 
     /**
@@ -127,7 +135,7 @@ class GatewayParamsControllerTest extends DataApiITCase {
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testUpdateGatewayParams() throws Exception {
-        final String paramKey = "TestKey";
+        final String paramKey = "CACHE_ACTIVATION";
         final String unknownKey = "test";
         testHttpRequestWithExpectedResult(
                 CommonUtils.placeholderFormat(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH + DataApiPathDict.GATEWAY_PARAM_PATH, PARAM_KEY, paramKey), HttpMethod.PUT,
@@ -154,7 +162,7 @@ class GatewayParamsControllerTest extends DataApiITCase {
     @SqlGroup({@Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
             @Sql(scripts = "classpath:jdd_dataMapping.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)})
     void testDeleteGatewayParams() throws Exception {
-        final String paramKey = "TestKey";
+        final String paramKey = "CACHE_ACTIVATION";
         final String unknownKey = "test";
         testHttpRequestWithExpectedResult(
                 CommonUtils.placeholderFormat(DataApiPathDict.GATEWAY_PARAMS_BASE_PATH + DataApiPathDict.GATEWAY_PARAM_PATH, PARAM_KEY, paramKey), HttpMethod.DELETE,
@@ -168,12 +176,13 @@ class GatewayParamsControllerTest extends DataApiITCase {
     }
 
 
-
-
     private String testHttpRequestWithExpectedResult(String uri, HttpMethod httpMethod,
                                                      HttpStatus httpStatusExpectedResult, String requestPayloadPath, String expectedResultPath,
                                                      JsonResponseTypeEnum resulType, final String message, boolean ignoreUUID, boolean ignoreTimeStamp,
                                                      MultiValueMap<String, String> parameters) throws Exception {
+
+
+        doNothing().when(gatewayParamStatusManager).synchronizeCacheStatus();
 
         String responseCall;
         ResultMatcher mockResultMatcher = WsTestUtil.getResultMatcher(httpStatusExpectedResult);
@@ -234,11 +243,11 @@ class GatewayParamsControllerTest extends DataApiITCase {
                     JSONObject expectedJsonObject = new JSONObject(jsonRef);
                     JSONObject resultJsonObject = new JSONObject(content);
 
-                    if(expectedJsonObject.has("callId")){
+                    if (expectedJsonObject.has("callId")) {
                         expectedJsonObject.remove("callId");
                         expectedJsonObject.remove("timestamp");
                     }
-                    if(resultJsonObject.has("callId")){
+                    if (resultJsonObject.has("callId")) {
                         resultJsonObject.remove("callId");
                         resultJsonObject.remove("timestamp");
                     }

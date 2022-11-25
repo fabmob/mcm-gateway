@@ -27,6 +27,7 @@ public class GatewayErrorMessage {
     public static final String INVALID_PARTNER_ID = "Invalid partner id";
     public static final String UNKNOWN_AREA_TYPE = "Unknown area type";
     public static final String UNKNOWN_PARTNER_TYPE = "Unknown partner type";
+    public static final String INVALID_FORMAT_UUID = "Invalid UUID";
 
 
     public static final String UNKNOWN_AREA_MESSAGE = "Unknown area type {0}. Allowed area types are 'OPERATING', 'NO_PARKING', 'SPEED_LIMIT', or 'PREFERENTIAL_PARKING'.";
@@ -53,5 +54,21 @@ public class GatewayErrorMessage {
     public static final String INVALID_AMOUNT_COVOIT = "Invalid amount of price {0}. Amount of price must be positive or zero.";
     public static final String INVALID_TYPE_OF_RECIPIENT_COVOIT = "Invalid recipient carpooler type {0}. Recipient carpooler type must be one of DRIVER or PASSENGER.";
     public static final String UNKNOWN_BOOKING_ID = "Unknown booking id {0}.";
+
+    // Internal error messages tomp
+    public static final String INTERNAL_ERROR_DETAIL = "Internal server error";
+    public static final String DEFAULT_TOMP_TYPE = "Technical issue";
+    public static final String DEFAULT_TOMP_INSTANCE = "Gateway callId ";
+    public static final String UNAUTHORIZED_TITLE = "Unauthorized";
+    public static final String FORBIDDEN_TITLE = "Forbidden";
+    public static final String DETAIL_MESSAGE_AUTHENTICATION = "The request requires user authentication.";
+    public static final String DETAIL_MESSAGE_FORBIDDEN = "The server understood the request, but is refusing to fulfill it.";
+    public static final String TITLE_FORMAT = "Gateway error : {0}";
+    public static final String DETAIL_FORMAT = "Gateway error happen : {0}, contact your Gateway support.";
+    public static final String INTERNAL_ERROR_TITLE = "Internal error";
+
+    // Internal error messages covoiturage
+    public static final String INTERNAL_MESSAGE_ERROR_CARPOOLING = "Internal server error, please contact your administrator or try again latter.";
+
 }
 

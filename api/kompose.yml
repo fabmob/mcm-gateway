@@ -21,6 +21,8 @@ services:
        - MAAS_API_CACHE_PORT=6379
        - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
        - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
+       - API_CONTEXT_PATH=/api/v1
+       - DATA_API_CONTEXT_PATH=/dataapi/v1
 
 # web network pour cloisonner une application
 #networks:

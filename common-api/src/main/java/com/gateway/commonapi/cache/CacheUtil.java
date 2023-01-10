@@ -27,6 +27,7 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class CacheUtil<CacheStoredType extends String, DtoGenericType extends Object> {
 
+    public static final int ONE_DAY_IN_SECONDS = 86400;
     private final ValueOperations<String, CacheStoredType> valueOperations;
     private final RedisTemplate<String, CacheStoredType> redisTemplate;
     private final GeoOperations<String, CacheStoredType> geoOperations;
@@ -41,7 +42,11 @@ public class CacheUtil<CacheStoredType extends String, DtoGenericType extends Ob
 
     private static final String STAR_PREFIX = "*";
 
+    @Value("${gateway.service.dataapi.baseUrl}")
+    private String uri;
+
     static ObjectMapper objectMapper = new ObjectMapper();
+
 
 
     @Autowired

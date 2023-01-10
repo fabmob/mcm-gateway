@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,9 +43,8 @@ import static org.mockito.Mockito.times;
 class CacheManagerServiceTest extends CacheManagerITTestCase {
 
     public static final String IT_RESOURCES_PATH = "./src/test/resources/";
-    public static final String CACHE_GET_STATUS_OK_JSON = "expected/cacheStatus.json";
-    public static final String CACHE_UPDATE_STATUS_OK_JSON = "expected/cacheStatusUpdated.json";
     public static final String CACHE_POSITIONS_REQUEST_JSON = "request/requestPositions.json";
+
 
 
     private ObjectMapper objectMapper = new ObjectMapper();
@@ -88,6 +88,13 @@ class CacheManagerServiceTest extends CacheManagerITTestCase {
     @Mock
     private CacheService cacheService;
 
+    @Mock
+    private GatewayParamStatusManager cacheUtil;
+
+    @Value("${spring.redis.keys.prefix:local}")
+    private String keyPrefixEnv;
+
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -107,28 +114,24 @@ class CacheManagerServiceTest extends CacheManagerITTestCase {
 
     @Test
     void testGetCacheStatus() {
-        Assertions.assertEquals(CacheStatus.getInstance(), cacheManagerService.getCacheStatus());
+        Mockito.when(cacheUtil.getCacheStatus()).thenReturn(true);
+        Assertions.assertTrue(cacheManagerService.getCacheStatus());
     }
 
     @Test
     void testPutCacheStatus() {
 
-        Mockito.when(restTemplate.exchange(
-                ArgumentMatchers.endsWith(CACHE_ACTIVATION),
-                ArgumentMatchers.eq(HttpMethod.PUT),
-                any(),
-                ArgumentMatchers.eq(Object.class))).thenThrow(HttpClientErrorException.NotFound.class);
-
         GatewayParamsDTO gatewayParamsDTO = new GatewayParamsDTO(CACHE_ACTIVATION, "true");
         ResponseEntity<GatewayParamsDTO> response = ResponseEntity.status(HttpStatus.OK).body(gatewayParamsDTO);
-        lenient().when(restTemplate.exchange(
+        Mockito.when(restTemplate.exchange(
                 ArgumentMatchers.contains(GATEWAY_PARAMS_BASE_PATH),
-                ArgumentMatchers.eq(HttpMethod.POST),
+                ArgumentMatchers.eq(HttpMethod.PUT),
                 any(),
                 ArgumentMatchers.eq(GatewayParamsDTO.class))).thenReturn(response);
 
+        Mockito.when(cacheUtil.getCacheStatus()).thenReturn(true);
+        Assertions.assertTrue(cacheManagerService.putCacheStatus(true));
 
-        Assertions.assertEquals(true, cacheManagerService.putCacheStatus(true).isEnabled());
 
     }
 

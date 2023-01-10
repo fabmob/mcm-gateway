@@ -4,8 +4,15 @@
 
 Le dossier delivery contient les fichiers de configuration du déploiement du cluster kubernetes. Il permet de déclarer les règles de sécurité, variables d'environements, stack complète des services à déployer.
 Il gère quatre pipelines :
-* une de build, gestion des releases déploiement, packaging des helm charts, construction des images docker et mise à dispo sous nexus, et gestion des deux autres pipelines de livraison des composants avec déploiement helm chart qu'elle créé sur deux autres repos.
-* une pipeline de publication du code source sur un github. Elle se lance sur un tag et avec le paramètre de pipeline "PUBLISH_CODE" à "true"
+* une de build, gestion des releases déploiement, packaging des helm charts, construction des images docker et mise à
+  dispo sous nexus, et gestion des deux autres pipelines de livraison des composants avec déploiement helm chart qu'elle
+  créé sur deux autres repos.
+* une pipeline de publication du code source sur un github. Elle se lance sur un tag et avec le paramètre de pipeline "
+  PUBLISH_CODE" à "true" qui est obligatoire et les paramères optionnels :
+  - GITHUB_CLONE_BRANCH : le nom de la branche à cloner, elle existe dans le repo Github.
+  - GITHUB_PR_TARGET_BRANCH : le nom de la branche vers laquelle on veut créer la pull request.
+  - GITHUB_DELETE_STRATEGY : Un boolean qui reflète si on souhaite supprimer tout le contenu du repo Github (s'il est à
+    true) après l'avoir cloner et avant de copier le repo gateway. Cela permet de gérer la suppression de fichiers.
 * une pipeline de déploiement des environnements preview et testing par publication sur un repo tiers
 * une pipeline de déploiement des environnements preprod et production par publication sur un repo tiers
 

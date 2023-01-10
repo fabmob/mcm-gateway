@@ -97,6 +97,12 @@ public class CacheManagerServiceImpl implements CacheManagerService {
     @Autowired
     private ZoneCacheManager zoneCacheManager;
 
+    @Autowired
+    private CacheUtil cacheUtil;
+
+    @Autowired
+    private GatewayParamStatusManager gatewayParamStatusManager;
+
     private static final String STAR_PREFIX = "*";
 
 
@@ -113,15 +119,15 @@ public class CacheManagerServiceImpl implements CacheManagerService {
     }
 
     @Override
-    public CacheStatus getCacheStatus() {
-        return CacheStatus.getInstance();
+    public boolean getCacheStatus() {
+        return gatewayParamStatusManager.getCacheStatus();
     }
 
     @Override
-    public CacheStatus putCacheStatus(boolean isEnabled) {
+    public boolean putCacheStatus(boolean isEnabled) {
         this.updateCacheGatewayParams(CACHE_ACTIVATION, String.valueOf(isEnabled));
-        CacheStatus.getInstance().setEnabled(isEnabled);
-        return CacheStatus.getInstance();
+        gatewayParamStatusManager.synchronizeCacheStatus();
+        return gatewayParamStatusManager.getCacheStatus();
     }
 
     @Override
@@ -211,7 +217,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
 
     private void updateCacheGatewayParams(String key, String value) {
-        log.info("Updating Gateway Param " + key + " in database");
+        log.info("Updating Gateway Param " + key + " in database and cache");
         UserContext userContext = new ThreadLocalUserSession().get();
         String correlationId = userContext.getContextId();
         HttpHeaders httpHeaders = new HttpHeaders();
@@ -224,9 +230,11 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
         try {
             restTemplate.exchange(urlPutGtwCacheParam, HttpMethod.PUT, entity, Object.class);
+            gatewayParamStatusManager.synchronizeCacheStatus();
 
         } catch (HttpClientErrorException.NotFound e) {
             //If corresponding Gateway param not found we create it
+            log.info("Cache param not found, creating one ...");
             this.createCacheGatewayParams(key, value);
         } catch (RestClientException e) {
             log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);

@@ -177,7 +177,7 @@ public class ExceptionHandlerTest extends UTTestCase {
         exception.initCause(new InvalidFormatException("The request format is not the expected one", "value", UUID.class));
         response = responseEntityExceptionHandler.handleHttpMessageNotReadable
                 (exception, headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request format is not the expected one", "Bad Request: Invalid Format", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Invalid UUID", "Bad Request: Invalid Format", 400);
     }
 
     @Test

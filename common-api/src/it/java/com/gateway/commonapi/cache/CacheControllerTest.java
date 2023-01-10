@@ -9,6 +9,7 @@ import com.gateway.commonapi.dto.api.*;
 import com.gateway.commonapi.dto.api.geojson.Coordinates;
 import com.gateway.commonapi.dto.api.geojson.Point;
 import com.gateway.commonapi.dto.data.CacheParamDTO;
+import com.gateway.commonapi.dto.data.GatewayParamsDTO;
 import com.gateway.commonapi.dto.data.PartnerMetaDTO;
 import com.gateway.commonapi.dto.data.PriceListDTO;
 import com.gateway.commonapi.exception.InternalException;
@@ -18,12 +19,21 @@ import com.gateway.commonapi.utils.enums.ZoneType;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.InjectMocks;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.json.JacksonTester;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.connection.RedisGeoCommands;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
@@ -34,9 +44,12 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.gateway.commonapi.utils.CommonUtils.useCache;
-import static org.junit.Assert.assertEquals;
+import static com.gateway.commonapi.cache.CacheUtil.ONE_DAY_IN_SECONDS;
+import static com.gateway.commonapi.constants.GlobalConstants.CACHE_ACTIVATION;
+import static org.junit.Assert.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 
 @Slf4j
 public class CacheControllerTest extends ApiITTestCase {
@@ -47,6 +60,10 @@ public class CacheControllerTest extends ApiITTestCase {
      */
     @Autowired
     private MockMvc mockMvc;
+
+
+    @MockBean
+    private RestTemplate restTemplate;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -80,6 +97,16 @@ public class CacheControllerTest extends ApiITTestCase {
 
     @Autowired
     private ParkingCacheManager parkingCacheManager;
+
+    @Autowired
+    @InjectMocks
+    private GatewayParamStatusManager gatewayParamStatusManager;
+
+    @Autowired
+    private CacheUtil cacheUtil;
+
+    @Value("${gateway.service.dataapi.baseUrl}")
+    private String uri;
 
 
     /*
@@ -211,11 +238,6 @@ public class CacheControllerTest extends ApiITTestCase {
 
     }
 
-    @Test
-    public void testCacheStatus() {
-        boolean value = useCache();
-        assertEquals(value, CacheStatus.getInstance().isEnabled());
-    }
 
     @Test
     public void testStationStatus() throws Exception {
@@ -482,6 +504,52 @@ public class CacheControllerTest extends ApiITTestCase {
 
     }
 
+    @Test
+    public void getCacheStatusTest() {
+        GatewayParamsDTO gatewayParam = new GatewayParamsDTO(CACHE_ACTIVATION, "true");
+        gatewayParamStatusManager.populateCacheActivation(gatewayParam, ONE_DAY_IN_SECONDS);
+        log.info("POPULATE CACHE WITH CACHE_ACTIVATION");
+
+        gatewayParamStatusManager.getCacheStatus();
+        log.info("GET CACHE STATUS FROM CACHE");
+        assertTrue(gatewayParamStatusManager.getCacheStatus());
+    }
+
+    @Test
+    public void getCacheStatusWhenStatusIsNullAndPresentInDBTest() {
+        gatewayParamStatusManager.clearCache("*");
+        ResponseEntity<GatewayParamsDTO> gatewayParamDto = ResponseEntity.status(HttpStatus.OK).body(new GatewayParamsDTO(CACHE_ACTIVATION, "true"));
+        lenient().when(restTemplate.exchange(
+                ArgumentMatchers.contains("/gateway-params"),
+                ArgumentMatchers.eq(HttpMethod.GET),
+                any(),
+                ArgumentMatchers.eq(GatewayParamsDTO.class))).thenReturn(gatewayParamDto);
+
+        log.info("GET CACHE STATUS FROM CACHE");
+        assertTrue(gatewayParamStatusManager.getCacheStatus());
+    }
+
+    @Test
+    public void getCacheStatusWhenStatusIsNullAndNotPresentInDBTest() {
+        gatewayParamStatusManager.clearCache("*");
+        lenient().when(restTemplate.exchange(
+                        ArgumentMatchers.contains("/gateway-params"),
+                        ArgumentMatchers.eq(HttpMethod.GET),
+                        any(),
+                        ArgumentMatchers.eq(GatewayParamsDTO.class)))
+                .thenThrow(HttpClientErrorException.NotFound.class);
+
+        ResponseEntity<GatewayParamsDTO> gatewayParamDtoDefault = ResponseEntity.status(HttpStatus.OK).body(new GatewayParamsDTO(CACHE_ACTIVATION, "false"));
+
+        lenient().when(restTemplate.postForEntity(
+                        ArgumentMatchers.contains("/gateway-params"),
+                        ArgumentMatchers.eq(new GatewayParamsDTO(CACHE_ACTIVATION, "false")),
+                        ArgumentMatchers.eq(GatewayParamsDTO.class)))
+                .thenReturn(gatewayParamDtoDefault);
+
+        assertFalse(gatewayParamStatusManager.getCacheStatus());
+    }
+
 
     public static List<PartnerMetaDTO> createPartnerMetas() {
         try {
@@ -496,4 +564,6 @@ public class CacheControllerTest extends ApiITTestCase {
             throw new InternalException(e.getMessage());
         }
     }
+
+
 }

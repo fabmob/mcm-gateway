@@ -23,6 +23,9 @@ api_helm_deploy_production:
     MODULE_NAME: api
   script:
     - |
+      . env/deployment.env
+      get_release_name
+      ls -lRa 
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -34,6 +37,8 @@ data_api_helm_deploy_production:
     MODULE_NAME: data-api
   script:
     - |
+      . env/deployment.env
+      get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -45,6 +50,8 @@ routing_api_helm_deploy_production:
     MODULE_NAME: routing-api
   script:
     - |
+      . env/deployment.env
+      get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -56,6 +63,8 @@ request_relay_helm_deploy_production:
     MODULE_NAME: request-relay
   script:
     - |
+      . env/deployment.env
+      get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -67,6 +76,8 @@ default_adapter_deploy_production:
     MODULE_NAME: default-adapter
   script:
     - |
+      . env/deployment.env
+      get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -78,6 +89,8 @@ custom_adapter_helm_deploy_production:
     MODULE_NAME: custom-adapter
   script:
     - |
+      . env/deployment.env
+      get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME
 
@@ -116,6 +129,7 @@ dkron_deploy_production:
     MODULE_NAME: dkron
   script:
     - |
+      . env/deployment.env
       get_release_name
       . env/.env.production
       helm_deploy $MODULE_NAME

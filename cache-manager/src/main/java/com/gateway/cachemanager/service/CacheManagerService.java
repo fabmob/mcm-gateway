@@ -1,6 +1,5 @@
 package com.gateway.cachemanager.service;
 
-import com.gateway.commonapi.cache.CacheStatus;
 import com.gateway.commonapi.dto.api.geojson.Position;
 import com.gateway.commonapi.utils.enums.ActionsEnum;
 
@@ -22,7 +21,7 @@ public interface CacheManagerService {
      *
      * @return CacheStatus singleton
      */
-    CacheStatus getCacheStatus();
+    boolean getCacheStatus();
 
     /**
      * Update cache status
@@ -30,7 +29,7 @@ public interface CacheManagerService {
      * @param isEnabled boolean new cache status.
      * @return CacheStatus singleton
      */
-    CacheStatus putCacheStatus(boolean isEnabled);
+    boolean putCacheStatus(boolean isEnabled);
 
     /**
      * Refresh partners' meta-data from cache

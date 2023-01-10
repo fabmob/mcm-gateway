@@ -8,9 +8,13 @@ spec:
       app.kubernetes.io/name: elasticsearch
   ingress:
     - from:
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: elasticsearch
-        - podSelector:
-            matchLabels:
-              app.kubernetes.io/name: apim3
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: elasticsearch
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/name: apim3
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            name: monitoring

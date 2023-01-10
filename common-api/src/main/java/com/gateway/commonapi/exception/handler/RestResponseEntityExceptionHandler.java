@@ -2,6 +2,7 @@ package com.gateway.commonapi.exception.handler;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.exceptions.BadGateway;
 import com.gateway.commonapi.dto.exceptions.BadRequest;
@@ -177,7 +178,11 @@ public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionH
             if (exception.getCause().getCause() != null && StringUtils.isNotBlank(exception.getCause().getCause().getMessage())) {
                 errorBody.setDescription(exception.getCause().getCause().getMessage());
             } else if (StringUtils.isNotBlank(exception.getCause().getMessage())) {
-                errorBody.setDescription(exception.getCause().getMessage());
+                if (ExceptionUtils.getRootException(exception, InvalidFormatException.class) != null) {
+                    errorBody.setDescription(INVALID_FORMAT_UUID);
+                } else {
+                    errorBody.setDescription(exception.getCause().getMessage());
+                }
             }
         } else {
             errorBody.setDescription(this.errorMessages.getTechnicalMessageNotReadableDescription());

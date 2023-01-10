@@ -26,7 +26,7 @@ public class EnumConverterTest {
 
     @Test
     public void testBookingStatus_error() {
-        BadRequestException exception = null;
+        BadRequestException exception = new BadRequestException("bad status");
         try {
             bookingStatusStringToEnumConverter.convert("wrong value");
         } catch (BadRequestException e) {

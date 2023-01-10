@@ -1,6 +1,6 @@
 [
   {
-    "paramKey": "TestKey",
-    "paramValue": "abc"
+    "paramKey": "CACHE_ACTIVATION",
+    "paramValue": "false"
   }
 ]

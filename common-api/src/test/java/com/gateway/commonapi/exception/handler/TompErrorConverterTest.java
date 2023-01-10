@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
+import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_ERROR_TITLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -24,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class TompErrorConverterTest {
 
     private List<Integer> tompValidCodes = List.of(200, 400, 401, 500);
+
+    private final static String INTERNAL_SERVER_ERROR = "Internal server error";
 
     private final static UUID UUID_TEST = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
 
@@ -59,8 +62,8 @@ public class TompErrorConverterTest {
         //Prepare
         GenericError error = new GenericError();
         error.setErrorCode(1234);
-        error.setLabel("label");
-        error.setDescription("description");
+        error.setLabel(INTERNAL_SERVER_ERROR);
+        error.setDescription(INTERNAL_SERVER_ERROR);
         error.setTimestamp("timestamp");
         error.setCallId(UUID_TEST);
         error.setStatus(400);
@@ -74,9 +77,9 @@ public class TompErrorConverterTest {
         TompError responseError = (TompError) response.getBody();
         assertEquals(1234, responseError.getErrorcode());
         assertEquals("Invalid", responseError.getType());
-        assertEquals("label", responseError.getTitle());
+        assertEquals(INTERNAL_ERROR_TITLE, responseError.getTitle());
         assertEquals(400, responseError.getStatus());
-        assertEquals("description", responseError.getDetail());
+        assertEquals(INTERNAL_SERVER_ERROR, responseError.getDetail());
         assertEquals("Gateway callId " + UUID_TEST.toString(), responseError.getInstance());
         assertEquals("timestamp", responseError.getTimestamp());
     }
@@ -87,7 +90,7 @@ public class TompErrorConverterTest {
         GenericError error = new GenericError();
         error.setErrorCode(1234);
         error.setLabel("label");
-        error.setDescription("description");
+        error.setDescription(INTERNAL_SERVER_ERROR);
         error.setTimestamp("timestamp");
         error.setCallId(UUID_TEST);
         error.setStatus(401);
@@ -113,8 +116,8 @@ public class TompErrorConverterTest {
         //Prepare
         GenericError error = new GenericError();
         error.setErrorCode(1234);
-        error.setLabel("label");
-        error.setDescription("description");
+        error.setLabel(INTERNAL_SERVER_ERROR);
+        error.setDescription(INTERNAL_SERVER_ERROR);
         error.setTimestamp("timestamp");
         error.setCallId(UUID_TEST);
         error.setStatus(500);
@@ -128,9 +131,9 @@ public class TompErrorConverterTest {
         TompError responseError = (TompError) response.getBody();
         assertEquals(7500, responseError.getErrorcode());
         assertEquals("Technical issue", responseError.getType());
-        assertEquals("Gateway error : label", responseError.getTitle());
+        assertEquals("Gateway error : Internal error", responseError.getTitle());
         assertEquals(500, responseError.getStatus());
-        assertEquals("Gateway error happen : description, contact your Gateway support.", responseError.getDetail());
+        assertEquals("Gateway error happen : Internal server error, contact your Gateway support.", responseError.getDetail());
         assertEquals("Gateway callId " + UUID_TEST.toString(), responseError.getInstance());
         assertEquals("timestamp", responseError.getTimestamp());
     }
@@ -138,7 +141,7 @@ public class TompErrorConverterTest {
     @Test
     public void testTompError_movedPermanently() throws JsonProcessingException {
         //Prepare
-        RuntimeException exception = new RuntimeException("resource is now here");
+        RuntimeException exception = new RuntimeException(INTERNAL_SERVER_ERROR);
         GenericError bodyGenericError = new GenericError(HttpStatus.MOVED_PERMANENTLY, HttpStatus.MOVED_PERMANENTLY.value(), HttpStatus.MOVED_PERMANENTLY.getReasonPhrase(), exception.getMessage());
         bodyGenericError.setCallId(UUID_TEST);
 
@@ -150,9 +153,9 @@ public class TompErrorConverterTest {
         TompError responseError = (TompError) response.getBody();
         assertEquals(7500, responseError.getErrorcode());
         assertEquals("Technical issue", responseError.getType());
-        assertEquals("Gateway error : resource is now here", responseError.getTitle());
+        assertEquals("Gateway error : Internal error", responseError.getTitle());
         assertEquals(500, responseError.getStatus());
-        assertEquals("Gateway error happen : resource is now here, contact your Gateway support.", responseError.getDetail());
+        assertEquals("Gateway error happen : Internal server error, contact your Gateway support.", responseError.getDetail());
         assertEquals("Gateway callId " + UUID_TEST.toString(), responseError.getInstance());
         assertNotNull(responseError.getTimestamp());
     }

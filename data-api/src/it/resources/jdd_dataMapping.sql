@@ -96,6 +96,6 @@ INSERT INTO msp.cache_param (partner_id, action_type, cache_param_id, soft_ttl, 
     ('28784eb7-de79-434d-a1b6-819ebfd50860', 'AVAILABLE_ASSET', '885a4c3d-b459-41d6-b1c1-e30a82ea888b', 45, 90, 20);
 
 INSERT INTO configuration.gateway_params (param_key,param_value) VALUES
-	 ('TestKey','abc');
+	 ('CACHE_ACTIVATION','false');
 
 commit;

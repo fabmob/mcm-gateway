@@ -18,6 +18,7 @@ services:
        - MAAS_API_CACHE_KEYS_PREFIX=${MAAS_API_CACHE_KEYS_PREFIX}
        - MAAS_API_CACHE_PASSWORD=${MAAS_API_CACHE_PASSWORD}
        - SERVICE_BASE_PATH=${DATA_API_FQDN}
+       - DATA_API_CONTEXT_PATH=/dataapi/v1
      ports:
        - '8081'
      labels:

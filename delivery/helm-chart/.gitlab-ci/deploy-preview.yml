@@ -10,7 +10,7 @@
     - .dev_pipeline_condition
     - .no-needs
     - .env_preview
-  when: always
+  when: manual
   variables:
     LANDSCAPE: preview-gw
     OPS_PIPELINE_CONDITION: "false"
@@ -145,6 +145,24 @@ dkron_deploy_preview:
     MODULE_NAME: dkron
   script:
     - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.preview
+      helm_deploy $MODULE_NAME
+
+gravitee_apim_helm_deploy_preview:
+  stage: deploy-preview
+  extends:
+    - .helm-deploy-preview-job
+    - .no-needs
+    - .always
+    - .env_preview
+  when: always
+  variables:
+    MODULE_NAME: gravitee-apim
+  script:
+    - |
+      . env/deployment.env
       get_release_name
       . env/.env.preview
       helm_deploy $MODULE_NAME

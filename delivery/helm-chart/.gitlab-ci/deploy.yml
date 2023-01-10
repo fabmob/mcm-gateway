@@ -181,49 +181,22 @@
       echo -e "${B_YELLOW} namespace '${KUBE_NAMESPACE}' trouve ${#RES[@]} fois $RESET"
 
       # ______________________________________________________________
-      # On désinstalle les namespaces déjà utilisés pour les recréer
-      # ______________________________________________________________
-
-      if [  ${#RES[@]} != "0" ]
-      then
-        echo -e "${B_YELLOW} dans le if $RESET"
-        # uninstall namespace only if already existing
-
-        POD_NUMBER=`kubectl get pod --namespace "${KUBE_NAMESPACE}" | grep "^graviteeio-apim3x" -c` > /dev/null 2>&1 || FAILED=true
-        if [ "$POD_NUMBER" != "0" ]
-        then
-          helm uninstall -n ${KUBE_NAMESPACE} graviteeio-apim3x
-          #helm uninstall -n ${KUBE_NAMESPACE} graviteeio-apim3x
-        fi
-
-        #POD_NUMBER=`kubectl get pod --namespace "${KUBE_NAMESPACE}" | grep "^graviteeio-apim-elasticsearch" -c` > /dev/null 2>&1 || FAILED=true
-        #if [ "$POD_NUMBER" != "0" ]
-        #then
-        #  #helm uninstall -n ${KUBE_NAMESPACE} graviteeio-apim-elasticsearch
-        #fi
-
-        POD_NUMBER=`kubectl get pod --namespace "${KUBE_NAMESPACE}" | grep "^elasticsearch-gravitee" -c` > /dev/null 2>&1 || FAILED=true
-        if [ "$POD_NUMBER" != "0" ]
-        then
-          helm uninstall -n ${KUBE_NAMESPACE} elasticsearch-gravitee
-        fi
-      else
-        echo "else"
-      fi
-      echo "__________________________ end uninstall"
-
-
-
-      # ______________________________________________________________
       # INSTALLER ELASTICSEARCH
       # ______________________________________________________________
-      echo -e "${B_YELLOW} Install ElasticSearch $RESET"
+      echo -e "${B_YELLOW} Installing ElasticSearch $RESET"
       # Ajout du helm repo pour Bitnami pour install des charts
       helm repo add bitnami https://charts.bitnami.com/bitnami
-      #helm install graviteeio-apim-elasticsearch bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE}
-      #helm install elasticsearch-gravitee bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE}
-      helm install elasticsearch-gravitee bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE} --set replicas=1,minimumMasterNodes=1 --set image.tag=7.16.3
-
+      helm upgrade --install graviteeio-apim-elasticsearch bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE} -f values/elastic-values.yaml --set imageTag=7.17.3
+      
+      # install kibana only in preview and testing
+      if [ `echo ${LANDSCAPE_ENV} | egrep "\<preview\>|\<testing\>" -c` -eq 1 ]
+      then
+        echo -e "${B_PINK} Installing Kibana $RESET"
+        #helm repo add elastic https://helm.elastic.co
+        echo "if you want to install kibana use this command"
+        echo "helm upgrade -install kibana-${LANDSCAPE_ENV} --create-namespace --namespace ${KUBE_NAMESPACE} elastic/kibana -f values/kibana-values.yaml --set imageTag=7.17.3 --set elasticsearchHosts=\"http://graviteeio-apim-elasticsearch.${KUBE_NAMESPACE}.svc.cluster.local:9200\""
+      fi
+  
       echo -e "$B_PINK list repo helm"
       helm repo list
       echo -e "____________________ end $RESET"
@@ -241,7 +214,7 @@
       echo "-----------gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml ----------"
       cat gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
   
-      helm install graviteeio-apim3x graviteeio/apim3 --create-namespace --namespace ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/gravitee-apim-values.yaml
+      helm upgrade --install graviteeio-apim3x-${LANDSCAPE_ENV} graviteeio/apim3 --create-namespace --namespace ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/gravitee-apim-values.yaml
 
     else
       echo -e "----------------- $B_PINK not in condition : ${MODULE_NAME} $RESET"
@@ -249,43 +222,20 @@
 
     echo -e "**************** ${B_YELLOW}end config helm"
   
-    echo "check which is current cluster"
-    kubectl cluster-info
-  
-    # HELM UPDATE REPO WITH LOCAL CHART
-    helm repo update
-
-    # HELM UPGRADE NEW PACKAGE
-    helm upgrade --install --version ${HELM_CHART_VERSION} gateway Gateway-Helm-chart-repo/gateway-${LANDSCAPE_ENV} -n ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
+    if [ $MODULE_NAME != "gravitee-apim" ]
+    then
+      echo "check which is current cluster"
+      kubectl cluster-info
+    
+      # HELM UPDATE REPO WITH LOCAL CHART
+      helm repo update
+      # HELM UPGRADE NEW PACKAGE
+      helm upgrade --install --version ${HELM_CHART_VERSION} gateway Gateway-Helm-chart-repo/gateway-${LANDSCAPE_ENV} -n ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
+    fi
 
     echo "Setting labels"
     if [ $MODULE_NAME == "gravitee-apim" ]
     then
-  
-      wait_pod graviteeio-apim3x-portal
-      for POD in `kubectl get pod --namespace "${KUBE_NAMESPACE}" | tail -n+2 | grep "graviteeio-apim3x-portal" | awk '{ print $1 }'`
-      do
-        kubectl label --overwrite pods $POD -n ${KUBE_NAMESPACE} visibility=external
-      done;
-  
-      wait_pod graviteeio-apim3x-api
-      for POD in `kubectl get pod --namespace "${KUBE_NAMESPACE}" | tail -n+2 | grep "graviteeio-apim3x-api" | awk '{ print $1 }'`
-      do
-        kubectl label --overwrite pods $POD -n ${KUBE_NAMESPACE} visibility=external
-      done;
-  
-      wait_pod graviteeio-apim3x-ui
-      for POD in `kubectl get pod --namespace "${KUBE_NAMESPACE}" | tail -n+2 | grep "graviteeio-apim3x-ui" | awk '{ print $1 }'`
-      do
-        kubectl label --overwrite pods $POD -n ${KUBE_NAMESPACE} visibility=external
-      done;
-  
-      wait_pod graviteeio-apim3x-gateway
-      for POD in `kubectl get pod --namespace "${KUBE_NAMESPACE}" | tail -n+2 | grep "graviteeio-apim3x-gateway" | awk '{ print $1 }'`
-      do
-        kubectl label --overwrite pods $POD -n ${KUBE_NAMESPACE} visibility=external
-      done;
-  
       kubectl label --overwrite namespace ${KUBE_NAMESPACE} com.mcm.maas.apim=true
   
       echo "installing middleware"
@@ -301,17 +251,11 @@
         kubectl apply -f $INGRESS_FILE -n ${KUBE_NAMESPACE}
       done;
   
-      wait_pod graviteeio-apim3x-portal
-      wait_pod graviteeio-apim3x-gateway
-      wait_pod graviteeio-apim3x-ui
-      wait_pod graviteeio-apim3x-api
-  
       kubectl apply -f security/internal-deny-all-policy.yaml -n ${KUBE_NAMESPACE}      
       kubectl apply -f security/apim-external-policy.yaml -n ${KUBE_NAMESPACE}
       kubectl apply -f security/apim-elastic-policy.yaml -n ${KUBE_NAMESPACE}
       kubectl apply -f security/apim-internal-policy.yaml -n ${KUBE_NAMESPACE}
     else
-      POD_NAME=`kubectl get pod --namespace "${KUBE_NAMESPACE}" | tail -n+2 | awk '{ print $1 }'`
       kubectl label --overwrite namespace ${KUBE_NAMESPACE} com.mcm.maas.internal=true
   
       #retain dkron volume

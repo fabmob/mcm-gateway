@@ -43,6 +43,8 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import javax.servlet.ServletException;
 import java.beans.PropertyChangeEvent;
 
+import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_MESSAGE_ERROR_CARPOOLING;
+
 @Slf4j
 @RunWith(SpringRunner.class)
 @TestPropertySource("classpath:errors.properties")
@@ -144,7 +146,7 @@ public class ExceptionHandlerCarpoolStandardTest {
     public void testHandleConnectException() {
         response = responseEntityExceptionHandler.handleConnectException
                 (new RuntimeException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), INTERNAL_SERVER_ERROR + DEFAULT_EXCEPTION_MESSAGE + TRY_LATER, "ExceptionMessage", 502);
+        checkErrorResponse(response, HttpStatus.BAD_GATEWAY.value(), INTERNAL_MESSAGE_ERROR_CARPOOLING, "ExceptionMessage", 502);
     }
 
     @Test
@@ -173,7 +175,7 @@ public class ExceptionHandlerCarpoolStandardTest {
     public void testHandleExceptionInternal() {
         response = responseEntityExceptionHandler.handleExceptionInternal
                 (new NullPointerException(DEFAULT_EXCEPTION_MESSAGE), null, headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR + DEFAULT_EXCEPTION_MESSAGE + TRY_LATER, "ExceptionMessage", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_MESSAGE_ERROR_CARPOOLING, "ExceptionMessage", 500);
     }
 
     @Test
@@ -204,7 +206,7 @@ public class ExceptionHandlerCarpoolStandardTest {
     public void testHandleInternal() {
         response = responseEntityExceptionHandler.handleInternal
                 (new ClassCastException(DEFAULT_EXCEPTION_MESSAGE), status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_SERVER_ERROR + DEFAULT_EXCEPTION_MESSAGE + TRY_LATER, "ExceptionMessage", 500);
+        checkErrorResponse(response, HttpStatus.INTERNAL_SERVER_ERROR.value(), INTERNAL_MESSAGE_ERROR_CARPOOLING, "ExceptionMessage", 500);
     }
 
     @Test

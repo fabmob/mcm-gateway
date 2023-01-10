@@ -3,7 +3,7 @@ package com.gateway.cachemanager.rest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.cachemanager.CacheManagerITTestCase;
 import com.gateway.cachemanager.service.CacheManagerServiceImpl;
-import com.gateway.commonapi.cache.CacheStatus;
+import com.gateway.commonapi.cache.GatewayParamStatusManager;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.tests.enums.JsonResponseTypeEnum;
@@ -35,6 +35,7 @@ import org.springframework.web.context.WebApplicationContext;
 import java.nio.charset.StandardCharsets;
 
 import static com.gateway.commonapi.constants.CacheManagerDict.*;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -59,6 +60,9 @@ class CacheManagerControllerTest extends CacheManagerITTestCase{
 
     @Autowired
     CacheManagerServiceImpl cacheManagerServiceCalled;
+
+    @MockBean
+    GatewayParamStatusManager cacheUtil;
 
 
     /*
@@ -112,16 +116,12 @@ class CacheManagerControllerTest extends CacheManagerITTestCase{
      */
     @Test
     void testPutCacheStatus() throws Exception {
-        boolean initialStatus = CacheStatus.getInstance().isEnabled();
-        CacheStatus.getInstance().setEnabled(false);
-
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
         parameters.add("isEnabled", "false");
         testHttpRequestWithExpectedResult(CACHE_MANAGER_PATH + CACHE_MANAGER_STATUS_PATH, HttpMethod.PUT, HttpStatus.OK,
                 null, CACHE_GET_STATUS_OK_JSON,
                 JsonResponseTypeEnum.JSON_OBJECT, "Test update cache status", parameters);
 
-        CacheStatus.getInstance().setEnabled(initialStatus);
 
     }
 
@@ -170,9 +170,9 @@ class CacheManagerControllerTest extends CacheManagerITTestCase{
                                                    HttpStatus httpStatusExpectedResult, String requestPayloadPath,
                                                    String expectedResultPath, JsonResponseTypeEnum resulType,
                                                    final String message, MultiValueMap<String, String> parameters) throws Exception {
-
-        doReturn(CacheStatus.getInstance()).when(cacheManagerService).putCacheStatus(false);
-        doReturn(CacheStatus.getInstance()).when(cacheManagerService).getCacheStatus();
+        doNothing().when(cacheUtil).synchronizeCacheStatus();
+        doReturn(cacheUtil.getCacheStatus()).when(cacheManagerService).putCacheStatus(false);
+        doReturn(cacheUtil.getCacheStatus()).when(cacheManagerService).getCacheStatus();
 
         // preparing the service call and expected elements
         ResultMatcher mockResultMatcher = WsTestUtil.getResultMatcher(httpStatusExpectedResult);

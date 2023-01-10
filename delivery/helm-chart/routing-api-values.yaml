@@ -88,6 +88,7 @@ deployments:
               MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
               MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
               MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+              DATA_API_CONTEXT_PATH: /dataapi/v1
               USE_CACHE: false
             image: ${ROUTING_API_IMAGE_NAME}
             name: routing-api

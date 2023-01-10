@@ -48,4 +48,4 @@ gateway:
     mockapi:
       basedir: ${MOCK_RESPONSES_DIRECTORY:@gateway.service.mockapi.dir@}
     dataapi:
-      baseUrl: "http://${DATA_API_HOST:localhost}:8081/v1"
+      baseUrl: "http://${DATA_API_HOST:localhost}:8081${DATA_API_CONTEXT_PATH:/dataapi/v1}"

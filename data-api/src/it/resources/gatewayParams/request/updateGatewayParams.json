@@ -1,4 +1,4 @@
 {
-  "paramKey": "TestKey",
-  "paramValue": "updatedValue"
+  "paramKey": "CACHE_ACTIVATION",
+  "paramValue": "true"
 }

@@ -1,6 +1,6 @@
 package com.gateway.commonapi.utils.cache.impl;
 
-import com.gateway.commonapi.cache.CacheStatus;
+import com.gateway.commonapi.cache.GatewayParamStatusManager;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.data.CacheParamDTO;
 import com.gateway.commonapi.exception.BadGatewayException;
@@ -40,6 +40,8 @@ public class CacheServiceImpl implements CacheService {
     private String uri;
     @Autowired
     private ErrorMessages errorMessages;
+    @Autowired
+    private GatewayParamStatusManager gatewayParamStatusManager;
 
     private List<CacheParamDTO> getCacheParamDatabase(UUID partnerId, String actionType) {
         String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
@@ -73,7 +75,7 @@ public class CacheServiceImpl implements CacheService {
 
     @Override
     public boolean useCache() {
-        return CacheStatus.getInstance().isEnabled();
+        return gatewayParamStatusManager.getCacheStatus();
     }
 
 

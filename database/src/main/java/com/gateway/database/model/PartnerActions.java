@@ -38,8 +38,7 @@ public class PartnerActions implements java.io.Serializable {
     @JoinColumn(name = "selector_id")
     private Selector selector;
 
-    @OneToMany(cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_id")
+    @OneToMany(mappedBy = "action", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private Set<PartnerCalls> partnerCalls;
 
     @OneToMany(mappedBy = "action", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)

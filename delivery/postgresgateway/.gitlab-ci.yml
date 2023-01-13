@@ -68,43 +68,6 @@ postgres_preview_deploy:
     on_stop: postgres_preview_cleanup
 
 
-postgres_clear_database:
-  extends:
-    - .preview-deploy-job
-    - .postgres-base
-    - .manual
-    - .trigger-condition
-  image: ${KUBETOOLS_IMAGE_TAGNAME}
-  script:
-    - *postgres_init_vars
-    - |
-      set -x
-      echo "POSTGRES CLEANING START ${BRANCH_NAME}"
-      DB_POD_NAME=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $2 }')
-      DB_NAMESPACE=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $1 }')
-      kubectl exec $DB_POD_NAME -n $DB_NAMESPACE -c postgresgateway -- sh -c 'psql -U postgres -d gateway -c "TRUNCATE TABLE msp.adapters, msp.body, msp.body_params, msp.cache_param, msp.data_mapper, msp.headers, msp.headers_values_template, msp.msp_actions, msp.msp_calls, msp.msp_meta, msp.msp_standard, msp.params, msp.params_multi_calls, msp.price_list, msp.price_list_item, msp.selector, msp.token CONTINUE IDENTITY CASCADE;"'
-  when: manual
-  stage: preview-tools
-  needs: [ "postgres_preview_deploy" ]
-
-postgres_destroy_database_tables:
-  extends:
-    - .preview-deploy-job
-    - .postgres-base
-    - .manual
-    - .trigger-condition
-  image: ${KUBETOOLS_IMAGE_TAGNAME}
-  script:
-    - *postgres_init_vars
-    - |
-      set -x
-      echo "POSTGRES CLEANING START ${BRANCH_NAME}"
-      DB_POD_NAME=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | cut -c -17` | grep postgresgateway | awk '{ print $2 }')
-      DB_NAMESPACE=$(kubectl get pods -o wide -A | grep `echo $BRANCH_NAME | grep postgresgateway | awk '{ print $1 }')
-      kubectl exec $DB_POD_NAME -n $DB_NAMESPACE -c postgresgateway -- sh -c 'psql -U postgres -d gateway -c "DROP TABLE msp.adapters, msp.body, msp.body_params, msp.cache_param, msp.data_mapper, msp.headers, msp.headers_values_template, msp.msp_actions, msp.msp_calls, msp.msp_meta, msp.msp_standard, msp.params, msp.params_multi_calls, msp.price_list, msp.price_list_item, msp.selector, msp.token CASCADE;"'
-  stage: preview-tools
-  needs: [ "postgres_preview_deploy" ]
-
 postgres_preview_cleanup:
   extends:
     - .preview-undeploy-job

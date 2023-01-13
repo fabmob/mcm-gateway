@@ -26,7 +26,7 @@ include:
   fi
   cd mock-api
   envsubst < ../settings.xml
-  mvn clean install -s ../settings.xml -DskipTests
+  mvn clean install -s ../settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
 
 mock_api_build:
   extends:
@@ -54,9 +54,9 @@ mock_api_image_build:
   script:
     - *mock_api_init_vars
     - |
-      #set -x
       cd mock-api
       pwd
+      cp ../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "mock_api_build" , "check-if-release-version" ]
 

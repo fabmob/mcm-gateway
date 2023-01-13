@@ -39,7 +39,6 @@ public class FormatUtils {
     public static final String TIMESTAMP = "timestamp";
     public static final String PARAMS_SEPARATOR = ",";
     public static final String KEY_VALUE_SEPARATOR = "=";
-    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
 
     /**
@@ -52,6 +51,8 @@ public class FormatUtils {
      */
     public static Map<String, Object> formatValue(Object value, String format, String internalField, String timezone, DataMapperDTO mapperDTO) {
         log.info(FORMATTING_FUNCTION + mapperDTO.getDataMapperId().toString() + " :");
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         try {
             String function = "";
             String parameters = "";
@@ -101,11 +102,11 @@ public class FormatUtils {
             return formattedData;
 
         } catch (IllegalArgumentException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new InternalException(CommonUtils.placeholderFormat(UNRECOGNIZED_FUNCTION, DATA_MAPPER_ID, mapperDTO.getDataMapperId().toString()));
 
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new InternalException(e.getMessage());
         }
     }
@@ -122,6 +123,8 @@ public class FormatUtils {
      */
     public static Map<String, Object> numericOperator(String operator, Float factor, Object value, String internalField) {
         log.info(NUMERIC_OPERATOR + operator + PARAMS_SEPARATOR + factor);
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         Map<String, Object> formattedData = new HashMap<>();
         Float result;
         try {
@@ -144,7 +147,7 @@ public class FormatUtils {
                     throw new InternalException(UNRECOGNISED_OPERATOR);
             }
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new InternalException(e.getMessage());
         }
 
@@ -196,6 +199,8 @@ public class FormatUtils {
      */
     public static Map<String, Object> formatDate(String format, String timezone, Object value, String internalField) {
         log.info(FORMAT_DATE + format + "\"");
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         Map<String, Object> formattedData = new HashMap<>();
         try {
             Object newValue;
@@ -218,7 +223,7 @@ public class FormatUtils {
             return formattedData;
 
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new InternalException(e.getMessage());
         }
     }

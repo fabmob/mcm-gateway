@@ -18,7 +18,7 @@
 api_helm_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: api
   script:
@@ -32,7 +32,7 @@ api_helm_deploy_production:
 data_api_helm_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: data-api
   script:
@@ -45,7 +45,7 @@ data_api_helm_deploy_production:
 routing_api_helm_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: routing-api
   script:
@@ -58,7 +58,7 @@ routing_api_helm_deploy_production:
 request_relay_helm_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: request-relay
   script:
@@ -71,7 +71,7 @@ request_relay_helm_deploy_production:
 default_adapter_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: default-adapter
   script:
@@ -84,7 +84,7 @@ default_adapter_deploy_production:
 custom_adapter_helm_deploy_production:
   stage: deploy-production
   extends:
-    - .helm-deploy-preprod-job
+    - .helm-deploy-production-job
   variables:
     MODULE_NAME: custom-adapter
   script:
@@ -100,6 +100,33 @@ cache_manager_deploy_production:
     - .helm-deploy-production-job
   variables:
     MODULE_NAME: cache-manager
+  script:
+    - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+elasticsearch_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-production-job
+  variables:
+    MODULE_NAME: elasticsearch
+  script:
+    - |
+      set -x
+      . env/deployment.env
+      get_release_name
+      . env/.env.production
+      helm_deploy $MODULE_NAME
+
+apm_and_kibana_helm_deploy_production:
+  stage: deploy-production
+  extends:
+    - .helm-deploy-production-job
+  variables:
+    MODULE_NAME: apm
   script:
     - |
       . env/deployment.env

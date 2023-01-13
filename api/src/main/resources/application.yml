@@ -15,18 +15,18 @@ springdoc:
 logging:
   level:
     org:
-      springframework: INFO
-      springframework.security: INFO
-      springframework.web: INFO
+      springframework: ${LOG_LEVEL_SPRING:INFO}
+      springframework.security: ${LOG_LEVEL_SPRING:INFO}
+      springframework.web: ${LOG_LEVEL_SPRING:INFO}
       springframework.scheduling.concurrent: WARN
-    root: INFO
+    root: ${LOG_LEVEL_SPRING:INFO}
 
 
 spring:
   application:
     name: api
   lifecycle:
-    timeout-per-shutdown-phase: "10s"
+    timeout-per-shutdown-phase: "30s"
   profiles:
     active: test
   data:

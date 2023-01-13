@@ -49,8 +49,7 @@ public class RoutingServiceImpl implements RoutingService {
     @Autowired
     private ErrorMessages errorMessages;
 
-    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
-    private static final String SEPARATOR = ": ";
+     private static final String SEPARATOR = ": ";
 
     @Override
     public Object routeOperation(Map<String, String> params, UUID partnerId, String actionName, Optional<Map<String, Object>> body) {
@@ -86,17 +85,19 @@ public class RoutingServiceImpl implements RoutingService {
         urlGetVersion = dataApiUri + CommonUtils.placeholderFormat(GET_VERSION_PATH + GET_BY_ACTIONS_NAME_PATH, PARTNER_ACTIONS_NAME, actionName
                 + GET_BY_MSP_META_ID_PATH, MSP_ID_PARAM, mspMetaIdValue + GET_IS_ACTIVE_TRUE_PATH);
         log.debug(ROUTING_SERVICE_CALL_URL, urlGetVersion);
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         try {
             ResponseEntity<PartnerStandardDTO[]> mspStandardDTO = restTemplate.exchange(urlGetVersion, HttpMethod.GET, CommonUtils.setHeaders(), PartnerStandardDTO[].class);
             mspBusinessVersion = Objects.requireNonNull(mspStandardDTO.getBody())[0];
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new NotFoundException(CommonUtils.placeholderFormat(NO_ACTIVE_ACTION_FOUND, PARTNER_ACTIONS_NAME, actionName, PARTNER_ID, (partnerId != null ? partnerId.toString() : StringUtils.EMPTY)));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetVersion));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetVersion));
         } finally {
             CallUtils.saveOutputStandardInCallThread(outputStandard);
@@ -117,18 +118,20 @@ public class RoutingServiceImpl implements RoutingService {
 
         String adapterName;
         String urlGetAdapterWithId = dataApiUri + CommonUtils.placeholderFormat(GET_ADAPTERS_BY_ID_PATH, ADAPTERS_ID_PARAM, adaptersId.toString());
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         try {
             ResponseEntity<AdaptersDTO> mspActionDTO = restTemplate.exchange(urlGetAdapterWithId, HttpMethod.GET, CommonUtils.setHeaders(), AdaptersDTO.class);
             AdaptersDTO mspBusinessAdapters = Objects.requireNonNull(mspActionDTO.getBody());
             adapterName = mspBusinessAdapters.getAdapterName();
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             return null;
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetAdapterWithId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetAdapterWithId));
         } finally {
             CallUtils.saveOutputStandardInCallThread(outputStandard);
@@ -171,6 +174,7 @@ public class RoutingServiceImpl implements RoutingService {
      */
 
     private Object forwardRequest(String uriCall, UUID partnerId, UUID actionId, Optional<Map<String, Object>> body, Map<String, String> params) {
+
         String mspActionsIdValue = actionId != null ? actionId.toString() : null;
         String mspMetaIdValue = partnerId != null ? partnerId.toString() : null;
         String urlCallAdapters;
@@ -187,6 +191,7 @@ public class RoutingServiceImpl implements RoutingService {
         if (StringUtils.isNotBlank(outputStandard)) {
             preserveOriginalErrors = CommonUtils.shouldPreserveResponseStatus(outputStandard);
         }
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<Object> response = restTemplate.exchange(urlTemplate, HttpMethod.POST, entity, Object.class);
@@ -208,14 +213,14 @@ public class RoutingServiceImpl implements RoutingService {
                 throw new InternalException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + error.getDescription());
             }
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             if (preserveOriginalErrors) {
                 throw e;
             } else {
                 throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlCallAdapters) + SEPARATOR + e.getMessage());
             }
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             if (preserveOriginalErrors) {
                 throw e;
             } else {

@@ -29,11 +29,8 @@ include:
   cd api
   echo "MODULE_PATH=$MODULE_PATH"
   echo "MODULE_NAME=$MODULE_NAME"
-  #ls
-  #envsubst < ../settings.xml
-  #echo "---------"
-  #cat ../settings.xml
-  mvn clean install --batch-mode -q -s ../settings.xml -DskipTests
+ 
+  mvn clean install --batch-mode -q -s ../settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
   echo "listage des elements dans `pwd`target" 
   ls target
 
@@ -62,6 +59,7 @@ api_image_build:
   script:
     - *api_init_vars
     - |
+      cp ../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "api_build", "check-if-release-version" ]
 

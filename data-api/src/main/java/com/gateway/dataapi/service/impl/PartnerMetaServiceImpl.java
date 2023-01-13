@@ -8,8 +8,6 @@ import com.gateway.commonapi.exception.BadGatewayException;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
-import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
-import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
@@ -125,8 +123,7 @@ public class PartnerMetaServiceImpl implements PartnerMetaService {
     @Override
     public void refreshCachePartnerMetas() {
         log.info("Refreshing partnerMetas in cache");
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 

@@ -24,7 +24,7 @@ public class GatewayErrorMessage {
     // partnerId
     public static final String UNKNOWN_PARTNER_ID_MESSAGE = "Unknown partner id {0}.";
     public static final String UNKNOWN_PARTNER_ID = "Unknown partner id";
-    public static final String INVALID_PARTNER_ID = "Invalid partner id";
+    public static final String INVALID_PARTNER_ID = "Invalid UUID";
     public static final String UNKNOWN_AREA_TYPE = "Unknown area type";
     public static final String UNKNOWN_PARTNER_TYPE = "Unknown partner type";
     public static final String INVALID_FORMAT_UUID = "Invalid UUID";
@@ -32,7 +32,7 @@ public class GatewayErrorMessage {
 
     public static final String UNKNOWN_AREA_MESSAGE = "Unknown area type {0}. Allowed area types are 'OPERATING', 'NO_PARKING', 'SPEED_LIMIT', or 'PREFERENTIAL_PARKING'.";
     public static final String UNKNOWN_PARTNER_TYPE_MESSAGE = "Unknown partner type {0}. Allowed partner types are 'MSP' or 'MAAS'.";
-    public static final String INVALID_PARTNER_ID_MESSAGE = "Invalid partner id {0}. Unauthorized to reach this partner.";
+    public static final String INVALID_PARTNER_ID_MESSAGE = "Invalid UUID {0}. Unauthorized to reach this partner.";
 
 
     public static final String PLACEHOLDER = "0";
@@ -69,6 +69,10 @@ public class GatewayErrorMessage {
 
     // Internal error messages covoiturage
     public static final String INTERNAL_MESSAGE_ERROR_CARPOOLING = "Internal server error, please contact your administrator or try again latter.";
+    public static final String UNEXPECTED_FORMAT = "Unexpected format, please check the body of the request.";
+    public static final String INTERNAL_MESSAGE_ERROR = "Internal server error, please contact your administrator or try again later.";
+    public static final String UUID_PARSE_ERROR = "java.util.UUID";
+    public static final String INTERNAL_SERVER_ERROR_LABEL = "Internal Server Error";
 
 }
 

@@ -177,7 +177,7 @@ public class ExceptionHandlerTest extends UTTestCase {
         exception.initCause(new InvalidFormatException("The request format is not the expected one", "value", UUID.class));
         response = responseEntityExceptionHandler.handleHttpMessageNotReadable
                 (exception, headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Invalid UUID", "Bad Request: Invalid Format", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Unexpected format, please check the body of the request.", "Bad Request", 400);
     }
 
     @Test
@@ -242,7 +242,7 @@ public class ExceptionHandlerTest extends UTTestCase {
         TypeMismatchException exception = new TypeMismatchException("7962e1ef-4d4c-4300-9fe4", UUID.class, new IllegalArgumentException("Invalid UUID string: 7962e1ef-4d4c-4300-9fe4"));
         response = responseEntityExceptionHandler.handleTypeMismatch
                 (exception, headers, status, servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Invalid partner id 7962e1ef-4d4c-4300-9fe4. Unauthorized to reach this partner.", "Invalid partner id", 1543);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "Invalid UUID 7962e1ef-4d4c-4300-9fe4. Unauthorized to reach this partner.", "Invalid UUID", 1543);
     }
 
     @Test

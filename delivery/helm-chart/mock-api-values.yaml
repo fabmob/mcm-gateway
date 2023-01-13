@@ -66,6 +66,10 @@ networkPolicies:
             - namespaceSelector:
                 matchLabels:
                   com.mcm.maas.internal: "true"
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  name: monitoring
 
 deployments:
   - metadata:
@@ -105,6 +109,12 @@ deployments:
               MAAS_API_CACHE_PORT: ${MAAS_API_CACHE_PORT}
               MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
               MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
+              LOG_LEVEL_SPRING: ${LOG_LEVEL_SPRING}
+              LOG_LEVEL_GATEWAY: ${LOG_LEVEL_GATEWAY}
+              ELASTIC_APM_SERVICE_NAME: mock-api
+              ELASTIC_APM_APPLICATION_PACKAGES: com.gateway,org.springframework
+              ELASTIC_APM_SERVER_URL: http://apm-server.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:8200
+              ELASTIC_APM_ENVIRONMENT: ${LANDSCAPE_ENV}
             image: ${MOCK_API_IMAGE_NAME}
             name: mock-api
             ports:

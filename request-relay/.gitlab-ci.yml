@@ -25,7 +25,7 @@ include:
   fi
   cd request-relay
   envsubst < ../settings.xml
-  mvn clean install -s ../settings.xml -DskipTests
+  mvn clean install -s ../settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
 
 request_relay_build:
   extends:
@@ -53,9 +53,9 @@ request_relay_image_build:
   script:
     - *request_relay_init_vars
     - |
-      #set -x
       cd request-relay
       pwd
+      cp ../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "request_relay_build" , "check-if-release-version" ]
 

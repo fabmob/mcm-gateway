@@ -1,0 +1,13 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: apm-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: apm-server
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              com.mcm.maas.internal: "true"

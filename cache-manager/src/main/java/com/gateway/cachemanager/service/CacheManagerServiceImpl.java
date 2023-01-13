@@ -12,8 +12,6 @@ import com.gateway.commonapi.dto.data.PartnerMetaDTO;
 import com.gateway.commonapi.dto.data.PriceListDTO;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
-import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
-import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
@@ -218,8 +216,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
     private void updateCacheGatewayParams(String key, String value) {
         log.info("Updating Gateway Param " + key + " in database and cache");
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 
@@ -248,8 +245,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
     private void createCacheGatewayParams(String key, String value) {
         log.info("Creating Gateway Param " + key + " in database");
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 
@@ -278,8 +274,8 @@ public class CacheManagerServiceImpl implements CacheManagerService {
         List<PartnerMetaDTO> partnerMetaDTOList = new ArrayList<>();
 
         // get the correlationId of the current thread and forward as http header
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
@@ -349,8 +345,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
      * @return response
      */
     private Object getRouting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         String partnerMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;

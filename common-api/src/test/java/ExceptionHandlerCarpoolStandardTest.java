@@ -253,7 +253,7 @@ public class ExceptionHandlerCarpoolStandardTest {
 
         response = responseEntityExceptionHandler.handleTypeMismatch
                 (new TypeMismatchException(DEFAULT_EXCEPTION_MESSAGE, String.class), headers, status, request);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request has an anomaly", "Type mismatch", 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "An error is detected in the request.", "Type mismatch", 400);
     }
 
     @Test

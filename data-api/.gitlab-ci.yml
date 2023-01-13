@@ -31,7 +31,7 @@ include:
   then
     mvn  --batch-mode -s settings.xml versions:set -DprocessAllModules -DgenerateBackupPoms=false -DnewVersion=$NEW_RELEASE_VERSION
   fi
-  mvn clean install -s settings.xml -DskipTests
+  mvn clean install -s settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
 
 data_api_build:
   extends:
@@ -58,6 +58,7 @@ data_api_image_build:
   script:
     - *data_api_init_vars
     - |
+      cp ../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "data_api_build" , "check-if-release-version" ]
 

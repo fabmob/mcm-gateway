@@ -165,9 +165,9 @@ public class WSUtilTest extends UTTestCase {
 
     @Test
     public void testSetHeader() {
-        String CORRELATION_ID = new ThreadLocalUserSession().get().getContextId();
+        String correlationId = new ThreadLocalUserSession().get().getContextId();
         org.springframework.http.HttpHeaders httpHeaders = new org.springframework.http.HttpHeaders();
-        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, CORRELATION_ID);
+        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
         HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
         Assertions.assertEquals(httpEntity, setHeaders());

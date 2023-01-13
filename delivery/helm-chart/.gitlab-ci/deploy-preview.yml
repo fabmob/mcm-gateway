@@ -150,6 +150,39 @@ dkron_deploy_preview:
       . env/.env.preview
       helm_deploy $MODULE_NAME
 
+elasticsearch_helm_deploy_preview:
+  stage: deploy-preview
+  extends:
+    - .helm-deploy-preview-job
+    - .no-needs
+    - .always
+    - .env_preview
+  when: always
+  variables:
+    MODULE_NAME: elasticsearch
+  script:
+    - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.preview
+      helm_deploy $MODULE_NAME
+
+apm_and_kibana_helm_deploy_preview:
+  stage: deploy-preview
+  extends:
+    - .helm-deploy-preview-job
+    - .no-needs
+    - .always
+    - .env_preview
+  variables:
+    MODULE_NAME: apm
+  script:
+    - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.preview
+      helm_deploy $MODULE_NAME
+
 gravitee_apim_helm_deploy_preview:
   stage: deploy-preview
   extends:

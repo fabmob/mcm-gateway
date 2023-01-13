@@ -77,7 +77,6 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
     RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
-    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
     private static final String SEPARATOR = ": ";
 
     /**
@@ -91,19 +90,20 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         PartnerActionDTO partnerBusinessAction;
         PartnerStandardDTO partnerStandard;
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         String urlGetActionById = dataApiUri + CommonUtils.placeholderFormat(GET_ACTION_BY_ID_PATH, ACTION_ID_PARAM, partnerActionId.toString());
         try {
             ResponseEntity<PartnerActionDTO> partnerActionDTO = restTemplate.exchange(urlGetActionById, HttpMethod.GET, CommonUtils.setHeaders(), PartnerActionDTO.class);
             partnerBusinessAction = Objects.requireNonNull(partnerActionDTO.getBody());
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -115,13 +115,13 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
             ResponseEntity<PartnerStandardDTO[]> standard = restTemplate.exchange(urlGetStandardByActionId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerStandardDTO[].class);
             partnerStandard = Objects.requireNonNull(standard.getBody())[0];
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -145,18 +145,19 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
 
         String urlGetPartnerByPartnerId = dataApiUri + CommonUtils.placeholderFormat(GET_PARTNER_META_BY_ID_PATH, ID_PARAM, id.toString());
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerMetaDTO> partnerMetaDto = restTemplate.exchange(urlGetPartnerByPartnerId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerMetaDTO.class);
             return Objects.requireNonNull(partnerMetaDto.getBody());
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetPartnerByPartnerId));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetPartnerByPartnerId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetPartnerByPartnerId));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -234,18 +235,19 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         HttpEntity<Object> entity = new HttpEntity<>(tokenDTO, CommonUtils.setHttpHeaders());
         String urlPostToken = dataApiUri + CommonUtils.placeholderFormat(GET_TOKEN_PATH);
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<TokenDTO> tokenResponse = restTemplate.exchange(urlPostToken, HttpMethod.POST, entity, TokenDTO.class);
             return tokenResponse.getBody();
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), dataApiUri));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), dataApiUri));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), dataApiUri));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -259,18 +261,19 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<PartnerActionDTO> actionList;
         String urlGetCallsByActionId = dataApiUri + CommonUtils.placeholderFormat(PARTNER_ACTIONS_BASE_PATH + GET_BY_PARTNER_META_ID_PATH, PARTNER_ID_PARAM, String.valueOf(partnerId));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerActionDTO[]> partnerCallsDTO = restTemplate.exchange(urlGetCallsByActionId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerActionDTO[].class);
             actionList = Arrays.asList(Objects.requireNonNull(partnerCallsDTO.getBody()));
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -420,18 +423,19 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
 
         String urlGetTokenByPartnerId = dataApiUri + CommonUtils.placeholderFormat(GET_TOKEN_PATH + GET_BY_PARTNER_META_ID_PATH, PARTNER_ID_PARAM, String.valueOf(partnerId));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<TokenDTO> tokenDTO = restTemplate.exchange(urlGetTokenByPartnerId, HttpMethod.GET, CommonUtils.setHeaders(), TokenDTO.class);
             return tokenDTO.getBody();
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetTokenByPartnerId));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetTokenByPartnerId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetTokenByPartnerId));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -694,18 +698,19 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<PartnerCallsDTO> partnerBusinessCalls;
         String urlGetCallsByActionId = dataApiUri + CommonUtils.placeholderFormat(GET_CALLS_PATH + GET_BY_ACTIONS_ID_PATH, ACTION_ID_PARAM, String.valueOf(actionId));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerCallsDTO[]> partnerCallsDTO = restTemplate.exchange(urlGetCallsByActionId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerCallsDTO[].class);
             partnerBusinessCalls = Arrays.asList(Objects.requireNonNull(partnerCallsDTO.getBody()));
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetCallsByActionId));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -725,6 +730,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<DataMapperDTO> dataMappers;
         String urlGetActionById = dataApiUri + CommonUtils.placeholderFormat(GET_DATA_MAPPER_BY_ID_PATH + GET_BY_ACTIONS_ID_PATH, ACTION_ID_PARAM, actionId.toString());
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<DataMapperDTO[]> dataMappersDTO = restTemplate.exchange(urlGetActionById, HttpMethod.GET, CommonUtils.setHeaders(), DataMapperDTO[].class);
@@ -732,10 +738,10 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         } catch (HttpClientErrorException.NotFound | NullPointerException e) {
             return Collections.emptyList();
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetActionById));
         } finally {
             CallUtils.saveOutputStandardInCallThread(initialOutputStandard);
@@ -850,12 +856,13 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         if (StringUtils.isNotBlank(initialOutputStandard)) {
             preserveOriginalErrors = CommonUtils.shouldPreserveResponseStatus(initialOutputStandard);
         }
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<String> partnerResponse = restTemplate.exchange(urlPostRequest, HttpMethod.POST, entity, String.class);
             return partnerResponse.getBody();
         } catch (HttpClientErrorException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             if (preserveOriginalErrors) {
                 throw e;
             } else {
@@ -863,14 +870,14 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
                 throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), requestRelayUrl) + SEPARATOR + error.getDescription());
             }
         } catch (RestClientException e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             if (preserveOriginalErrors) {
                 throw e;
             } else {
                 throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), requestRelayUrl) + SEPARATOR + e.getMessage());
             }
         } catch (Exception e) {
-            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             if (preserveOriginalErrors) {
                 throw e;
             } else {

@@ -18,7 +18,7 @@ import java.io.IOException;
 public class Slf4jFilter extends OncePerRequestFilter {
 
     private static final String CORRELATION_ID_HEADER_NAME = GlobalConstants.CORRELATION_ID_HEADER;
-    private static final String CORRELATION_ID_LOG_VAR_NAME = "CORRELATION_ID";
+    private static final String CORRELATION_ID_LOG_VAR_NAME = "correlationId";
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

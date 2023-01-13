@@ -1,0 +1,41 @@
+image: "docker.elastic.co/apm/apm-server"
+imageTag: "7.17.3"
+
+# Allows you to add config files
+apmConfig:
+  apm-server.yml: |
+    apm-server:
+      host: "0.0.0.0:8200"
+
+    queue: {}
+
+    output.elasticsearch:
+      hosts: ["http://elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200"]
+      username: "elastic"
+      password: "${ELASTIC_PASSWORD}"
+
+replicas: 1
+
+elasticsearchCredentialSecret: ""
+
+# additionals labels
+labels: {}
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "100Mi"
+  limits:
+    cpu: "1000m"
+    memory: "512Mi"
+
+# Override various naming aspects of this chart
+# Only edit these if you know what you're doing
+nameOverride: ""
+fullnameOverride: "apm-server"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  averageCpuUtilization: 50

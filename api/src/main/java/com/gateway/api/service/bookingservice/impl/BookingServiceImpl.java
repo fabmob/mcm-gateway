@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.api.service.bookingservice.BookingService;
 import com.gateway.api.service.ivservice.impl.IVServiceImpl;
 import com.gateway.api.util.ValidityUtils;
+import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.api.Booking;
 import com.gateway.commonapi.dto.api.CarpoolBookingEvent;
 import com.gateway.commonapi.dto.api.DriverCarpoolBooking;
@@ -180,7 +181,7 @@ public class BookingServiceImpl implements BookingService {
             genericError.setErrorCode(BOOKING_ID_CODE);
             String msg = CommonUtils.placeholderFormat(UNKNOWN_BOOKING_ID, FIRST_PLACEHOLDER, bookingId != null ? bookingId.toString() : null);
             genericError.setDescription(msg);
-            throw new BadRequestException(genericError);
+            throw new NotFoundException(genericError);
         }
 
         return bookingGet;
@@ -213,9 +214,7 @@ public class BookingServiceImpl implements BookingService {
      * @return response
      */
     private Object getRouting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         String mspMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;

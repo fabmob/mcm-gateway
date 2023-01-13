@@ -3,7 +3,8 @@ ARG MAVEN_IMAGE_NAME
 FROM ${MAVEN_IMAGE_NAME}
 
 COPY target/request-relay*.jar /request-relay.jar
+COPY elastic-apm-agent-1.35.0.jar /elastic-apm-agent-1.35.0.jar
 
 EXPOSE 8085
 
-CMD java -jar request-relay.jar
+CMD java -javaagent:./elastic-apm-agent-1.35.0.jar -jar request-relay.jar

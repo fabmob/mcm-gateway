@@ -8,8 +8,33 @@ management:
   type: jdbc
 ratelimit:
   type: jdbc
+jwtSecret: ${GRAVITEE_JWT_SECRET_TOKEN}
+
+services:
+  core:
+    http:
+      enabled: false
+
+inMemoryAuth:
+  enabled: true
+  allowEmailInSearchResults: false
+  passwordEncodingAlgo: bcrypt
+
+adminAccountEnable: true
+adminPasswordBcrypt: ${GRAVITEE_INMEMORY_BCRYPT_ADMIN_PASSWORD}
+adminEmail: mcm_admin_gw@moncomptemobilite.org
+adminFirstName:
+adminLastName:
+
+extraInMemoryUsers: |
+  
 
 
+## https://docs.gravitee.io/apim/3.x/apim_how_to_configuration.html#step_3_update_the_jwt_secret
+#jwt:
+#  secret: muOJ2G1trcbheu5_3t4v33_S3cr3t
+#  # 2 days delay
+#  expire-after: 172800
 es:
   enabled: true
   cluster: elasticsearch
@@ -20,9 +45,11 @@ es:
   # https://docs.gravitee.io/apim_installguide_repositories_elasticsearch.html#management_api_configuration
   index_mode: daily # Index mode normal (daily index) vs ILM (managed by ILM)
   security:
-    enabled: false
+    username: elastic
+    password: ${ELASTIC_PASSWORD}
+    enabled: ${ELASTIC_SECURED}
   endpoints:
-    - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+    - http://elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
   lifecycle:
     enabled: false
     policyPropertyName: index.lifecycle.name   #for openDistro, use 'opendistro.index_state_management.policy_id' instead of 'index.lifecycle.name'
@@ -40,13 +67,18 @@ es:
       ingest: geoip, user_agent # geoip and user_agent plugins are enabled by default
 
 
+
+
 portal:
   image:
     repository: graviteeio/apim-portal-ui
     tag: 3.19.1
-  replicaCount: 1
   autoscaling:
-    enabled: false
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetAverageUtilization: 70
+    targetMemoryAverageUtilization: 50
   ingress:
     enabled: false
     path: /
@@ -56,38 +88,49 @@ portal:
     labels: { "visibility": "external" }
 
 ui:
+  title: Management UI
+  managementTitle: API Management Std MaaS | Mon Compte Mobilité
   portal:
+    apikeyHeader: x-api-key
     analytics:
       enabled: true
   image:
     repository: graviteeio/apim-management-ui
     tag: 3.19.1
-  replicaCount: 1
   autoscaling:
-    enabled: false
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
   ingress:
     enabled: false
     path: /
     hosts:
       - ${APIM_CONSOLE_FQDN}
   companyName: Mon Compte Mobilité
-  title: Management UI
-  managementTitle: API Management Std MaaS | Mon Compte Mobilité
   documentationLink: https://github.com/fabmob/mcm-gateway
   deployment:
     labels: { "visibility": "external" }
 
 api:
+  #properties:
+  #  encryption:
+  #    secret: ${GRAVITEE_JWT_SECRET_TOKEN}
   image:
     repository: graviteeio/apim-management-api
     tag: 3.19.1
-  replicaCount: 1
+  http:
+    client:
+      timeout: 30000
+    services:
+      core:
+        http:
+          enabled: "false"
   autoscaling:
-    enabled: false
-    # minReplicas: 1
-    #    maxReplicas: 3
-    #    targetAverageUtilization: 50
-    #    targetMemoryAverageUtilization: 80
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetAverageUtilization: 70
+    targetMemoryAverageUtilization: 50
   resources:
     requests:
       cpu: 500m
@@ -96,7 +139,7 @@ api:
     file:
       enabled: true
       endpoints:
-        - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+        - http://elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
       output: json
       request:
         include:
@@ -116,7 +159,7 @@ api:
             <maxHistory>30</maxHistory>
         </rollingPolicy>
       encoderPattern: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%n"
-    graviteeLevel: DEBUG
+    graviteeLevel: ${LOG_LEVEL_GRAVITEE}
     jettyLevel: INFO
   ingress:
     management:
@@ -132,25 +175,14 @@ api:
   user:
     login:
       # Create a default application when user connects to the portal for the very first time (default true)
-        defaultApplication: false
-    # Password complexity validation policy
-    # Applications should enforce password complexity rules to discourage easy to guess passwords.
-    # Passwords should require a minimum level of complexity that makes sense for the application and its user population.
-    password:
-      policy:
-        # Regex pattern for password validation (default to OWASP recommendations).
-        # 8 to 32 characters, no more than 2 consecutive equal characters, min 1 special characters (@ & # ...), min 1 upper case character.
-        pattern: ^(?:(?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))(?!.*(.)\1{2,})[A-Za-z0-9!~<>,;:_\-=?*+#."'&§`£€%°()\\\|\[\]\-\$\^\@\/]{8,32}$
+      defaultApplication: false
   deployment:
     labels: { "visibility": "external" }
-  containers:
-    - name: downloadFile
-      command:
-        - |
-          echo "Hello, World!"
-          touch /tmp/titi
-          wget -O /opt/graviteeio-management-api/templates/images/mob.jpeg https://media-exp1.licdn.com/dms/image/C4E0BAQGjm1JoC3plUA/company-logo_200_200/0/1608647485892?e=2147483647&v=beta&t=8am8tz2_IEY-O5lSKtMxr9nCpAU2s1KzM_oKT2nvo5I
-
+    extraEnvs:
+      - name: gravitee_user_password_policy_pattern
+        value: ^(?:(?=.*\d)(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[^A-Za-z0-9])(?=.*[a-z])|(?=.*[^A-Za-z0-9])(?=.*[A-Z])(?=.*[a-z])|(?=.*\d)(?=.*[A-Z])(?=.*[^A-Za-z0-9]))(?!.*(.)\1{2,})[A-Za-z0-9!~<>,;:_\-=?*+#."'&§`£€%°()\\\|\[\]\-\$\^\@\/]{8,32}$
+      - name: gravitee_api_properties_encryption_secret
+        value: ${GRAVITEE_API_SECRET_TOKEN}
 
 gateway:
   image:
@@ -159,18 +191,22 @@ gateway:
   policy:
     api-key:
       header: X-API-KEY
-  replicaCount: 2
   autoscaling:
-    enabled: false
-    # minReplicas: 1
-    #    maxReplicas: 3
-    #    targetAverageUtilization: 50
-    #    targetMemoryAverageUtilization: 80
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 4
+    targetAverageUtilization: 70
+    targetMemoryAverageUtilization: 50
+  services:
+    core:
+      http:
+        enabled: "false"
   resources:
     requests:
       cpu: 500m
       memory: 128Mi
   logging:
+    graviteeLevel: ${LOG_LEVEL_GRAVITEE}
     debug: true
   ingress:
     enabled: false
@@ -187,7 +223,7 @@ gateway:
     file:
       enabled: true
       endpoints:
-        - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+        - http://elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
       output: json
       request:
         include:
@@ -200,13 +236,14 @@ gateway:
       #  exclude: "*"
   deployment:
     labels: { "visibility": "external" }
-
-
+    extraEnvs:
+      - name: gravitee_api_properties_encryption_secret
+        value: ${GRAVITEE_API_SECRET_TOKEN}
 analytics:
   type: elasticsearch
   elasticsearch:
     endpoints:
-      - http://graviteeio-apim-elasticsearch.gravitee-apim-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
+      - http://elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:9200
 
 
 
@@ -232,6 +269,3 @@ notifiers:
     from: ${email.from}
     username: ${email.username}
     password: ${email.password}
-
-
-

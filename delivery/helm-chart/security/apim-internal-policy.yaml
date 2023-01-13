@@ -14,3 +14,7 @@ spec:
         - podSelector:
             matchLabels:
               app.kubernetes.io/name: elasticsearch
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring

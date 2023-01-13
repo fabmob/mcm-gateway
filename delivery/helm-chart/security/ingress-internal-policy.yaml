@@ -18,3 +18,7 @@ spec:
           podSelector:
             matchLabels:
               app.kubernetes.io/component: gateway
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring

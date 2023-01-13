@@ -1,0 +1,32 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: apim-elastic-policy
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: elasticsearch
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              com.mcm.maas.apim: "true"
+          podSelector:
+            matchLabels:
+              app.kubernetes.io/name: "apim3"
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: "monitoring"
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: "apm-kibana"
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: "elasticsearch"
+    - from:
+        - podSelector:
+            matchLabels:
+              app: "apm-server"

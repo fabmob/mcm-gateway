@@ -58,6 +58,8 @@ public class ExceptionHandlerTompStandardTest {
     public static final String GATEWAY_ERROR_HAPPEN = "Gateway error happen : ";
     public static final String CONTACT_GATEWAY_SUPPORT = ", contact your Gateway support.";
     public static final String INTERNAL_SERVER_ERROR = "Internal server error";
+    public static final String BAD_REQUEST = "Bad Request";
+    public static final String NOT_FOUND = "Not Found";
 
     @TestConfiguration
     public static class ErrorMessagesConfiguration {
@@ -118,7 +120,7 @@ public class ExceptionHandlerTompStandardTest {
     @Test
     public void testHandleBadRequest() {
         response = responseEntityExceptionHandler.handleBadRequest(new BadRequestException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), DEFAULT_EXCEPTION_MESSAGE, BAD_REQUEST, 400);
     }
 
     @Test
@@ -167,7 +169,7 @@ public class ExceptionHandlerTompStandardTest {
     public void testHandleNotFound() {
         response = responseEntityExceptionHandler.handleNotFound
                 (new NotFoundException(DEFAULT_EXCEPTION_MESSAGE), servletWebRequest);
-        checkErrorResponse(response, HttpStatus.NOT_FOUND.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 404);
+        checkErrorResponse(response, HttpStatus.NOT_FOUND.value(), DEFAULT_EXCEPTION_MESSAGE, NOT_FOUND, 404);
     }
 
     @Test
@@ -193,7 +195,7 @@ public class ExceptionHandlerTompStandardTest {
 
         response = responseEntityExceptionHandler.handleHttpMessageNotReadable
                 (new HttpMessageNotReadableException(DEFAULT_EXCEPTION_MESSAGE), headers, status, request);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "The request format is not the expected one", "Bad Request: Invalid Format", 400);
     }
 
     @Test
@@ -263,7 +265,7 @@ public class ExceptionHandlerTompStandardTest {
 
         response = responseEntityExceptionHandler.handleTypeMismatch
                 (exception, headers, status, request);
-        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), INTERNAL_SERVER_ERROR, INTERNAL_ERROR_TITLE, 400);
+        checkErrorResponse(response, HttpStatus.BAD_REQUEST.value(), "An error is detected in the request.", "Type mismatch", 400);
     }
 
     @Test

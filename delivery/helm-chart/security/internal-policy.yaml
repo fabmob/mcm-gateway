@@ -11,3 +11,7 @@ spec:
         - namespaceSelector:
             matchLabels:
               com.mcm.maas.internal: "true"
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring

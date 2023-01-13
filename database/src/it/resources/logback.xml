@@ -4,9 +4,9 @@
             <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] [%X{CORRELATION_ID}] %-5level %logger{36} - %msg %n</pattern>
         </encoder>
     </appender>
-    <root level="INFO">
+    <root level="${LOG_LEVEL_SPRING:-INFO}">
         <appender-ref ref="stdout"/>
     </root>
 
-    <logger name="com.gateway" level="DEBUG"/>
+    <logger name="com.gateway" level="${LOG_LEVEL_GATEWAY:-INFO}"/>
 </configuration>

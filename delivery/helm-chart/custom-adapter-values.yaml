@@ -47,7 +47,10 @@ networkPolicies:
             - namespaceSelector:
                 matchLabels:
                   com.mcm.maas.internal: "true"
-
+        - from:
+            - namespaceSelector:
+                matchLabels:
+                  name: monitoring
 deployments:
   - metadata:
       annotations:
@@ -88,6 +91,12 @@ deployments:
               MAAS_API_CACHE_KEYS_PREFIX: "${MAAS_API_CACHE_KEYS_PREFIX}"
               MAAS_API_CACHE_PASSWORD: "${MAAS_API_CACHE_PASSWORD}"
               DATA_API_CONTEXT_PATH: "/dataapi/v1"
+              LOG_LEVEL_SPRING: ${LOG_LEVEL_SPRING}
+              LOG_LEVEL_GATEWAY: ${LOG_LEVEL_GATEWAY}
+              ELASTIC_APM_SERVICE_NAME: custom-adapter
+              ELASTIC_APM_APPLICATION_PACKAGES: com.gateway,org.springframework
+              ELASTIC_APM_SERVER_URL: http://apm-server.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:8200
+              ELASTIC_APM_ENVIRONMENT: ${LANDSCAPE_ENV}
             image: ${CUSTOM_ADAPTER_IMAGE_NAME}
             name: custom-adapter
             ports:

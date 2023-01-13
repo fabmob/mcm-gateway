@@ -74,58 +74,79 @@ Il gère quatre pipelines :
 
 - Variables spécifiques repo "helm-chart" (ENV = PREVIEW ou TESTING)
 
-| Nom variable                         | Commentaire                                                  |
-|--------------------------------------|--------------------------------------------------------------|
-| ${ENV}_BASE_DOMAIN                   | Base des url                                                 |
-| ${ENV}_DATABASE_HOST                 | host de base de données pour les données de la gateway       |
-| ${ENV}_DATABASE_NAME                 | nom de la base de données de la gateway                      |
-| ${ENV}_DATABASE_USER_NAME            | Compte de service nexus non admin                            |
-| ${ENV}_DATABASE_USER_PWD             | Mot de passe Compte de service nexus non admin               |
-| ${ENV}_POSTGRES_SERVICE_PASSWORD     | mot de passe du compte de service pour la bdd de la gateway  |
-| ${ENV}_POSTGRES_SERVICE_USER         | compte de service pour la bdd de la gateway                  |
-| ${ENV}_GRAVITEE_DATABASE_NAME        | nom de la base de données gravitee                           |
-| ${ENV}_GRAVITEE_DATABASE_SERVER      | nom du serveur de base de données pour gravitee              |
-| ${ENV}_GRAVITEE_DATABASE_USER_NAME   | compte de service de la bdd gravitee                         |
-| ${ENV}_GRAVITEE_DATABASE_USER_PWD    | mot de passe du compte de service de la bdd gravitee         |
-| ${ENV}_GRAVITEE_SMTP_ENABLED         | activation du SMTP                                           |
-| ${ENV}_GRAVITEE_SMTP_FROM            | from dans les emails envoyés par gravitee                    |
-| ${ENV}_GRAVITEE_SMTP_HOST            | host SMTP                                                    |
-| ${ENV}_GRAVITEE_SMTP_PASSWORD        | mot de passe pour le smtp (valeur de l'apikey)               |
-| ${ENV}_GRAVITEE_SMTP_PORT            | port smtp                                                    |
-| ${ENV}_GRAVITEE_SMTP_SUBJECT_PATTERN |  objet des messages envoyés par gravitee                     |
-| ${ENV}_GRAVITEE_SMTP_USERNAME        | apikey  pour utiliser une authent par apikey pour le smtp    |
-| ${ENV}_MAAS_API_CACHE_HOST           | url serveur redis                                            |
-| ${ENV}_MAAS_API_CACHE_KEYS_PREFIX    | prefix de clé des éléments dans le cache redis               |
-| ${ENV}_MAAS_API_CACHE_PASSWORD       | mot de passe du serveur redis                                |
-| ${ENV}_MAAS_API_CACHE_PORT           | port redis                                                   |
-
+| Nom variable                         | Commentaire                                                                                                                                               |
+|--------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ${ENV}_BASE_DOMAIN                   | Base des url                                                                                                                                              |
+| ${ENV}_DATABASE_HOST                 | host de base de données pour les données de la gateway                                                                                                    |
+| ${ENV}_DATABASE_NAME                 | nom de la base de données de la gateway                                                                                                                   |
+| ${ENV}_DATABASE_USER_NAME            | Compte de service nexus non admin                                                                                                                         |
+| ${ENV}_DATABASE_USER_PWD             | Mot de passe Compte de service nexus non admin                                                                                                            |
+| ${ENV}_POSTGRES_SERVICE_PASSWORD     | mot de passe du compte de service pour la bdd de la gateway                                                                                               |
+| ${ENV}_POSTGRES_SERVICE_USER         | compte de service pour la bdd de la gateway                                                                                                               |
+| ${ENV}_GRAVITEE_DATABASE_NAME        | nom de la base de données gravitee                                                                                                                        |
+| ${ENV}_GRAVITEE_DATABASE_SERVER      | nom du serveur de base de données pour gravitee                                                                                                           |
+| ${ENV}_GRAVITEE_DATABASE_USER_NAME   | compte de service de la bdd gravitee                                                                                                                      |
+| ${ENV}_GRAVITEE_DATABASE_USER_PWD    | mot de passe du compte de service de la bdd gravitee                                                                                                      |
+| ${ENV}_GRAVITEE_SMTP_ENABLED         | activation du SMTP                                                                                                                                        |
+| ${ENV}_GRAVITEE_SMTP_FROM            | from dans les emails envoyés par gravitee                                                                                                                 |
+| ${ENV}_GRAVITEE_SMTP_HOST            | host SMTP                                                                                                                                                 |
+| ${ENV}_GRAVITEE_SMTP_PASSWORD        | mot de passe pour le smtp (valeur de l'apikey)                                                                                                            |
+| ${ENV}_GRAVITEE_SMTP_PORT            | port smtp                                                                                                                                                 |
+| ${ENV}_GRAVITEE_SMTP_SUBJECT_PATTERN | objet des messages envoyés par gravitee                                                                                                                   |
+| ${ENV}_GRAVITEE_SMTP_USERNAME        | apikey  pour utiliser une authent par apikey pour le smtp                                                                                                 |
+| ${ENV}_MAAS_API_CACHE_HOST           | url serveur redis                                                                                                                                         |
+| ${ENV}_MAAS_API_CACHE_KEYS_PREFIX    | prefix de clé des éléments dans le cache redis                                                                                                            |
+| ${ENV}_MAAS_API_CACHE_PASSWORD       | mot de passe du serveur redis                                                                                                                             |
+| ${ENV}_MAAS_API_CACHE_PORT           | port redis                                                                                                                                                |
+| ${ENV}_ELASTIC_SYSCTL_ENABLED        | booléen : true permet de configurer les limites filesystem et openfile pour Elasticsearch                                                                 |                                                             |
+| ${ENV}_ELASTIC_SECURED               | booléen : activation ou désactivation du chiffrage SSL/TLS  pour l'api REST d'elasticsearch                                                               |                                                             |
+| ${ENV}_ELASTIC_PASSWORD              | mot de passe si ${ENV}_ELASTIC_SECURED est actif                                                                                                          |                                                             |
+| ${ENV}_ELASTIC_KIBANA_INSTALL        | booléen : indique s'il faut installer kibana                                                                                                              |                                                             |
+| ${ENV}_ELASTIC_STORAGE_CLASS         | nom du storage classe pour les disques elasticsearch                                                                                                      |                                                             |
+| ${ENV}_LOG_LEVEL_SPRING | log level de spring (DEBUG, INFO, WARN)                                                                                                                   |
+| ${ENV}_LOG_LEVEL_GATEWAY | log level du package gateway (DEBUG, INFO, WARN)                                                                                                          |
+| ${ENV}_LOG_LEVEL_GRAVITEE | log elvel de gravitee (DEBUG, INFO, WARN)                                                                                                                 |
+| ${ENV}_GRAVITEE_JWT_SECRET_TOKEN | secret token afin de protéger de l'usurpation d'identité des sessions                                                                                             |
+| ${ENV}_GRAVITEE_API_SECRET_TOKEN | secret token afin de protéger les propriétés d'api                                                                                                                |
+| ${ENV}_GRAVITEE_INMEMORY_BCRYPT_ADMIN_PASSWORD | mot de passe en mode bcrypt de l'utilisateur admin inmemory   cf https://docs.gravitee.io/apim/3.x/apim_how_to_configuration.html#step_2_update_the_default_users |
 
 - Variables spécifiques repo "delivery-ops" (ENV = PPRD ou PROD)
 
-| Nom variable                         | Commentaire                                                  |
-|--------------------------------------|--------------------------------------------------------------|
-| ${ENV}_BASE_DOMAIN                   | Base des url                                                 |
-| ${ENV}_DATABASE_HOST                 | host de base de données pour les données de la gateway       |
-| ${ENV}_DATABASE_NAME                 | nom de la base de données de la gateway                      |
-| ${ENV}_DATABASE_USER_NAME            | Compte de service nexus non admin                            |
-| ${ENV}_DATABASE_USER_PWD             | Mot de passe Compte de service nexus non admin               |
-| ${ENV}_POSTGRES_SERVICE_PASSWORD     | mot de passe du compte de service pour la bdd de la gateway  |
-| ${ENV}_POSTGRES_SERVICE_USER         | compte de service pour la bdd de la gateway                  |
-| ${ENV}_GRAVITEE_DATABASE_NAME        | nom de la base de données gravitee                           |
-| ${ENV}_GRAVITEE_DATABASE_SERVER      | nom du serveur de base de données pour gravitee              |
-| ${ENV}_GRAVITEE_DATABASE_USER_NAME   | compte de service de la bdd gravitee                         |
-| ${ENV}_GRAVITEE_DATABASE_USER_PWD    | mot de passe du compte de service de la bdd gravitee         |
-| ${ENV}_GRAVITEE_SMTP_ENABLED         | activation du SMTP                                           |
-| ${ENV}_GRAVITEE_SMTP_FROM            | from dans les emails envoyés par gravitee                    |
-| ${ENV}_GRAVITEE_SMTP_HOST            | host SMTP                                                    |
-| ${ENV}_GRAVITEE_SMTP_PASSWORD        | mot de passe pour le smtp (valeur de l'apikey)               |
-| ${ENV}_GRAVITEE_SMTP_PORT            | port smtp                                                    |
-| ${ENV}_GRAVITEE_SMTP_SUBJECT_PATTERN |  objet des messages envoyés par gravitee                     |
-| ${ENV}_GRAVITEE_SMTP_USERNAME        | apikey  pour utiliser une authent par apikey pour le smtp    |
-| ${ENV}_MAAS_API_CACHE_HOST           | url serveur redis                                            |
-| ${ENV}_MAAS_API_CACHE_KEYS_PREFIX    | prefix de clé des éléments dans le cache redis               |
-| ${ENV}_MAAS_API_CACHE_PASSWORD       | mot de passe du serveur redis                                |
-| ${ENV}_MAAS_API_CACHE_PORT           | port redis                                                   |
+| Nom variable                         | Commentaire                                                                                                                                                       |
+|--------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ${ENV}_BASE_DOMAIN                   | Base des url                                                                                                                                                      |
+| ${ENV}_DATABASE_HOST                 | host de base de données pour les données de la gateway                                                                                                            |
+| ${ENV}_DATABASE_NAME                 | nom de la base de données de la gateway                                                                                                                           |
+| ${ENV}_DATABASE_USER_NAME            | Compte de service nexus non admin                                                                                                                                 |
+| ${ENV}_DATABASE_USER_PWD             | Mot de passe Compte de service nexus non admin                                                                                                                    |
+| ${ENV}_POSTGRES_SERVICE_PASSWORD     | mot de passe du compte de service pour la bdd de la gateway                                                                                                       |
+| ${ENV}_POSTGRES_SERVICE_USER         | compte de service pour la bdd de la gateway                                                                                                                       |
+| ${ENV}_GRAVITEE_DATABASE_NAME        | nom de la base de données gravitee                                                                                                                                |
+| ${ENV}_GRAVITEE_DATABASE_SERVER      | nom du serveur de base de données pour gravitee                                                                                                                   |
+| ${ENV}_GRAVITEE_DATABASE_USER_NAME   | compte de service de la bdd gravitee                                                                                                                              |
+| ${ENV}_GRAVITEE_DATABASE_USER_PWD    | mot de passe du compte de service de la bdd gravitee                                                                                                              |
+| ${ENV}_GRAVITEE_SMTP_ENABLED         | activation du SMTP                                                                                                                                                |
+| ${ENV}_GRAVITEE_SMTP_FROM            | from dans les emails envoyés par gravitee                                                                                                                         |
+| ${ENV}_GRAVITEE_SMTP_HOST            | host SMTP                                                                                                                                                         |
+| ${ENV}_GRAVITEE_SMTP_PASSWORD        | mot de passe pour le smtp (valeur de l'apikey)                                                                                                                    |
+| ${ENV}_GRAVITEE_SMTP_PORT            | port smtp                                                                                                                                                         |
+| ${ENV}_GRAVITEE_SMTP_SUBJECT_PATTERN | objet des messages envoyés par gravitee                                                                                                                           |
+| ${ENV}_GRAVITEE_SMTP_USERNAME        | apikey  pour utiliser une authent par apikey pour le smtp                                                                                                         |
+| ${ENV}_MAAS_API_CACHE_HOST           | url serveur redis                                                                                                                                                 |
+| ${ENV}_MAAS_API_CACHE_KEYS_PREFIX    | prefix de clé des éléments dans le cache redis                                                                                                                    |
+| ${ENV}_MAAS_API_CACHE_PASSWORD       | mot de passe du serveur redis                                                                                                                                     |
+| ${ENV}_MAAS_API_CACHE_PORT           | port redis                                                                                                                                                        |
+| ${ENV}_ELASTIC_SYSCTL_ENABLED        | booléen : true permet de configurer les limites filesystem et openfile pour Elasticsearch                                                                         |                                                             |
+| ${ENV}_ELASTIC_SECURED               | booléen : activation ou désactivation du chiffrage SSL/TLS  pour l'api REST d'elasticsearch                                                                       |                                                             |
+| ${ENV}_ELASTIC_PASSWORD              | mot de passe si ${ENV}_ELASTIC_SECURED est actif                                                                                                                  |                                                             |
+| ${ENV}_ELASTIC_KIBANA_INSTALL        | booléen : indique s'il faut installer kibana                                                                                                                      |                                                             |
+| ${ENV}_ELASTIC_STORAGE_CLASS         | nom du storage classe pour les disques elasticsearch                                                                                                              |                                                             |
+| ${ENV}_LOG_LEVEL_SPRING | log level de spring (DEBUG, INFO, WARN)                                                                                                                           |
+| ${ENV}_LOG_LEVEL_GATEWAY | log level du package gateway (DEBUG, INFO, WARN)                                                                                                                  |
+| ${ENV}_LOG_LEVEL_GRAVITEE | log level de gravitee (DEBUG, INFO, WARN)                                                                                                                         |
+| ${ENV}_GRAVITEE_JWT_SECRET_TOKEN | secret token afin de protéger de l'usurpation d'identité des sessions                                                                                             |
+| ${ENV}_GRAVITEE_API_SECRET_TOKEN | secret token afin de protéger les propriétés d'api                                                                                                                |
+| ${ENV}_GRAVITEE_INMEMORY_BCRYPT_ADMIN_PASSWORD | mot de passe en mode bcrypt de l'utilisateur admin inmemory   cf https://docs.gravitee.io/apim/3.x/apim_how_to_configuration.html#step_2_update_the_default_users |
 
 ## Packages
 

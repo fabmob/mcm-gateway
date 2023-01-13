@@ -77,4 +77,11 @@ class MockApiServiceTest {
         ReflectionTestUtils.setField(service, "mockDirectory", null);
         assertThrows(InternalException.class, () -> service.getMockedBody("sub/200\\response.json"));
     }
+
+    @Test
+    void testGetMockedIncorrectPath() {
+        assertThrows(BadRequestException.class, () -> service.getMockedBody("../sub/response.json"));
+        assertThrows(BadRequestException.class, () -> service.getMockedBody("/sub/response.json"));
+        assertThrows(BadRequestException.class, () -> service.getMockedBody("\\sub/response.json"));
+    }
 }

@@ -3,7 +3,23 @@
 Ce fichier liste tous les changements notables sur le projet [Gateway].
 Le versionning des release suit le [semantic versioning](http://semver.org).
 
-### 0.5.3
+### 0.7.2
+- [x] Mise à jour de sécurité sur la dépendance client postgres 
+- [x] Mise en place de KPI fonctionnelles pour la réservation à l'aide Grafana et Elasticsearch
+- [x] Mise en place de l'Application Performance Monitoring (APM) d'Elasticsearch sur les microservices de la gateway
+- [x] Correction des anomalies liées au cache et à la verbosité des erreurs
+
+
+### 0.6.3
+- [x] Séparation des namespaces, job installation et nom du service elasticsearch de l'installation gravitee
+- [x] Ajout de nouveaux paramètres de déploiement à la CI/CD pour le déploiement sécurisé d'elasticsearch et gravitee
+- [x] Mise en place de persistance des disques Elastic par storageClass
+- [x] Mise en place de KPI fonctionnelles à l'aide Grafana et Elasticsearch
+- [x] Corrections de vulnérabilités sur la librairie jackson
+- [x] Correction d'anomalies mineures
+
+
+### 0.5.4
 - [x] Activation des logs et analytics Gravitee & autorisation de Grafana à contacter Elasticsearch
 - [x] Amélioration du déploiement de gravitee et elasticsaerch par les helm charts
 - [x] Montée de version de gravitee de  3.18.11 à 3.19.1

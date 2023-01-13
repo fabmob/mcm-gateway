@@ -135,7 +135,7 @@ class BookingServiceImplTest {
         assertEquals("3fa85f64-5717-4562-b3fc-2c963f66afa6", booking.getId().toString());
 
         UUID wrongBookingId = UUID.fromString("3fa85f64-5717-4562-b3fc-2c963f66afa5");
-        assertThrows(BadRequestException.class, () -> bookingService.getBooking(partnerId, wrongBookingId));
+        assertThrows(NotFoundException.class, () -> bookingService.getBooking(partnerId, wrongBookingId));
     }
 
 

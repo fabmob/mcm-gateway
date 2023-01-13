@@ -162,9 +162,6 @@
     mkdir -p security/ingress
     cp -rT ../delivery/helm-chart/security security
   
-    mkdir -p values
-    cp -rT ../delivery/helm-chart/values values
-  
     # set the version of the release and chart in an env file that is commited
     echo "GATEWAY_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
     echo "GATEWAY_CHART_RELEASE_VERSION=${RELEASE_VERSION}" >> env/deployment.env
@@ -344,6 +341,7 @@
     unset GRAVITEE_DATABASE_USER_PWD
     unset GRAVITEE_DATABASE_SERVER
     unset GRAVITEE_DATABASE_NAME
+    unset GRAVITEE_INMEMORY_BCRYPT_ADMIN_PASSWORD
     unset GRAVITEE_SMTP_PORT
     unset GRAVITEE_SMTP_HOST
     unset GRAVITEE_SMTP_FROM
@@ -351,6 +349,16 @@
     unset GRAVITEE_SMTP_USERNAME
     unset GRAVITEE_SMTP_PASSWORD
     unset GRAVITEE_SMTP_SUBJECT_PATTERN
+    unset ELASTIC_SYSCTL_ENABLED
+    unset ELASTIC_SECURED
+    unset ELASTIC_PASSWORD
+    unset ELASTIC_KIBANA_INSTALL
+    unset ELASTIC_STORAGE_CLASS
+    unset LOG_LEVEL_SPRING
+    unset LOG_LEVEL_GATEWAY
+    unset LOG_LEVEL_GRAVITEE
+    unset GRAVITEE_JWT_SECRET_TOKEN
+    unset GRAVITEE_API_SECRET_TOKEN
   }
 
   function install_gravitee {
@@ -426,6 +434,12 @@
     for ENVIRONMENT in `echo $ENV_LIST`
     do  
         . delivery/commons/.gitlab-ci/.env.${ENVIRONMENT}
+  
+        echo "Preparing elastic values file"
+        # delete elastic templates that not match the env, and rename the good one
+        find delivery/helm-chart -name "*-elasticsearch-values.yaml" ! -name "${ENVIRONMENT}-elasticsearch-*" -exec rm {} \;
+        find delivery/helm-chart -name "${ENVIRONMENT}-elasticsearch-values.yaml*" -exec mv {} delivery/helm-chart/elasticsearch-values.yaml \;
+    
         # SUBSTITUTE VARIABLES FOR ALL *-VALUES FILES
         for FILE in delivery/helm-chart-template/*-values.yaml
         do
@@ -451,7 +465,7 @@
 
       echo "********************* ci_commit_branch=$CI_COMMIT_BRANCH"
       # cases for which we deploy the pipeline to gateway-helm repo
-      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" || "$CI_COMMIT_BRANCH" =~ "release/"  || "$TRIGGER_RELEASE" == "0" ]]
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" || "$CI_COMMIT_BRANCH" =~ "release/" || "$TRIGGER_RELEASE" == "0" ]]
       then
         export SKIP_HELM_STUFF=0
       else

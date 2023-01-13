@@ -3,14 +3,14 @@
 
      <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] [%X{CORRELATION_ID}] %-5level %logger{36} - %replace(%replace(%msg){'\r\n',''}){'\n',''} %n</pattern>
+            <pattern>%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] [%X{correlationId}] %-5level %logger{36} - %replace(%replace(%msg){'\r\n',''}){'\n',''} %n</pattern>
         </encoder>
     </appender>
 
 
-    <root level="INFO">
+    <root level="${LOG_LEVEL_SPRING:-INFO}">
         <appender-ref ref="STDOUT" />
     </root>
 
-	<logger name="com.gateway" level="DEBUG" />
+	<logger name="com.gateway" level="${LOG_LEVEL_GATEWAY:-DEBUG}" />
 </configuration>

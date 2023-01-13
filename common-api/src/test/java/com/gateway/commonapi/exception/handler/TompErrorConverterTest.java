@@ -17,7 +17,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 import java.util.UUID;
 
-import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_ERROR_TITLE;
+import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_ERROR_DETAIL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -77,7 +77,7 @@ public class TompErrorConverterTest {
         TompError responseError = (TompError) response.getBody();
         assertEquals(1234, responseError.getErrorcode());
         assertEquals("Invalid", responseError.getType());
-        assertEquals(INTERNAL_ERROR_TITLE, responseError.getTitle());
+        assertEquals(INTERNAL_ERROR_DETAIL, responseError.getTitle());
         assertEquals(400, responseError.getStatus());
         assertEquals(INTERNAL_SERVER_ERROR, responseError.getDetail());
         assertEquals("Gateway callId " + UUID_TEST.toString(), responseError.getInstance());

@@ -26,7 +26,7 @@ include:
   cd routing-api
   cat pom.xml | egrep "version"
   envsubst < ../settings.xml
-  mvn clean install --batch-mode -s ../settings.xml -DskipTests
+  mvn clean install --batch-mode -s ../settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
 
 routing_api_build:
   extends:
@@ -54,6 +54,7 @@ routing_api_image_build:
     - *routing_api_init_vars
     - |
       cd routing-api
+      cp ../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "routing_api_build" , "check-if-release-version" ]
 

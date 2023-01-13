@@ -44,8 +44,8 @@ public class TompErrorConverter {
 
             // Init TompError with default values and GenericError data
             tompError.setType(DEFAULT_TOMP_TYPE);
-            tompError.setTitle(GatewayErrorMessage.INTERNAL_ERROR_TITLE);
-            tompError.setDetail(GatewayErrorMessage.INTERNAL_ERROR_DETAIL);
+            tompError.setTitle((exceptionInGatewayFormat) ? bodyGenericError.getLabel() : rawResponseFromException);
+            tompError.setDetail(bodyGenericError.getDescription());
             tompError.setTimestamp(bodyGenericError.getTimestamp());
             tompError.setInstance(DEFAULT_TOMP_INSTANCE + bodyGenericError.getCallId());
 
@@ -72,6 +72,8 @@ public class TompErrorConverter {
             }
             if (500 == tompError.getStatus()) {
                 tompError.setErrorcode(7500);
+                tompError.setTitle(GatewayErrorMessage.INTERNAL_ERROR_TITLE);
+                tompError.setDetail(GatewayErrorMessage.INTERNAL_ERROR_DETAIL);
             }
 
             // Overwrite type

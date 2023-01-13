@@ -1,8 +1,0 @@
-gitops:
- manifest_projects:
- - id: mcm/std-maas/helm-gateway
-   paths: 
-   - glob: 'helm-gateway/agents/*.yml'
-observability:
- logging:
-   level: debug

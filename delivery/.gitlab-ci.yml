@@ -49,7 +49,7 @@ gateway-build:
     fi
     cat pom.xml
     pwd
-    mvn -s settings.xml clean install -DskipTests -B
+    mvn -s settings.xml clean install -DskipTests -B -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
   artifacts:
     paths:
       - .m2/repository
@@ -112,8 +112,11 @@ gateway_tests:
     envsubst < settings.xml
     echo "--------- settings.xml ---------"
     cat settings.xml
-    mvn clean install -DskipTests -s settings.xml
-    mvn $MAVEN_CLI_OPTS $MAVEN_TESTS_OPTS test verify sonar:sonar -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_URL -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.projectName="$SONAR_PROJECT_NAME"
+    LOG_LEVEL_OPTS=""
+    export LOG_LEVEL_SPRING=INFO
+    export LOG_LEVEL_GATEWAY=INFO
+    mvn clean install -DskipTests -s settings.xml ${LOG_LEVEL_OPTS}
+    mvn $MAVEN_CLI_OPTS $MAVEN_TESTS_OPTS test verify sonar:sonar ${LOG_LEVEL_OPTS} -Dsonar.login=$SONAR_TOKEN -Dsonar.host.url=$SONAR_URL -Dsonar.projectKey="$SONAR_PROJECT_KEY" -Dsonar.projectName="$SONAR_PROJECT_NAME"
   needs: [ "deploy-nexus", "check-if-release-version" ]
   artifacts:
     reports:

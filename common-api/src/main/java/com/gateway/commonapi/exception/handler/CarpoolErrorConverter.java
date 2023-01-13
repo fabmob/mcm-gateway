@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.gateway.commonapi.constants.GatewayApiPathDict.CARPOOLING_PATH;
-import static com.gateway.commonapi.constants.GatewayErrorMessage.INTERNAL_MESSAGE_ERROR_CARPOOLING;
+import static com.gateway.commonapi.constants.GatewayErrorMessage.*;
 
 public class CarpoolErrorConverter {
     private CarpoolErrorConverter() {
@@ -25,17 +25,16 @@ public class CarpoolErrorConverter {
         ResponseEntity<Object> response;
         boolean preserveCode = validCodes.contains(rawStatusCodeFromException.value());
         HttpStatus responseStatus;
+        String callId = bodyGenericError.getCallId().toString();
+
 
         //Case the error in exception is gateway format, we convert it into carpoolurage format
         if (CommonUtils.isGatewayErrorFormat(rawResponseFromException) || CommonUtils.isGatewayException(exception)) {
-            String callId = bodyGenericError.getCallId().toString();
-
             if (preserveCode) {
                 responseStatus = rawStatusCodeFromException;
             } else {
                 responseStatus = HttpStatus.valueOf(500);
             }
-
             String carpoolErrorFromGenericError = bodyGenericError.getDescription() + " Technical gateway instance " + callId + ", errorcode " + convertErrorCodesToCarpoolErrorCodes(request, bodyGenericError.getErrorCode());
             carpoolError.setError(carpoolErrorFromGenericError);
 
@@ -44,7 +43,12 @@ public class CarpoolErrorConverter {
             //Errors from partner mapping
         } else {
             if (CommonUtils.isCarpoolErrorFormat(rawResponseFromException) && preserveCode) {
-                response = new ResponseEntity<>(rawResponseFromException, new HttpHeaders(), rawStatusCodeFromException);
+                if (httpStatus.is5xxServerError() && bodyGenericError.getLabel().equals(INTERNAL_SERVER_ERROR_LABEL)) {
+                    carpoolError.setError(INTERNAL_MESSAGE_ERROR);
+                    response = new ResponseEntity<>(carpoolError, new HttpHeaders(), rawStatusCodeFromException);
+                } else {
+                    response = new ResponseEntity<>(rawResponseFromException, new HttpHeaders(), rawStatusCodeFromException);
+                }
             } else if (CommonUtils.isCarpoolErrorFormat(rawResponseFromException)) {
                 response = new ResponseEntity<>(rawResponseFromException, new HttpHeaders(), httpStatus);
             } else {

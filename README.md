@@ -214,11 +214,11 @@ Lors de la réception de l'exception, on vérifie la présence ou non d'un heade
 Pour cela tout appel à un web service doit se faire avec un RestTemplate et en retransmettant le correlation id s'il existe.
 Exemple :
 ```java
-// get the CORRELATION_ID of the current thread and forward as http header
+// get the correlationId of the current thread and forward as http header
         UserContext userContext = new ThreadLocalUserSession().get();
-                String CORRELATION_ID = userContext.getContextId();
+                String correlationId = userContext.getContextId();
                 HttpHeaders httpHeaders = new HttpHeaders();
-                httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, CORRELATION_ID);
+                httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
                 HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
                 
             .../...
@@ -228,13 +228,13 @@ Exemple :
         } catch (NotFoundException e) {
             log.error("No metadata for MSP identifier {}", mm.getMspId(), e);
         } catch (HttpClientErrorException.NotFound e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
             throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         } catch (RestClientException e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
             throw new BadGatewayException(MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         } catch (Exception e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()),e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()),e);
             throw new UnavailableException(MessageFormat.format(errorsProperties.getTechnicalRestHttpClientError(),urlGetMetas));
         }
 ```

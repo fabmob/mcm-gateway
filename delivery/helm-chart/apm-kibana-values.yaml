@@ -1,0 +1,26 @@
+image:
+  tag: 7.17.3
+  repository: bitnami/kibana
+
+nameOverride: "apm-kibana"
+
+resources:
+  requests:
+    cpu: "700m"
+    memory: "1Gi"
+  limits:
+    cpu: "700m"
+    memory: "1Gi"
+
+elasticsearch:
+  hosts:
+    - elasticsearch.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local
+  port: 9200
+  security:
+    auth:
+      enabled: true
+      authc:
+        api_key:
+          enabled: true
+      kibanaPassword: "${ELASTIC_PASSWORD}"
+      elasticsearchPasswordSecret: "${ELASTIC_PASSWORD}"

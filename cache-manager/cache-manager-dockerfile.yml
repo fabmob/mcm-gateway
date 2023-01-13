@@ -3,7 +3,8 @@ ARG MAVEN_IMAGE_NAME
 FROM ${MAVEN_IMAGE_NAME}
 
 COPY target/cache-manager*.jar /cache-manager.jar
+COPY elastic-apm-agent-1.35.0.jar /elastic-apm-agent-1.35.0.jar
 
 EXPOSE 8086
 
-CMD java -jar cache-manager.jar
+CMD java -javaagent:./elastic-apm-agent-1.35.0.jar -jar cache-manager.jar

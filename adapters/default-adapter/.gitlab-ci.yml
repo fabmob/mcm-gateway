@@ -28,7 +28,7 @@ include:
   fi
   cd adapters/default-adapter
   envsubst < ../../settings.xml
-  mvn clean install -s ../../settings.xml -DskipTests
+  mvn clean install -s ../../settings.xml -DskipTests -Dlogging.level.org.springframework=INFO -Dlogging.level.com.gateway=INFO
 
 default_adapter_build:
   extends:
@@ -55,6 +55,7 @@ default_adapter_image_build:
   script:
     - *default_adapter_init_vars
     - |
+      cp ../../delivery/commons/lib/elastic-apm-agent-1.35.0.jar .
       image
   needs: [ "default_adapter_build" , "check-if-release-version" ]
 

@@ -1,13 +1,13 @@
 package com.gateway.requestrelay.service.impl;
 
+import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.requestrelay.HeadersValuesTemplateFinalDTO;
 import com.gateway.commonapi.dto.requestrelay.PartnerCallsFinalDTO;
 import com.gateway.commonapi.exception.BadGatewayException;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.exception.UnavailableException;
-import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
-import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
 import com.gateway.commonapi.utils.SanitizorUtils;
 import com.gateway.requestrelay.service.RequestRelayService;
@@ -42,7 +42,6 @@ public class RequestRelayServiceImpl implements RequestRelayService {
     private static final List<String> ALLOWED_OUTBOUND_PROTOCOLS = List.of("http", "https");
 
     private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
 
     /**
      * Process a call.
@@ -100,9 +99,8 @@ public class RequestRelayServiceImpl implements RequestRelayService {
     @Override
     public ResponseEntity<String> makeCall(@SuppressWarnings("rawtypes") HttpEntity requestEntity, PartnerCallsFinalDTO callInfos, boolean preserveOriginalErrors) {
 
-        // get the CORRELATION_ID of the current thread
-        UserContext userContext = new ThreadLocalUserSession().get();
-        String correlationId = userContext.getContextId();
+        // get the correlationId of the current thread
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
 
         ResponseEntity<String> response = null;
 
@@ -154,13 +152,7 @@ public class RequestRelayServiceImpl implements RequestRelayService {
             if (isUtf16) {
                 responseBody = CustomParamUtils.convertUtf16ToUtf8(response);
             }
-            if (response.getStatusCode().isError()) {
-                UserContext userContext = new ThreadLocalUserSession().get();
-                String correlationId = userContext.getContextId();
-                response = new ResponseEntity<>(responseBody, response.getStatusCode());
-            } else {
-                response = new ResponseEntity<>(responseBody, HttpStatus.OK);
-            }
+            response = new ResponseEntity<>(responseBody, response.getStatusCode().isError() ? response.getStatusCode() : HttpStatus.OK);
         } else {
             response = null;
         }

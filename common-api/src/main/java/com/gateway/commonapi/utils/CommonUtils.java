@@ -123,7 +123,7 @@ public class CommonUtils {
 
     public static HttpEntity<String> setHeaders() {
         String correlationId = new ThreadLocalUserSession().get().getContextId();
-        org.springframework.http.HttpHeaders httpHeaders = new org.springframework.http.HttpHeaders();
+        HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
         StandardEnum outpuStandard = new ThreadLocalUserSession().get().getOutPutStandard();
         if (outpuStandard != null) {
@@ -131,7 +131,7 @@ public class CommonUtils {
         }
         String validCodes = new ThreadLocalUserSession().get().getValidCodes();
         if (validCodes != null && !validCodes.isEmpty()) {
-            httpHeaders.set(GlobalConstants.VALID_CODES, String.valueOf(validCodes));
+            httpHeaders.set(GlobalConstants.VALID_CODES, validCodes);
         }
         return new HttpEntity<>(httpHeaders);
     }

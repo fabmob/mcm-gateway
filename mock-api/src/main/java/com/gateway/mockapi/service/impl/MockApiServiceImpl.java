@@ -81,6 +81,9 @@ public class MockApiServiceImpl implements MockApiService {
         } else if (StringUtils.isEmpty(mockPath)) {
             log.warn(ERROR_MOCKS_NO_HEADER);
             throw new BadRequestException(ERROR_MOCKS_NO_HEADER);
+        } else if ( !mockPath.matches("^[0-9a-zA-Z].*")) {
+            log.warn(ERROR_MOCKS_INCORRECT_PATH);
+            throw new BadRequestException(ERROR_MOCKS_INCORRECT_PATH);
         }
 
         Path responsePath = null;

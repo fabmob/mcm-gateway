@@ -94,6 +94,36 @@ custom_adapter_helm_deploy_testing:
       . env/.env.testing
       helm_deploy $MODULE_NAME
 
+elasticsearch_apim_helm_deploy_testing:
+  stage: deploy-testing
+  extends:
+    - .helm-deploy-testing-job
+    - .no-needs
+    - .always
+    - .env_testing
+  when: always
+  variables:
+    MODULE_NAME: elasticsearch
+  script:
+    - |
+      . env/deployment.env
+      set -x
+      . env/.env.testing
+      helm_deploy $MODULE_NAME
+
+apm_and_kibana_helm_deploy_testing:
+  stage: deploy-testing
+  extends:
+    - .helm-deploy-testing-job
+  variables:
+    MODULE_NAME: apm
+  script:
+    - |
+      . env/deployment.env
+      get_release_name
+      . env/.env.testing
+      helm_deploy $MODULE_NAME
+
 gravitee_apim_helm_deploy_testing:
   stage: deploy-testing
   extends:
@@ -107,6 +137,8 @@ gravitee_apim_helm_deploy_testing:
   script:
     - |
       set -x
+      . env/deployment.env
+      get_release_name
       . env/.env.testing
       helm_deploy $MODULE_NAME
 

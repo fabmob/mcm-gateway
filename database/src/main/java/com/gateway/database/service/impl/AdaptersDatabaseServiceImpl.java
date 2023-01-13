@@ -37,8 +37,6 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
     @Autowired
     private ErrorMessages errorMessage;
 
-    private static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
-
     public AdaptersDatabaseServiceImpl(AdaptersRepository adaptersRepository) {
         this.adaptersRepository = adaptersRepository;
 
@@ -56,11 +54,13 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
      */
     @Override
     public Adapters addAdapter(Adapters adapter) {
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         Adapters postedAdapter;
         try {
             postedAdapter = adaptersRepository.save(adapter);
         } catch (Exception e) {
-            log.error(MessageFormat.format("CallId: {0}, {1}", CORRELATION_ID, e.getMessage()), e);
+            log.error(MessageFormat.format("CallId: {0}, {1}", correlationId, e.getMessage()), e);
             throw new InternalException(CommonUtils.placeholderFormat(DataMessageDict.DUPLICATE_VALUE_OF_ADAPTER_NAME, FIRST_PLACEHOLDER, adapter.getAdapterName()));
         }
         return postedAdapter;

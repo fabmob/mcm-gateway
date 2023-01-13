@@ -29,8 +29,6 @@ public class CustomParamUtils {
     private CustomParamUtils() {
     }
 
-    public static final String CORRELATION_ID = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
-
     /**
      * decode initValue from a paramMultiCalls and retrieve start date that can be NOW (current date) or Shifted with an Offset (current date + Offset)
      *
@@ -38,13 +36,15 @@ public class CustomParamUtils {
      * @return date in string format
      */
     public static String decodeInitValue(ParamsMultiCallsDTO recursiveParams) {
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(AdapterMessageDict.DATE_TIME_FORMAT);
         ZonedDateTime startDate = ZonedDateTime.now(ZoneOffset.UTC);
         if (recursiveParams.getTimezone() != null && !recursiveParams.getTimezone().isEmpty()) {
             try {
                 startDate = ZonedDateTime.now(ZoneId.of(recursiveParams.getTimezone()));
             } catch (Exception exception) {
-                log.error(MessageFormat.format(BASE_ERROR_MESSAGE, CORRELATION_ID, exception.getMessage()), exception);
+                log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, exception.getMessage()), exception);
                 startDate = ZonedDateTime.now(ZoneOffset.UTC);
             }
         }

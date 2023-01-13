@@ -93,21 +93,9 @@
     RES=`kubectl get namespaces | grep "^${KUBE_NAMESPACE} " -c` > /dev/null 2>&1 || FAILED=true
     echo "namespace ${KUBE_NAMESPACE} trouve $RES fois"
 
-    SHOUD_CREATE_NAMESPACE=0
     if [ "$RES" == "0" ]
     then
       echo "namespace ${KUBE_NAMESPACE} not existing yet"
-      SHOUD_CREATE_NAMESPACE=1;
-    else
-      if [ "$MODULE_NAME" == "gravitee-apim" ]
-      then
-        kubectl delete namespace ${KUBE_NAMESPACE}
-        SHOUD_CREATE_NAMESPACE=1;
-      fi
-    fi
-  
-    if [ $SHOUD_CREATE_NAMESPACE -eq 1 ]
-    then
       kubectl create namespace ${KUBE_NAMESPACE}
     fi
   
@@ -153,12 +141,36 @@
   
     ls -lR gateway*
   
-    # SUBSTITUTE VARIABLES FOR ALL MODULE_NAME-VALUES FILE
-    envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml > gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
   
-    echo "-----------gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml ----------"
-    cat gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
-    echo "-------------------------------------"
+    if [ -f gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml ]
+    then
+      # SUBSTITUTE VARIABLES FOR ALL MODULE_NAME-VALUES FILE
+      envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml > gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
+      echo "-----------gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml ----------"
+      cat gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
+      echo "-------------------------------------"
+    fi
+  
+    if [ $MODULE_NAME == "elasticsearch" ]
+    then
+      # ______________________________________________________________
+      # INSTALLER ELASTICSEARCH
+      # ______________________________________________________________
+      echo -e "${B_YELLOW} Installing ElasticSearch $RESET"
+  
+      # Adding helm for Bitnami pour install des charts
+      helm repo add bitnami https://charts.bitnami.com/bitnami
+  
+      # replace elasticsearch values env variables in values.yaml
+      envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml > gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml.tmp gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml
+      cat gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml
+      # upgrading elasticsearch 
+      helm upgrade --install elasticsearch bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/elasticsearch-values.yaml
+  
+      echo -e "$B_PINK list repo helm"
+      helm repo list
+      echo -e "____________________ end $RESET"
+    fi  
 
     echo -e "----------------- $B_PINK module_name ${MODULE_NAME} $RESET"
     if [ $MODULE_NAME == "gravitee-apim" ]
@@ -172,34 +184,8 @@
       # TODO : voir comment utiliser gravitee.yml téléchargé dans template
       helm repo add graviteeio https://helm.gravitee.io
 
-      echo -e "$B_RED list helm"
-      echo "helm list --all-namespaces"
-      helm list --all-namespaces
-      echo "end list namespaces $RESET"
-
       RES=`helm list --namespace ${KUBE_NAMESPACE} --output json`
       echo -e "${B_YELLOW} namespace '${KUBE_NAMESPACE}' trouve ${#RES[@]} fois $RESET"
-
-      # ______________________________________________________________
-      # INSTALLER ELASTICSEARCH
-      # ______________________________________________________________
-      echo -e "${B_YELLOW} Installing ElasticSearch $RESET"
-      # Ajout du helm repo pour Bitnami pour install des charts
-      helm repo add bitnami https://charts.bitnami.com/bitnami
-      helm upgrade --install graviteeio-apim-elasticsearch bitnami/elasticsearch --create-namespace --namespace ${KUBE_NAMESPACE} -f values/elastic-values.yaml --set imageTag=7.17.3
-      
-      # install kibana only in preview and testing
-      if [ `echo ${LANDSCAPE_ENV} | egrep "\<preview\>|\<testing\>" -c` -eq 1 ]
-      then
-        echo -e "${B_PINK} Installing Kibana $RESET"
-        #helm repo add elastic https://helm.elastic.co
-        echo "if you want to install kibana use this command"
-        echo "helm upgrade -install kibana-${LANDSCAPE_ENV} --create-namespace --namespace ${KUBE_NAMESPACE} elastic/kibana -f values/kibana-values.yaml --set imageTag=7.17.3 --set elasticsearchHosts=\"http://graviteeio-apim-elasticsearch.${KUBE_NAMESPACE}.svc.cluster.local:9200\""
-      fi
-  
-      echo -e "$B_PINK list repo helm"
-      helm repo list
-      echo -e "____________________ end $RESET"
 
       # ______________________________________________________________
       # INSTALLER les Charts GRAVITEE
@@ -213,16 +199,48 @@
       envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml > gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml.tmp gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
       echo "-----------gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml ----------"
       cat gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
-  
+      
+      helm repo update
+      echo "helm upgrade --install graviteeio-apim3x-${LANDSCAPE_ENV} graviteeio/apim3 --create-namespace --namespace ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/gravitee-apim-values.yaml"
       helm upgrade --install graviteeio-apim3x-${LANDSCAPE_ENV} graviteeio/apim3 --create-namespace --namespace ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/gravitee-apim-values.yaml
 
     else
       echo -e "----------------- $B_PINK not in condition : ${MODULE_NAME} $RESET"
     fi
 
-    echo -e "**************** ${B_YELLOW}end config helm"
+    echo -e "**************** ${B_YELLOW}end config helm ${RESET}"
   
-    if [ $MODULE_NAME != "gravitee-apim" ]
+  
+    if [ $MODULE_NAME == "apm" ]
+    then
+      # installing apm elastic and kibana
+      echo "installing apm elastic and kibana"
+      helm repo add bitnami https://charts.bitnami.com/bitnami
+      helm repo add elastic https://helm.elastic.co
+      helm repo update
+  
+      envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml > gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml.tmp gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml
+      envsubst "$(env | cut -d= -f1 | sed -e 's/^/$/')" < gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml > gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml.tmp && mv gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml.tmp gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml
+      echo "installing APM"
+      echo -e "${B_YELLOW}"
+      cat gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml 
+      echo -e "${RESET}"
+      helm upgrade --install apm-${LANDSCAPE_ENV} elastic/apm-server --set imageTag=7.17.3 --namespace elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH} -f gateway-${LANDSCAPE_ENV}/apm-elastic-values.yaml
+      
+      echo "installing Kibana"
+      echo -e "${B_YELLOW}"
+      cat gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml
+      echo -e "${RESET}"
+      helm upgrade --install kibana-${LANDSCAPE_ENV} bitnami/kibana  --set imageTag=7.17.3 --create-namespace --namespace elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH} -f gateway-${LANDSCAPE_ENV}/apm-kibana-values.yaml
+      
+      echo "setting policy got apm"
+      echo -e "${B_YELLOW}"
+      cat security/apm-policy.yaml
+      echo -e "${RESET}"
+      echo "kubectl apply -f security/apm-policy.yaml -n elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}"
+      kubectl apply -f security/apm-policy.yaml -n elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}
+  
+    elif [ $MODULE_NAME != "gravitee-apim" ]
     then
       echo "check which is current cluster"
       kubectl cluster-info
@@ -232,6 +250,7 @@
       # HELM UPGRADE NEW PACKAGE
       helm upgrade --install --version ${HELM_CHART_VERSION} gateway Gateway-Helm-chart-repo/gateway-${LANDSCAPE_ENV} -n ${KUBE_NAMESPACE} -f gateway-${LANDSCAPE_ENV}/${MODULE_NAME}-values.yaml
     fi
+  
 
     echo "Setting labels"
     if [ $MODULE_NAME == "gravitee-apim" ]
@@ -253,8 +272,12 @@
   
       kubectl apply -f security/internal-deny-all-policy.yaml -n ${KUBE_NAMESPACE}      
       kubectl apply -f security/apim-external-policy.yaml -n ${KUBE_NAMESPACE}
-      kubectl apply -f security/apim-elastic-policy.yaml -n ${KUBE_NAMESPACE}
       kubectl apply -f security/apim-internal-policy.yaml -n ${KUBE_NAMESPACE}
+    elif [ $MODULE_NAME == "elasticsearch" ]
+    then
+      echo "setting elasticsearch network policies rules" 
+      kubectl apply -f security/internal-deny-all-policy.yaml -n ${KUBE_NAMESPACE}      
+      kubectl apply -f security/elastic-policy.yaml -n ${KUBE_NAMESPACE}
     else
       kubectl label --overwrite namespace ${KUBE_NAMESPACE} com.mcm.maas.internal=true
   

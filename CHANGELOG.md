@@ -3,12 +3,20 @@
 Ce fichier liste tous les changements notables sur le projet [Gateway].
 Le versionning des release suit le [semantic versioning](http://semver.org).
 
+### 0.9.1
+
+- [x] Mise en place des Horizontal Pod Autoscaler
+
+### 0.8.2
+
+- [x] Mise en place des requests timeout au niveau de la gateway + variabilisation CI/CD
+- [x] Mise à jour des descriptions des endpoints API
+
 ### 0.7.2
 - [x] Mise à jour de sécurité sur la dépendance client postgres 
 - [x] Mise en place de KPI fonctionnelles pour la réservation à l'aide Grafana et Elasticsearch
 - [x] Mise en place de l'Application Performance Monitoring (APM) d'Elasticsearch sur les microservices de la gateway
 - [x] Correction des anomalies liées au cache et à la verbosité des erreurs
-
 
 ### 0.6.3
 - [x] Séparation des namespaces, job installation et nom du service elasticsearch de l'installation gravitee

@@ -42,6 +42,8 @@ public class GatewayApiPathDict {
 
     public static final String PARTNER_TYPE_FILTER = "?partnerType=";
 
+    public static final String PARTNER_METAS_PATH_PARAM = "/partner-metas?";
+
     public static final String CACHE_PARAM_ENDPOINT = "/cache-params";
 
 

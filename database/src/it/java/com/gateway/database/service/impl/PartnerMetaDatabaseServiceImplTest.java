@@ -32,6 +32,8 @@ import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 public class PartnerMetaDatabaseServiceImplTest {
+
+
     @TestConfiguration
     public static class PartnerMetaServiceImplTestContextConfiguration {
         @Bean
@@ -41,7 +43,7 @@ public class PartnerMetaDatabaseServiceImplTest {
     }
 
     @Autowired
-    private PartnerMetaDatabaseService PartnerMetaService;
+    private PartnerMetaDatabaseService partnerMetaService;
 
     @MockBean
     private PartnerMetaRepository partnerMetaRepository;
@@ -72,7 +74,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         // we mock the call off the database
         Mockito.when(partnerMetaRepository.findAll()).thenReturn(allPartner);
         // Test (when)
-        List<PartnerMeta> PartnerMetaList = PartnerMetaService.findAllPartnerMeta();
+        List<PartnerMeta> PartnerMetaList = partnerMetaService.findAllPartnerMeta();
         // Then
         assertEquals(1, PartnerMetaList.size());
         verify(partnerMetaRepository, times(1)).findAll();
@@ -102,7 +104,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         Mockito.when(priceListItemRepository.findAllDurationPriceListId(partner.getPriceList().getPriceListId())).thenReturn(durationList);
 
         // when I call the method that I want to test
-        PartnerMeta partnerToFind = PartnerMetaService.findPartnerMetaById(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888"));
+        PartnerMeta partnerToFind = partnerMetaService.findPartnerMetaById(UUID.fromString("f457579d-02f8-4479-b97b-ffb678e3f888"));
 
         // then
         assertEquals(partnerToFind, partner);
@@ -126,8 +128,16 @@ public class PartnerMetaDatabaseServiceImplTest {
         Mockito.when(priceListItemRepository.saveAll(durationList)).thenReturn(durationList);
         Mockito.when(priceListItemRepository.saveAll(distanceList)).thenReturn(distanceList);
         //then
-        PartnerMeta PartnerMetaCreated = PartnerMetaService.createPartnerMeta(PartnerMeta);
+        PartnerMeta PartnerMetaCreated = partnerMetaService.createPartnerMeta(PartnerMeta);
         assertNotEquals(PartnerMeta, PartnerMetaCreated);
+    }
+
+    @Test
+    public void findAllByExample() {
+        PartnerMeta partnerMetaExample = new PartnerMeta();
+        partnerMetaExample.setPartnerType("MSP");
+        List<PartnerMeta> partnerMetaList = new ArrayList<>();
+        assertEquals(partnerMetaList, partnerMetaService.findAllByExample(partnerMetaExample));
     }
 
     @Test
@@ -158,7 +168,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         Mockito.when(partnerMetaRepository.findById(partnerId)).thenReturn(Optional.of(PartnerMeta));
         doNothing().when(priceListRepository).removePricelistById(PartnerMeta.getPriceList().getPriceListId());
         // When I call the method that I want to test
-        PartnerMetaService.removePartnerMeta(partnerId);
+        partnerMetaService.removePartnerMeta(partnerId);
         // Then verify that it's invoked once (for testing void methods)
         verify(partnerMetaRepository, times(1)).deleteById(partnerId);
     }
@@ -184,7 +194,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         Mockito.when(partnerMetaRepository.findById(partnerId)).thenReturn(Optional.of(PartnerMeta));
         Mockito.when(partnerMetaRepository.save(PartnerMeta)).thenReturn(PartnerMeta);
         // When
-        PartnerMetaService.updatePartnerMeta(partnerId, PartnerMeta);
+        partnerMetaService.updatePartnerMeta(partnerId, PartnerMeta);
         //Then
         verify(partnerMetaRepository, times(2)).save(PartnerMeta);
     }
@@ -210,7 +220,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         doNothing().when(priceListItemRepository).removePricelistId(duration.getPriceListItemId());
 
         // When
-        PartnerMetaService.updateDurationItems(partnerId, durationsUpdate, durationsList);
+        partnerMetaService.updateDurationItems(partnerId, durationsUpdate, durationsList);
         //Then
         verify(priceListItemRepository, times(1)).save(durationUpdate);
     }
@@ -234,7 +244,7 @@ public class PartnerMetaDatabaseServiceImplTest {
         Mockito.when(priceListItemRepository.save(distanceUpdate)).thenReturn(distanceUpdate);
         doNothing().when(priceListItemRepository).removePricelistId(distance.getPriceListItemId());
         // When
-        PartnerMetaService.updateDistanceItems(partnerId, distancesUpdate, distancesList);
+        partnerMetaService.updateDistanceItems(partnerId, distancesUpdate, distancesList);
         //Then
         verify(priceListItemRepository, times(1)).save(distanceUpdate);
     }
@@ -297,10 +307,9 @@ public class PartnerMetaDatabaseServiceImplTest {
         when(partnerMetaRepository.save(partner)).thenReturn(partner);
 
         // When
-        PartnerMeta mspResult = PartnerMetaService.updatePartnerMeta(updates, partnerId);
+        PartnerMeta mspResult = partnerMetaService.updatePartnerMeta(updates, partnerId);
         // Then
         assertNotEquals(partner, mspResult);
     }
-
 
 }

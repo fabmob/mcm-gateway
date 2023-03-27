@@ -16,6 +16,7 @@ import com.gateway.commonapi.dto.data.*;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
@@ -31,7 +32,6 @@ import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.client.HttpClientErrorException;
@@ -61,11 +61,8 @@ public class IVServiceImpl implements IVService {
     @Value("${gateway.service.dataapi.baseUrl}")
     private String dataApiUri;
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
     @Autowired
     private PartnerService partnerService;
-
 
     private PriceListDTOMapper priceMapper = Mappers.getMapper(PriceListDTOMapper.class);
 
@@ -96,6 +93,8 @@ public class IVServiceImpl implements IVService {
     @Autowired
     ValidityUtils validityUtils;
 
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
 
     /**
      * check if the partner necessarily expects the latitude , longitude and radius parameters based on the data in the params table
@@ -367,7 +366,7 @@ public class IVServiceImpl implements IVService {
     private List<PartnerCallsDTO> getCalls(UUID actionId) {
         String initialOutputStandard = CallUtils.getOutputStandardFromCallThread();
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         
         List<PartnerCallsDTO> partnerBusinessCalls;
         String urlGetCallsByActionId = dataApiUri + CommonUtils.placeholderFormat(GET_CALLS_PATH + GET_BY_ACTIONS_ID_PATH, ACTION_ID_PARAM, String.valueOf(actionId));
@@ -401,7 +400,7 @@ public class IVServiceImpl implements IVService {
     private PartnerStandardDTO getStandard(UUID partnerId, String actionName) {
         String initialOutputStandard = CallUtils.getOutputStandardFromCallThread();
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         PartnerStandardDTO partnerStandard;
         String urlGetStandard = dataApiUri + ("/partner-standards?partnerId=" + partnerId + "&partnerActionsName=" + actionName);
@@ -527,7 +526,7 @@ public class IVServiceImpl implements IVService {
     @Override
     public GlobalView getGlobalView() {
         String outputStandard = CallUtils.getOutputStandardFromCallThread();
-        List<PartnerMeta> partnerMetas = partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP);
+        List<PartnerMeta> partnerMetas = partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null);
 
         GlobalView globalView = new GlobalView();
         List<UUID> partnerIds = new ArrayList<>();
@@ -660,7 +659,7 @@ public class IVServiceImpl implements IVService {
                 }
             }
         } else {
-            List<PartnerMeta> allMsps = partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP);
+            List<PartnerMeta> allMsps = partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null);
             for (PartnerMeta msp : allMsps) {
                 mspIds.add(msp.getPartnerId());
             }
@@ -862,7 +861,7 @@ public class IVServiceImpl implements IVService {
      * @return
      */
     private Object getRooting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String partnerMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;
@@ -926,7 +925,7 @@ public class IVServiceImpl implements IVService {
      * @param partnerId
      */
     private void exceptionHandler(Exception e, String serviceCalledMsg, UUID partnerId) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         if (e.getMessage() != null) {
             log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);
             throw new InternalException(e.getMessage());
@@ -1027,6 +1026,7 @@ public class IVServiceImpl implements IVService {
     public List<DriverJourney> getDriverJourneys(UUID partnerId, Float departureLat, Float departureLng,
                                                  Float arrivalLat, Float arrivalLng, Integer departureDate, Integer timeDelta,
                                                  Float departureRadius, Float arrivalRadius, Integer count) {
+
 
         validityUtils.checkPartnerId(partnerId);
         this.checkIvCarpoolingParams(departureLat, arrivalLat, departureLng, arrivalLng, departureRadius, arrivalRadius, count, null, null, null, null);

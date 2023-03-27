@@ -113,6 +113,28 @@ class PartnerMetaApiControllerTest extends DataApiITCase {
                 JsonResponseTypeEnum.JSON_ARRAY, "Test to get list of partner-metas", true, false);
     }
 
+    @Test
+    @SqlGroup({
+            @Sql(scripts = "classpath:cleanup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD),
+            @Sql(scripts = "classpath:jdd.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+    })
+    void testGetPartnerMetasFilters() throws Exception {
+        testHttpRequestWithExpectedResult(PARTNER_METAS_BASE_PATH + "?type=CARPOOLING", HttpMethod.GET,
+                HttpStatus.OK, null, PARTNER_METAS_EXPECTED_GET_PARTNER_METAS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test to get list of partner-metas", true, false);
+        //verify(partnerMetaService, times(1)).getPartnerMetasByType(any(), any());
+        testHttpRequestWithExpectedResult(PARTNER_METAS_BASE_PATH + "?partnerType=MSP", HttpMethod.GET,
+                HttpStatus.OK, null, PARTNER_METAS_EXPECTED_GET_PARTNER_METAS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test to get list of partner-metas", true, false);
+        testHttpRequestWithExpectedResult(PARTNER_METAS_BASE_PATH + "?name=Dott", HttpMethod.GET,
+                HttpStatus.OK, null, PARTNER_METAS_EXPECTED_GET_PARTNER_METAS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test to get list of partner-metas", true, false);
+        testHttpRequestWithExpectedResult(PARTNER_METAS_BASE_PATH + "?operator=Dott", HttpMethod.GET,
+                HttpStatus.OK, null, PARTNER_METAS_EXPECTED_GET_PARTNER_METAS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test to get list of partner-metas", true, false);
+
+    }
+
     /**
      * test GET on PartnerMetas by Id
      *

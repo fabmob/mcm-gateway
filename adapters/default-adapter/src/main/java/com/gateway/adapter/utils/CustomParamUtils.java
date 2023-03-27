@@ -36,7 +36,7 @@ public class CustomParamUtils {
      * @return date in string format
      */
     public static String decodeInitValue(ParamsMultiCallsDTO recursiveParams) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(AdapterMessageDict.DATE_TIME_FORMAT);
         ZonedDateTime startDate = ZonedDateTime.now(ZoneOffset.UTC);

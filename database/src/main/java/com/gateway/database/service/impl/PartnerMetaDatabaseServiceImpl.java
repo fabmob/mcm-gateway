@@ -15,12 +15,15 @@ import com.gateway.database.service.PriceListDatabaseService;
 import com.gateway.database.util.enums.Partner;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.*;
 
+import static com.gateway.commonapi.constants.AttributeDict.*;
 import static com.gateway.database.util.constant.DataMessageDict.FIRST_PLACEHOLDER;
 import static com.gateway.database.util.constant.DataMessageDict.PARTNER_META_WITH_ID_IS_NOT_FOUND;
 
@@ -44,8 +47,15 @@ public class PartnerMetaDatabaseServiceImpl implements PartnerMetaDatabaseServic
     private ErrorMessages errorMessage;
 
     @Override
-    public List<PartnerMeta> findAllByPartnerType(String partnerType) {
-        return partnerMetaRepository.findByPartnerType(partnerType);
+    public List<PartnerMeta> findAllByExample(PartnerMeta partnerMetaExample) {
+        ExampleMatcher caseInsensitiveExampleMatcher = ExampleMatcher.matchingAll()
+                .withMatcher(PARTNER_TYPE_ATTRIBUTE, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+                .withMatcher(TYPE_ATTRIBUTE, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+                .withMatcher(NAME_ATTRIBUTE, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase())
+                .withMatcher(OPERATOR_ATTRIBUTE, ExampleMatcher.GenericPropertyMatchers.contains().ignoreCase());
+        Example<PartnerMeta> example = Example.of(partnerMetaExample, caseInsensitiveExampleMatcher);
+
+        return (List<PartnerMeta>) partnerMetaRepository.findAll(example);
     }
 
     @Override

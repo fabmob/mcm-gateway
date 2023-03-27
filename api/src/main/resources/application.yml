@@ -74,3 +74,5 @@ gateway:
       baseUrl: "http://${DATA_API_HOST:localhost}:8081${DATA_API_CONTEXT_PATH:/dataapi/v1}"
     routingapi:
       baseurl: "http://${ROUTING_API_HOST:localhost}:8082/v1/route"
+
+

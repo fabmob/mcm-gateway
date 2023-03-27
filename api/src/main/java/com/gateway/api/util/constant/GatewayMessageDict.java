@@ -30,6 +30,7 @@ public class GatewayMessageDict {
     public static final String AROUND_ME_KEY_NAME = "aroundMe";
     public static final String GLOBAL_VIEW_KEY_NAME = "globalView";
     public static final String BOOKING_EVENT_KEY_NAME = "carpoolingBookingEventsPost";
+    public static final String PARTNER_META_BY_EXAMPLE = "partnerMetaByExample";
 
 
     //log errors when link cannot be generated when msp does not handle a feature

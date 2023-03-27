@@ -1,0 +1,4685 @@
+{
+	"info": {
+		"_postman_id": "a332485c-b9d8-44fc-a324-0ba846c1e141",
+		"name": "GTW JDD - master V2",
+		"description": "La collection \"JDD master v2\" fournit un jeux de données à insérer en base. Il crée et configure en base 4 MSPs aux standards variés (GBFS, Le.Taxi, Covoiturage et Le.Taxi avec action d'authentification). Ces MSPs fournissent différentes actions accessibles depuis l'ensemble des endpoints exposés par la Gateway.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "22328767"
+	},
+	"item": [
+		{
+			"name": "VLS",
+			"item": [
+				{
+					"name": "Init VLS",
+					"item": [
+						{
+							"name": "MSP VLS",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_partnerId\", jsonData.partnerId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n \"partnerType\": \"MSP\",\r\n  \"hasVehicle\": true,\r\n  \"hasStation\": true,\r\n  \"hasStationStatus\": true,\r\n  \"hasOperatingZone\": true,\r\n  \"hasNoParkingZone\": true,\r\n  \"hasPrefParkingZone\": true,\r\n  \"hasSpeedLimitZone\": true,\r\n  \"hasParking\": true,\r\n  \"hasHold\": true,\r\n  \"hasVehicleTypes\": true,\r\n  \"hasPricingPlan\": true,\r\n  \"hasPing\": true,\r\n  \"hasCarpoolingBookingPost\": false,\r\n  \"hasCarpoolingBookingPatch\": false,\r\n  \"hasCarpoolingBookingGet\": false,\r\n  \"hasCarpoolingDriverJourney\": false,\r\n  \"hasCarpoolingPassengerJourney\": false,\r\n  \"hasCarpoolingDriverTrip\": false,\r\n  \"hasCarpoolingPassengerTrip\": false,\r\n  \"hasCarpoolingMessages\": false,\r\n  \"hasCarpoolingStatus\": false,\r\n  \"hasAroundMe\": true,\r\n  \"urlWebview\": true,\r\n  \"isEnabled\": true,\r\n  \"name\": \"GBFS\",\r\n  \"operator\": \"mockable.io\",\r\n  \"type\": \"FREE_FLOATING\",\r\n  \"url\": \"https://api.gouv.fr/documentation/gbfs\",\r\n  \"logoUrl\": null,\r\n  \"logoFormat\": null,\r\n  \"primaryColor\": \"#0054BB\",\r\n  \"secondaryColor\": \"#0054BB\",\r\n  \"priceList\": null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-metas",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-metas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create adapter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"adapterId\", jsonData.adapterId);\r",
+											"\r",
+											"pm.test(\"Status code is 201 OR 500 if adapter already exists\", function () {\r",
+											"    console.log(pm.response.json().description);\r",
+											"    if (pm.response.code==500) {\r",
+											"        pm.expect(pm.response.json().description).to.include(\"duplicate value\");\r",
+											"    } else {\r",
+											"        pm.response.to.have.status(201);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"adapterName\": \"default-adapter\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Init JDD : adapter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"for(var i=0; i< jsonData.length; i++) {\r",
+											"    console.log(jsonData[i].adapterName);\r",
+											"    console.log(jsonData[i].adapterId);\r",
+											"\r",
+											"    if(jsonData[i].adapterName === \"default-adapter\") {\r",
+											"        postman.setEnvironmentVariable(\"adapterId\", jsonData[i].adapterId);\r",
+											"        console.log(\"adapter found \"+jsonData[i].adapterId);\r",
+											"    }\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Le dossier init VLS crée un partenaire MSP du standard GBFS. Ainsi qu'un adaptateur indiquant quel adapteur doit être utilisé dans la Gateway, ici : 'default-adapter'.  \nSi jamais cet adaptateur est déjà créé, alors on le récupère via le GET. Ces données sont utilisées pour toutes les actions(dossiers) suivantes."
+				},
+				{
+					"name": "MSP_ZONE_SEARCH",
+					"item": [
+						{
+							"name": "action MSP_ZONE_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_MSP_ZONE_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_zone\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"MSP_ZONE_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"geofencing_zones\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "data mapper MSP_ZONE_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"internalField\": \"type\",\r\n        \"externalField\": \"type\",\r\n        \"isArray\": 0,\r\n        \"format\": null,\r\n        \"timezone\": null,\r\n        \"containedValue\": null,\r\n        \"defaultValue\": null,\r\n        \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n    },{\r\n    \"internalField\": \"zones.type\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"type\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.geometry\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"geometry\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.name\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.name\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.rules.vehicleTypeId\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.rules.vehicle_type_id\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.rules.isRideAllowed\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.rules.ride_allowed\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.rules.isRideThroughAllowed\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.rules.ride_through_allowed\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.rules.maximumSpeedKph\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.rules.maximum_speed_kph\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.rules.isStationParking\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"properties.rules.station_parking\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"zones.validityStartDate\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": \"FORMAT_DATE(\\\"timestamp\\\")\",\r\n    \"timezone\": \"Europe/Paris\",\r\n    \"containedValue\": \"properties.start\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  },\r\n  {\r\n    \"internalField\": \"zones.validityEndDate\",\r\n    \"externalField\": \"features\",\r\n    \"isArray\": 1,\r\n    \"format\": \"FORMAT_DATE(\\\"timestamp\\\")\",\r\n    \"timezone\": \"Europe/Paris\",\r\n    \"containedValue\": \"properties.end\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_MSP_ZONE_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9071502.mockable.io/area\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 0,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{181_action_MSP_ZONE_SEARCH}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_MSP_ZONE_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_zone}}\",\r\n  \"softTTL\": 86400,\r\n  \"hardTTL\": 604800,\r\n  \"refreshCacheDelay\": 86400\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action MSP_ZONE_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /area/{areaType} pour le MSP GBFS créé."
+				},
+				{
+					"name": "STATION_SEARCH",
+					"item": [
+						{
+							"name": "action STATION_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_STATION_SEARCH\", jsonData.partnerActionId);\r",
+											"pm.environment.set(\"actionName_station\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"STATION_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"stations\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "data mapper STATION_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"internalField\": \"stationId\",\r\n        \"externalField\": \"station_id\",\r\n        \"isArray\": null,\r\n        \"format\": null,\r\n        \"timezone\": null,\r\n        \"containedValue\": null,\r\n        \"defaultValue\": null,\r\n        \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n    },{\r\n    \"internalField\": \"name\",\r\n    \"externalField\": \"name\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"coordinates.lat\",\r\n    \"externalField\": \"lat\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"coordinates.lng\",\r\n    \"externalField\": \"lon\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"assetsDocksAvailable.vehicleTypeIds\",\r\n    \"externalField\": \"vehicle_docks_available\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle_type_ids\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isValet\",\r\n    \"externalField\": \"is_valet_station\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isVirtualStation\",\r\n    \"externalField\": \"is_virtual_station\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"capacity\",\r\n    \"externalField\": \"capacity\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"stationArea.type\",\r\n    \"externalField\": \"station_area.type\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"stationArea.coordinates\",\r\n    \"externalField\": \"station_area.coordinates\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  }, {\r\n    \"internalField\": null,\r\n    \"externalField\": \"parking_type\",\r\n    \"isArray\": 0,\r\n    \"format\": \"CONVERT_STRING_TO_BOOLEAN(\\\"parking_lot\\\"=\\\"isParkingLot\\\",\\\"street_parking\\\"=\\\"isStreetParking\\\",\\\"underground_parking\\\"=\\\"isUnderground\\\",\\\"sidewalk_parking\\\"=\\\"isSidewalkParking\\\")\",\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"vehicleTypeCapacity\",\r\n    \"externalField\": \"vehicle_type_capacity\",\r\n    \"isArray\": 0,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  },\r\n  {\r\n    \"internalField\": \"vehicleCapacity\",\r\n    \"externalField\": \"vehicle_capacity\",\r\n    \"isArray\": 0,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_STATION_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9071502.mockable.io/stationVLS\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 0,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{181_action_STATION_SEARCH}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n        {\r\n          \"key\": \"lat\",\r\n          \"sensitive\": 0,\r\n          \"value\": \"null\",\r\n          \"keyMapper\": \"lat\",\r\n          \"precision\": null,\r\n          \"timezone\": null\r\n        },\r\n        {\r\n          \"key\": \"lon\",\r\n          \"sensitive\": 0,\r\n          \"value\": \"null\",\r\n          \"keyMapper\": \"lon\",\r\n          \"precision\": null,\r\n          \"timezone\": null\r\n        }\r\n      ],\r\n      \"paramsMultiCalls\": []\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_STATION_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_station}}\",\r\n  \"softTTL\": 86400,\r\n  \"hardTTL\": 604800,\r\n  \"refreshCacheDelay\": 86400\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action STATION_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /stations pour le MSP GBFS créé."
+				},
+				{
+					"name": "STATION_STATUS_SEARCH",
+					"item": [
+						{
+							"name": "action STATION_STATUS_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_STATION_STATUS_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_station_status\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"STATION_STATUS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"stations\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "data mapper STATION_STATUS_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"internalField\": \"stationId\",\r\n        \"externalField\": \"station_id\",\r\n        \"isArray\": null,\r\n        \"format\": null,\r\n        \"timezone\": null,\r\n        \"containedValue\": null,\r\n        \"defaultValue\": null,\r\n        \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n    },{\r\n    \"internalField\": \"assetsDocksAvailable.vehicleTypeIds\",\r\n    \"externalField\": \"vehicle_docks_available\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle_type_ids\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"assetsDocksAvailable.count\",\r\n    \"externalField\": \"vehicle_docks_available\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"count\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"numAssetsAvailableType.count\",\r\n    \"externalField\": \"vehicle_types_available\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"count\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"numAssetsAvailableType.vehicleTypeId\",\r\n    \"externalField\": \"vehicle_types_available\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle_type_id\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isInstalled\",\r\n    \"externalField\": \"is_installed\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isReturning\",\r\n    \"externalField\": \"is_returning\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isRenting\",\r\n    \"externalField\": \"is_renting\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"lastReported\",\r\n    \"externalField\": \"last_reported\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"numDocksAvailable\",\r\n    \"externalField\": \"num_docks_available\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"numAssetsAvailable\",\r\n    \"externalField\": \"num_bikes_available\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_STATION_STATUS_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9071502.mockable.io/stationStatusVLS\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 0,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{181_action_STATION_STATUS_SEARCH}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n        {\r\n          \"key\": \"station_id\",\r\n          \"sensitive\": 0,\r\n          \"value\": \"null\",\r\n          \"keyMapper\": \"stationId\",\r\n          \"precision\": null,\r\n          \"timezone\": null\r\n        }\r\n      ],\r\n      \"paramsMultiCalls\": []\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_STATION_STATUS_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_station_status}}\",\r\n  \"softTTL\": 300,\r\n  \"hardTTL\": 3600,\r\n  \"refreshCacheDelay\": 300\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action STATION_STATUS_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /station-status pour le MSP GBFS créé."
+				},
+				{
+					"name": "ASSET_SEARCH",
+					"item": [
+						{
+							"name": "action ASSET_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_ASSET_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_asset\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"ASSET_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"bikes\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "data mapper ASSET_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n        \"internalField\": \"assetId\",\r\n        \"externalField\": \"bike_id\",\r\n        \"isArray\": null,\r\n        \"format\": null,\r\n        \"timezone\": null,\r\n        \"containedValue\": null,\r\n        \"defaultValue\": null,\r\n        \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n    },{\r\n    \"internalField\": \"lastReported\",\r\n    \"externalField\": \"last_reported\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.location.coordinates.lat\",\r\n    \"externalField\": \"lat\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.location.coordinates.lng\",\r\n    \"externalField\": \"lon\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isReserved\",\r\n    \"externalField\": \"is_reserved\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"isDisabled\",\r\n    \"externalField\": \"is_disabled\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"assetType\",\r\n    \"externalField\": \"vehicle_type_id\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.currentRangeMeters\",\r\n    \"externalField\": \"current_range_meters\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.location.stationId\",\r\n    \"externalField\": \"station_id\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"homeStationId\",\r\n    \"externalField\": \"home_station\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"planId\",\r\n    \"externalField\": \"pricing_plan_id\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.infantSeat\",\r\n    \"externalField\": \"vehicle_equipment\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"child_seat_a\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.winterTires\",\r\n    \"externalField\": \"vehicle_equipment\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"winter_tires\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"overriddenProperties.snowChains\",\r\n    \"externalField\": \"vehicle_equipment\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"snow_chains\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  }, {\r\n    \"internalField\": \"overriddenProperties.stateOfCharge\",\r\n    \"externalField\": \"current_fuel_percent\",\r\n    \"isArray\": null,\r\n    \"format\": \"NUMERIC_OPERATOR(*,100)\",\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_ASSET_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"partnerCallId\": \"bfc126d5-d29c-4957-b1b0-d89bc58b1aae\",\r\n      \"url\": \"http://demo9071502.mockable.io/vehicleStatus\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 0,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{181_action_ASSET_SEARCH}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_ASSET_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_asset}}\",\r\n  \"softTTL\": 300,\r\n  \"hardTTL\": 3600,\r\n  \"refreshCacheDelay\": 300\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action ASSETS_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /assets pour le MSP GBFS créé."
+				},
+				{
+					"name": "VEHICLE_TYPES_SEARCH Copy",
+					"item": [
+						{
+							"name": "action VEHICLE_TYPES_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_VEHICLE_TYPES_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_vehicle_type\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"VEHICLE_TYPES_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"vehicle_types\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "data mapper VEHICLE_TYPES_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n    {\r\n    \"internalField\": \"vehicleTypeId\",\r\n    \"externalField\": \"vehicle_type_id\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\"\r\n    },{\r\n    \"internalField\": \"formFactor\",\r\n    \"externalField\": \"form_factor\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"propulsionType\",\r\n    \"externalField\": \"propulsion_type\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"name\",\r\n    \"externalField\": \"name\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\"\r\n  },{\r\n    \"internalField\": \"maxRangeMeters\",\r\n    \"externalField\": \"max_range_meters\",\r\n    \"isArray\": null,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_VEHICLE_TYPES_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9071502.mockable.io/vehicleTypes\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 0,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_VEHICLE_TYPES_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam Copy 2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_vehicle_type}}\",\r\n  \"softTTL\": 86400,\r\n  \"hardTTL\": 604800,\r\n  \"refreshCacheDelay\": 86400\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action VEHICLE_TYPES_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /vehicle-types pour le MSP GBFS créé."
+				},
+				{
+					"name": "AVAILABLE_ASSET_SEARCH Copy",
+					"item": [
+						{
+							"name": "action AVAILABLE_ASSET_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_AVAILABLE_ASSET_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_available_asset\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"AVAILABLE_ASSET_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_AVAILABLE_ASSET_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_available_asset}}\",\r\n  \"softTTL\": 300,\r\n  \"hardTTL\": 3600,\r\n  \"refreshCacheDelay\": 300\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Add MspCall Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_call_STATION_STATUS_SEARCH\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"https://mock-api-develop.preview-gw.moncomptemobilite.fr/v1/mock-api/mock\",\r\n    \"method\": \"GET\",\r\n    \"isMocked\": 0,\r\n    \"nbCalls\": 1,\r\n    \"executionOrder\": 1,\r\n    \"partnerActionId\": \"{{181_action_AVAILABLE_ASSET_SEARCH}}\",\r\n    \"body\": null,\r\n    \"headers\": [\r\n    {\r\n      \"key\": \"mock-path\",\r\n      \"sensitive\": 0,\r\n      \"value\": \"available-assets/200/availableAssets.json\"\r\n      \r\n    }\r\n  ],\r\n    \"params\": [\r\n      {\r\n        \"key\": \"lat\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"lat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },{\r\n        \"key\": \"rad\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"lon\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"lon\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"lon\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action AVAILABLE_ASSETS_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /available-assets pour le MSP GBFS créé."
+				},
+				{
+					"name": "PING",
+					"item": [
+						{
+							"name": "PartnerAction (PING)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"action_ping\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"PING\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Adapter (default)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"adapterId\", jsonData.adapterId);\r",
+											"\r",
+											"pm.test(\"Status code is 201 OR 500 if adapter already exists\", function () {\r",
+											"    console.log(pm.response.json().description);\r",
+											"    if (pm.response.code==500) {\r",
+											"        pm.expect(pm.response.json().description).to.include(\"duplicate value\");\r",
+											"    } else {\r",
+											"        pm.response.to.have.status(201);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"adapterName\": \"default-adapter\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Adapter (if default already exists)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"for(var i=0; i< jsonData.length; i++) {\r",
+											"    console.log(jsonData[i].adapterName);\r",
+											"    console.log(jsonData[i].adapterId);\r",
+											"\r",
+											"    if(jsonData[i].adapterName === \"default-adapter\") {\r",
+											"        postman.setEnvironmentVariable(\"adapterId\", jsonData[i].adapterId);\r",
+											"        console.log(\"adapter found \"+jsonData[i].adapterId);\r",
+											"    }\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PartnerCall (Mock)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerCallId\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/ping\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{action_ping}}\",\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Standard (TOMP)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerStandardId\", jsonData.partnerStandardId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"tomp-1.3.0\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"v1\",\r\n      \"versionDataMapping\": \"v1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{action_ping}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action PING et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /ping (interroge un msp de type TOMP et retourne son statut) pour le MSP GBFS créé."
+				},
+				{
+					"name": "PRICING_PLAN_SEARCH Copy",
+					"item": [
+						{
+							"name": "action PRICING_PLAN_SEARCH",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"181_action_PRICING_PLAN_SEARCH\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.environment.set(\"actionName_pricing_plan\", jsonData.action);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"GBFS\",\r\n  \"action\": \"PRICING_PLAN_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"vehicle_types\",\r\n    \"value\": null\r\n  }\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add call pricing plan",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"https://mock-api-develop.preview-gw.moncomptemobilite.fr/v1/mock-api/mock\",\r\n    \"method\": \"GET\",\r\n    \"isMocked\": 0,\r\n    \"nbCalls\": 1,\r\n    \"executionOrder\": 1,\r\n    \"partnerActionId\": \"{{181_action_PRICING_PLAN_SEARCH}}\",\r\n    \"body\": null,\r\n    \"headers\": [\r\n    {\r\n      \"key\": \"mock-path\",\r\n      \"sensitive\": 0,\r\n      \"value\": \"system-pricing-plan/200/pricing_plan.json\"\r\n      \r\n    }\r\n  ],\r\n    \"params\": [],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"GBFS\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{181_partnerId}}\",\r\n      \"partnerActionsId\": \"{{181_action_PRICING_PLAN_SEARCH}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add cacheParam",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerId\": \"{{181_partnerId}}\" ,\r\n  \"actionType\": \"{{actionName_pricing_plan}}\",\r\n  \"softTTL\": 86400,\r\n  \"hardTTL\": 604800,\r\n  \"refreshCacheDelay\": 86400\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/cache-params",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"cache-params"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action PRICING_PLAN_SEARCH et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint GET /system-pricing-plan pour le MSP GBFS créé."
+				}
+			],
+			"description": "Le dossier VLS insère en base un MSP du standard GBFS et sa configuration complète pour supporter les actions associées à tous les endpoints TOMP.\n\nLe sous dossier Init VLS initialise le MSP, puis chacun des autres dossiers suivants (MSP_ZONE_SEARCH, STATION_SEARCH ...) permet l'insertion du datamapping complet d'un service pour ce MSP (action, datamapper, call, standard, cacheParam)."
+		},
+		{
+			"name": "Le.Taxi",
+			"item": [
+				{
+					"name": "Init Le.Taxi",
+					"item": [
+						{
+							"name": "MSP Le.Taxi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"letaxi.partnerId\", jsonData.partnerId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerType\": \"MSP\",\r\n  \"hasVehicle\": false,\r\n  \"hasStation\": false,\r\n  \"hasStationStatus\": false,\r\n  \"hasOperatingZone\": false,\r\n  \"hasNoParkingZone\": false,\r\n  \"hasPrefParkingZone\": false,\r\n  \"hasSpeedLimitZone\": false,\r\n  \"hasParking\": false,\r\n  \"hasHold\": false,\r\n  \"hasVehicleTypes\": false,\r\n  \"hasPricingPlan\": false,\r\n  \"hasPing\": false,\r\n  \"hasCarpoolingBookingPost\": false,\r\n  \"hasCarpoolingBookingPatch\": false,\r\n  \"hasCarpoolingBookingGet\": false,\r\n  \"hasCarpoolingDriverJourney\": false,\r\n  \"hasCarpoolingPassengerJourney\": false,\r\n  \"hasCarpoolingDriverTrip\": false,\r\n  \"hasCarpoolingPassengerTrip\": false,\r\n  \"hasCarpoolingMessages\": false,\r\n  \"hasCarpoolingStatus\": false,\r\n  \"hasAroundMe\": true,\r\n  \"urlWebview\": true,\r\n  \"name\": \"le.taxi\",\r\n  \"operator\": \"mockable.io\",\r\n  \"type\": \"TAXI_VTC\",\r\n  \"url\": \"https://api.gouv.fr/documentation/le-taxi\",\r\n  \"logoUrl\": null,\r\n  \"logoFormat\": null,\r\n  \"primaryColor\": \"#0054BB\",\r\n  \"secondaryColor\": \"#0054BB\",\r\n  \"priceList\": null,\r\n  \"isEnabled\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-metas",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-metas"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Le dossier init Le.Taxi crée un partenaire MSP du standard Le.Taxi. Ainsi qu'un adaptateur indiquant quel adapteur doit être utilisé dans la Gateway, ici : 'default-adapter'.  \nSi jamais cet adaptateur est déjà créé, alors on le récupère via le GET. Ces données sont utilisées pour toutes les actions(dossiers) suivantes."
+				},
+				{
+					"name": "AROUND_ME",
+					"item": [
+						{
+							"name": "Ajout Action AROUND_ME_SEARCH le.taxi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"letaxi.partnerActionId\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"le.taxi\",\r\n    \"action\": \"AROUND_ME_SEARCH\",\r\n    \"isPagination\": 0,\r\n    \"selector\": null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper position.lon Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.coordinates.lng\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"position.lon\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper position.lat Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.coordinates.lat\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"position.lat\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper operator Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.operator\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"operator\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper crowfly_distance Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.crowflyDistance\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"crowfly_distance\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper assetId",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.assetId\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"id\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.constructor Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.brand\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.constructor\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.engine Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.fuel\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.engine\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper assetType",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.assetType\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": \"TAXI\",\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.model Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.model\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.model\",\r\n    \"defaultValue\": null,\r\n     \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.nb_seats Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.persons\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.nb_seats\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.characteristics",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.other\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": \"CONVERT_LIST_TO_STRING(\\\", \\\")\",\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.characteristics\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout Call AssetSearch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerCallId\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"http://demo7362099.mockable.io/le-taxi-mock/taxis\",\r\n    \"method\": \"GET\",\r\n    \"isMocked\": 0,\r\n    \"nbCalls\": 1,\r\n    \"executionOrder\": 1,\r\n    \"partnerActionId\": \"{{letaxi.partnerActionId}}\",\r\n    \"body\": null,\r\n    \"headers\": [],\r\n    \"params\": [\r\n      {\r\n        \"key\": \"lat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"lat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"lon\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"lon\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout MspStandard AssetSearch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"le.taxi\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{letaxi.partnerId}}\",\r\n      \"partnerActionsId\": \"{{letaxi.partnerActionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "StartFragment\n\nCréation de l'action AROUND_ME et des données associées (datamapper, call, standard, cache param ...).\n\nL'insertion de cette action permet l'utilisation du endpoint POST /around-me pour le MSP Le.Taxi créé.\n\nEndFragment"
+				}
+			],
+			"description": "Le dossier Le.Taxi insère en base un MSP du standard Le.Taxi et sa configuration complète pour supporter l'action associée au endpoint around-me.\n\nLe sous dossier Init Le.Taxi initialise le MSP, puis le sous dossier AROUND_ME permet l'insertion du datamapping complet de l'action AROUND_ME pour ce MSP (action, datamapper, call, standard, cacheParam).\n\nCe MSP n'expose que le endpoint around-me car les paramètres de position lat et long lui sont obligatoires."
+		},
+		{
+			"name": "Covoiturage",
+			"item": [
+				{
+					"name": "Init Covoiturage",
+					"item": [
+						{
+							"name": "create msp meta",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerId\", jsonData.partnerId);\r",
+											"pm.environment.get(\"variable_key\");\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerType\":\"MSP\",\r\n  \"hasVehicle\": false,\r\n  \"hasStation\": false,\r\n  \"hasStationStatus\": false,\r\n  \"hasOperatingZone\": false,\r\n  \"hasNoParkingZone\": false,\r\n  \"hasPrefParkingZone\": false,\r\n  \"hasSpeedLimitZone\": false,\r\n  \"hasParking\": false,\r\n  \"hasHold\": false,\r\n  \"hasVehicleTypes\": false,\r\n  \"hasPricingPlan\": false,\r\n  \"hasPing\": false,\r\n  \"hasCarpoolingBookingPost\": true,\r\n  \"hasCarpoolingBookingPatch\": true,\r\n  \"hasCarpoolingBookingGet\": true,\r\n  \"hasCarpoolingDriverJourney\": true,\r\n  \"hasCarpoolingPassengerJourney\": true,\r\n  \"hasCarpoolingDriverTrip\": true,\r\n  \"hasCarpoolingPassengerTrip\": true,\r\n  \"hasCarpoolingMessages\": true,\r\n  \"hasCarpoolingStatus\": true,\r\n  \"hasCarpoolingBookingEvent\" : true,\r\n  \"hasAroundMe\": false,\r\n  \"urlWebview\": true,\r\n  \"name\": \"COVOITURAGE\",\r\n  \"operator\": \"mockable.io\",\r\n  \"type\": \"CARPOOLING\",\r\n  \"url\": \"https://api.gouv.fr/documentation/Carpooling\",\r\n  \"logoUrl\": null,\r\n  \"logoFormat\": null,\r\n  \"primaryColor\": \"#0054BB\",\r\n  \"secondaryColor\": \"#0054BB\",\r\n  \"priceList\": null,\r\n  \"isEnabled\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-metas",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-metas"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create adapter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"adapterId\", jsonData.adapterId);\r",
+											"\r",
+											"pm.test(\"Status code is 201 OR 500 if adapter already exists\", function () {\r",
+											"    console.log(pm.response.json().description);\r",
+											"    if (pm.response.code==500) {\r",
+											"        pm.expect(pm.response.json().description).to.include(\"duplicate value\");\r",
+											"    } else {\r",
+											"        pm.response.to.have.status(201);\r",
+											"    }\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"adapterName\": \"default-adapter\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Init JDD adapter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"\r",
+											"for(var i=0; i< jsonData.length; i++) {\r",
+											"    console.log(jsonData[i].adapterName);\r",
+											"    console.log(jsonData[i].adapterId);\r",
+											"\r",
+											"    if(jsonData[i].adapterName === \"default-adapter\") {\r",
+											"        postman.setEnvironmentVariable(\"adapterId\", jsonData[i].adapterId);\r",
+											"        console.log(\"adapter found \"+jsonData[i].adapterId);\r",
+											"    }\r",
+											"}\r",
+											"\r",
+											"pm.test(\"Status code is 200\", function () {\r",
+											"    pm.response.to.have.status(200);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{URL}}/adapters",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"adapters"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Le dossier init Covoiturage crée un partenaire MSP du standard Covoiturage. Ainsi qu'un adaptateur indiquant quel adapteur doit être utilisé dans la Gateway, ici : 'default-adapter'.  \nSi jamais cet adaptateur est déjà créé, alors on le récupère via le GET. Ces données sont utilisées pour toutes les actions(dossiers) suivantes."
+				},
+				{
+					"name": "Driver-journeys-endpoint Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"DRIVER_JOURNEYS_actionId\", jsonData.partnerActionId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"DRIVER_JOURNEYS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9471709.mockable.io/driverJourneys\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{DRIVER_JOURNEYS_actionId}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{DRIVER_JOURNEYS_actionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action DRIVER_JOURNEYS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /driver-journeys pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Passenger-journeys-endpoint Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"PASSENGER_JOURNEYS_action-id\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"PASSENGER_JOURNEYS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9471709.mockable.io/passengerJourneys\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{PASSENGER_JOURNEYS_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{PASSENGER_JOURNEYS_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action PASSENGER_JOURNEYS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /passenger-journeys pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Driver-regular-trips-endpoint Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"DRIVER_REGULAR_TRIPS_action-id\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"DRIVER_REGULAR_TRIPS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9471709.mockable.io/driver_regular_trips\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{DRIVER_REGULAR_TRIPS_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureTimeOfDay\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureTimeOfDay\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureWeekdays\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureWeekdays\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"minDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"minDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"maxDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"maxDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{DRIVER_REGULAR_TRIPS_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action DRIVER_TRIPS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /driver-regular-trips pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Passenger-regular-trips-endpoint Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"PASSENGER_REGULAR_TRIP_action-id\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"PASSENGER_REGULAR_TRIPS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo9471709.mockable.io/passenger_regular_trips\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{PASSENGER_REGULAR_TRIP_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n        \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureTimeOfDay\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureTimeOfDay\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },{\r\n        \"key\": \"departureWeekdays\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureWeekdays\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"minDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"minDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"maxDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"maxDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{PASSENGER_REGULAR_TRIP_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action PASSENGER_TRIPS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /passenger-regular-trips pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Post_Booking",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"CARPOOLING_BOOK_actionId\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"CARPOOLING_BOOK\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/covoiturage/bookings\",\r\n      \"method\": \"POST\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{CARPOOLING_BOOK_actionId}}\",\r\n      \"body\": {\r\n         \"template\": \"ORIGINAL_BODY\",\r\n         \"isStatic\": 1\r\n       },\r\n      \"headers\": [],\r\n      \"params\": [],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{CARPOOLING_BOOK_actionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action CARPOOLING_BOOK et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint POST /booking pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Get_Booking Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"CARPOOLING_BOOKING_SEARCH_action-id\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"CARPOOLING_BOOKING_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/covoiturage/getBooking\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{CARPOOLING_BOOKING_SEARCH_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"bookingId\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"bookingId\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{CARPOOLING_BOOKING_SEARCH_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action CARPOOLING_BOOKING_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /booking pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Patch_Booking Copy",
+					"item": [
+						{
+							"name": "create action",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"CARPOOLING_PATCH_BOOKING_action-id\", jsonData.partnerActionId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"Covoiturage\",\r\n  \"action\": \"CARPOOLING_PATCH_BOOKING\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": null,\r\n  \"isPagination\": 0,\r\n  \"selector\": null\r\n}\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create call",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/covoiturage/patchBooking\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{CARPOOLING_PATCH_BOOKING_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"bookingId\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"bookingId\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"status\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"status\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"message\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"message\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "create standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{CARPOOLING_PATCH_BOOKING_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action CARPOOLING_PATCH_BOOKING et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint PATCH /booking pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Action Send_Message Copy",
+					"item": [
+						{
+							"name": "MspAction (SEND_MESSAGE)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"msgActionId\", jsonData.partnerActionId);\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"bloblocor\",\r\n  \"action\": \"SEND_MESSAGE\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "MspCall (Mock)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"mspCallId\", jsonData.partnerCallId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/messages\",\r\n      \"method\": \"POST\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{msgActionId}}\",\r\n      \"body\": {\r\n    \"template\": \"ORIGINAL_BODY\",\r\n    \"isStatic\": 1\r\n    },\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Standard (COVOITURAGE)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"standardId\", jsonData.standardId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"COVOITURAGE\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{msgActionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action SEND_MESSAGE et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint POST / message pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "Post_Booking_Event",
+					"item": [
+						{
+							"name": "PartnerAction (BOOKING_EVENT) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"bookingEventActionId\", jsonData.partnerActionId);\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"bloblocor\",\r\n  \"action\": \"BOOKING_EVENT\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PartnerCall (Mock) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"bookingEventCallId\", jsonData.partnerCallId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"http://demo1796187.mockable.io/booking_event\",\r\n      \"method\": \"POST\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{bookingEventActionId}}\",\r\n      \"body\": {\r\n    \"template\": \"ORIGINAL_BODY\",\r\n    \"isStatic\": 1\r\n    },\r\n      \"headers\": [],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Standard (COVOITURAGE) Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerStandardId\", jsonData.partnerStandardId);\r",
+											"\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"COVOITURAGE\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"v1\",\r\n      \"versionDataMapping\": \"v1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{bookingEventActionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action BOOKING_EVENT et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint POST /booking_event pour le MSP Covoiturage créé."
+				},
+				{
+					"name": "PING",
+					"item": [
+						{
+							"name": "PartnerAction",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"action_status\", jsonData.partnerActionId);\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"name\": \"COVOITURAGE\",\r\n  \"action\": \"STATUS\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "PartnerCall",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerCallId\", jsonData.partnerCallId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"url\": \"https://mock-api-develop.preview-gw.moncomptemobilite.fr/v1/mock-api/mock\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{action_status}}\",\r\n      \"headers\": [\r\n    {\r\n      \"key\": \"mock-path\",\r\n      \"sensitive\": 0,\r\n      \"value\": \"carpooling-status/200/status.json\"\r\n      \r\n    }\r\n  ],\r\n      \"params\": [],\r\n      \"paramsMultiCalls\": []\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Standard",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerStandardId\", jsonData.partnerStandardId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"COVOITURAGE\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"v1\",\r\n      \"versionDataMapping\": \"v1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{action_status}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Création de l'action STATUS et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /status pour le MSP Covoiturage créé."
+				}
+			],
+			"description": "Le dossier Covoiturage insère en base un MSP du standard Covoiturage et sa configuration complète pour supporter les actions associées à tous les endpoints Covoiturage.\n\nLe sous dossier Init Covoiturage initialise le MSP, puis chacun des autres dossiers suivants (Driver-journeys-endpoint, Passenger-journeys-endpoint...) permet l'insertion du datamapping complet d'un service pour ce MSP (action, datamapper, call, standard, cacheParam)."
+		},
+		{
+			"name": "Le.Taxi with OAuth2",
+			"item": [
+				{
+					"name": "Init Le.Taxi with auth",
+					"item": [
+						{
+							"name": "Ajout MSP Le.Taxi Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"letaxiAuth.partnerId\", jsonData.partnerId);\r",
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"partnerType\":\"MSP\",\r\n  \"hasVehicle\": false,\r\n  \"hasStation\": false,\r\n  \"hasStationStatus\": false,\r\n  \"hasOperatingZone\": false,\r\n  \"hasNoParkingZone\": false,\r\n  \"hasPrefParkingZone\": false,\r\n  \"hasSpeedLimitZone\": false,\r\n  \"hasParking\": false,\r\n  \"hasHold\": false,\r\n  \"hasVehicleTypes\": false,\r\n  \"hasPricingPlan\": false,\r\n  \"hasPing\": false,\r\n  \"hasCarpoolingBookingPost\": false,\r\n  \"hasCarpoolingBookingPatch\": false,\r\n  \"hasCarpoolingBookingGet\": false,\r\n  \"hasCarpoolingDriverJourney\": false,\r\n  \"hasCarpoolingPassengerJourney\": false,\r\n  \"hasCarpoolingDriverTrip\": false,\r\n  \"hasCarpoolingPassengerTrip\": false,\r\n  \"hasCarpoolingMessages\": false,\r\n  \"hasCarpoolingStatus\": false,\r\n  \"hasAroundMe\": true,\r\n  \"urlWebview\": true,\r\n  \"name\": \"le.taxi with Authentication\",\r\n  \"operator\": \"mockable.io\",\r\n  \"type\": \"TAXI_VTC\",\r\n  \"url\": \"https://api.gouv.fr/documentation/le-taxi\",\r\n  \"logoUrl\": null,\r\n  \"logoFormat\": null,\r\n  \"primaryColor\": \"#0054BB\",\r\n  \"secondaryColor\": \"#0054BB\",\r\n  \"priceList\": null,\r\n  \"isEnabled\": true\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-metas",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-metas"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Action d'authentification la.taxi",
+					"item": [
+						{
+							"name": "Action auth le.taxi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"auth.partnerActionId\", jsonData.partnerActionId);pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"le.taxiXauth\",\r\n    \"action\": null,\r\n    \"isAuthentication\": true,\r\n    \"isRefreshAuthentication\": 0,\r\n    \"isPagination\": 0,\r\n    \"selector\": null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper access_token",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[\r\n  {\r\n    \"internalField\": \"accessToken\",\r\n    \"externalField\": \"access_token\",\r\n    \"isArray\": 0,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{auth.partnerActionId}}\"\r\n  }\r\n]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout Call Action OAuth2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"authPartnerCallId\", jsonData.partnerCallId);pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"http://demo7362099.mockable.io/mockedmsp/oauth2/token\",\r\n    \"method\": \"POST\",\r\n    \"isMocked\": 0,\r\n    \"nbCalls\": 1,\r\n    \"executionOrder\": 1,\r\n    \"partnerActionId\": \"{{auth.partnerActionId}}\",\r\n    \"body\": {\r\n      \"template\": \"{\\\"client_id\\\": \\\"${CLIENT_ID}\\\", \\\"client_secret\\\": \\\"${CLIENT_SECRET}\\\", \\\"grant_type\\\": \\\"${CLIENT_CREDENTIALS}\\\", \\\"scope\\\": \\\"${SCOPE}\\\"}\",\r\n      \"isStatic\": 1,\r\n      \"bodyParams\": [\r\n        {\r\n          \"keyMapper\": \"SCOPE\",\r\n          \"key\": null,\r\n          \"sensitive\": 0,\r\n          \"value\": \"monscope\",\r\n          \"precision\": null,\r\n          \"timezone\": null,\r\n          \"isRefreshToken\": null\r\n        },\r\n        {\r\n          \"keyMapper\": \"CLIENT_SECRET\",\r\n          \"key\": null,\r\n          \"sensitive\": 0,\r\n          \"value\": \"123client_secret\",\r\n          \"precision\": null,\r\n          \"timezone\": null,\r\n          \"isRefreshToken\": null\r\n        },\r\n        {\r\n          \"keyMapper\": \"CLIENT_CREDENTIALS\",\r\n          \"key\": null,\r\n          \"sensitive\": 0,\r\n          \"value\": \"123client_credentials\",\r\n          \"precision\": null,\r\n          \"timezone\": null,\r\n          \"isRefreshToken\": null\r\n        },\r\n        {\r\n          \"keyMapper\": \"CLIENT_ID\",\r\n          \"key\": null,\r\n          \"sensitive\": 0,\r\n          \"value\": \"123client_id\",\r\n          \"precision\": null,\r\n          \"timezone\": null,\r\n          \"isRefreshToken\": null\r\n        }\r\n      ]\r\n    },\r\n    \"headers\": [],\r\n    \"params\": [],\r\n    \"paramsMultiCalls\": []\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout MspStandard action OAuth2",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"le.taxi\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{letaxiAuth.partnerId}}\",\r\n      \"partnerActionsId\": \"{{auth.partnerActionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "AROUND_ME with auth",
+					"item": [
+						{
+							"name": "Ajout Action AROUND_ME_SEARCH le.taxi Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"aroundMe.partnerActionId\", jsonData.partnerActionId);\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"le.taxiXauth\",\r\n    \"action\": \"AROUND_ME_SEARCH\",\r\n    \"isAuth\": 0,\r\n    \"isRefreshAuth\": null,\r\n    \"isPagination\": 0,\r\n    \"selector\": null\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-actions",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-actions"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper position.lon Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.coordinates.lng\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"position.lon\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper position.lat Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.coordinates.lat\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"position.lat\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper operator Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.operator\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"operator\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper crowfly_distance Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.location.crowflyDistance\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"crowfly_distance\",\r\n    \"defaultValue\": null,\r\n  \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper assetId Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.assetId\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"id\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.constructor Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.brand\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.constructor\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.engine Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.fuel\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.engine\",\r\n    \"defaultValue\": null,\r\n   \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper TAXI Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.assetType\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": null,\r\n    \"defaultValue\": \"TAXI\",\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.model Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.model\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.model\",\r\n    \"defaultValue\": null,\r\n   \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.nb_seats Copy",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.persons\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": null,\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.nb_seats\",\r\n    \"defaultValue\": null,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout DataMapper vehicle.characteristics",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "[{\r\n    \"internalField\": \"assets.overriddenProperties.other\",\r\n    \"externalField\": \"data\",\r\n    \"isArray\": 1,\r\n    \"format\": \"CONVERT_LIST_TO_STRING(\\\", \\\")\",\r\n    \"timezone\": null,\r\n    \"containedValue\": \"vehicle.characteristics\",\r\n    \"defaultValue\": null,\r\n   \"partnerActionId\": \"{{aroundMe.partnerActionId}}\"\r\n}]",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/data-mappers",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"data-mappers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout Call AssetSearch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = pm.response.json();\r",
+											"pm.environment.set(\"partnerCallId\", jsonData.partnerCallId);\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"url\": \"http://demo7362099.mockable.io/le-taxi-mock/taxis\",\r\n    \"method\": \"GET\",\r\n    \"isMocked\": 0,\r\n    \"nbCalls\": 1,\r\n    \"executionOrder\": 1,\r\n    \"partnerActionId\": \"{{aroundMe.partnerActionId}}\",\r\n    \"body\": null,\r\n    \"headers\": [\r\n        {\r\n            \"key\": \"access_token\",\r\n            \"sensitive\": null,\r\n            \"value\": \"application/json\",\r\n            \"processFunction\": null,\r\n            \"securityFlag\": 1,\r\n            \"valuePrefix\": null,\r\n            \"valueTemplate\": null,\r\n            \"headersValuesTemplate\": []\r\n        }\r\n    ],\r\n    \"params\": [\r\n      {\r\n        \"key\": \"lat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"lat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"lon\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"lon\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}\r\n\r\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-calls",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-calls"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ajout MspStandard AssetSearch",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"\r",
+											"pm.test(\"Status code is 201\", function () {\r",
+											"    pm.response.to.have.status(201);\r",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n      \"standardName\": \"le.taxi\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{letaxiAuth.partnerId}}\",\r\n      \"partnerActionsId\": \"{{aroundMe.partnerActionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{URL}}/partner-standards",
+									"host": [
+										"{{URL}}"
+									],
+									"path": [
+										"partner-standards"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Comme le dossier Le.Taxi, le dossier Le.Taxi with auth insère un MSP du standard Le.Taxi fournissant une action AROUND-ME, donnant ainsi l'accès au endpoint associé pour ce MSP.\n\n\"Le.Taxi with auth\" fournit en plus une action d'authentication qui s'exécute afin de récupérer un token au près du MSP qui suit la norme d'authentification OAuth2."
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "32343345-59d7-4efb-adf8-d03185277184",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "x-api-key",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "URL",
+			"value": "https://data-api-develop.preview-gw.moncomptemobilite.fr/dataapi/v1",
+			"type": "string"
+		},
+		{
+			"key": "URL",
+			"value": "https://data-api.preprod-gw.moncomptemobilite.fr/v1",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "URL",
+			"value": "https://data-api-feature-362-request-timeout.preview-gw.moncomptemobilite.fr/dataapi/v1",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "URL",
+			"value": "",
+			"type": "string",
+			"disabled": true
+		},
+		{
+			"key": "URL",
+			"value": "",
+			"type": "string",
+			"disabled": true
+		}
+	]
+}

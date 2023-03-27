@@ -9,6 +9,7 @@ import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
 import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
@@ -48,24 +49,21 @@ public class PartnerMetaServiceImpl implements PartnerMetaService {
     private PartnerMetaDatabaseService partnerMetaService;
 
     private final PartnerMetaMapper mapper = Mappers.getMapper(PartnerMetaMapper.class);
-    private RestTemplate restTemplate = new RestTemplate();
+
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
+    
     @Value("${gateway.service.cachemanager.baseUrl}")
     private String cacheManagerUri;
     @Autowired
     private ErrorMessages errorMessages;
 
     @Override
-    public List<PartnerMetaDTO> getPartnerMetasByPartnerType(PartnerTypeEnum partnerType) {
-        String type = String.valueOf(partnerType);
-        List<PartnerMeta> entityPartnerMetas = partnerMetaService.findAllByPartnerType(type);
+    public List<PartnerMetaDTO> getPartnerMetasByExample(PartnerMeta partnerMetaExample) {
+        List<PartnerMeta> entityPartnerMetas = partnerMetaService.findAllByExample(partnerMetaExample);
         return mapper.mapEntityToDto(entityPartnerMetas);
     }
 
-    @Override
-    public List<PartnerMetaDTO> getPartnerMetas() {
-        List<PartnerMeta> entityPartnerMetas = partnerMetaService.findAllPartnerMeta();
-        return mapper.mapEntityToDto(entityPartnerMetas);
-    }
 
     @Override
     public PartnerMetaDTO getPartnerMeta(UUID id) throws NotFoundException {
@@ -123,7 +121,7 @@ public class PartnerMetaServiceImpl implements PartnerMetaService {
     @Override
     public void refreshCachePartnerMetas() {
         log.info("Refreshing partnerMetas in cache");
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 

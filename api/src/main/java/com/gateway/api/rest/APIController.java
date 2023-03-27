@@ -12,10 +12,7 @@ import com.gateway.commonapi.dto.exceptions.TompError;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
-import com.gateway.commonapi.utils.enums.BookingStatus;
-import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
-import com.gateway.commonapi.utils.enums.StandardEnum;
-import com.gateway.commonapi.utils.enums.ZoneType;
+import com.gateway.commonapi.utils.enums.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.headers.Header;
@@ -41,7 +38,9 @@ import java.util.*;
 
 import static com.gateway.api.util.constant.GatewayMessageDict.*;
 import static com.gateway.commonapi.constants.ControllerMessageDict.*;
+import static com.gateway.commonapi.constants.ErrorCodeDict.ILLEGAL_OPERATION_CODE;
 import static com.gateway.commonapi.constants.GatewayApiPathDict.*;
+import static com.gateway.commonapi.constants.GatewayErrorMessage.*;
 
 @Slf4j
 @Validated
@@ -63,7 +62,7 @@ public class APIController {
      */
 
 
-    @Operation(summary = "Get metadata for all managed Partner", description = "Endpoint used to get all metadata for all managed Partner and useful links", tags = "Partners Information")
+    @Operation(summary = "Retrieve informations for all managed partners (Standard TOMP v1.3.0).", description = "Route used to retrieve all information (metadata) and useful links for all managed partners.", tags = "Partners Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -73,14 +72,38 @@ public class APIController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = TompError.class)))})
     @GetMapping(value = "",
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<PartnerMeta> getPartnersMeta(@RequestParam(required = false) PartnerTypeEnum partnerType) {
-        log.info("Call of service getPartnersMeta");
+    @Parameter(name = "X-PARTNER-TYPE", hidden = true)
+    public List<PartnerMeta> getPartnerMetas(@RequestHeader(required = false, name = "X-PARTNER-TYPE") PartnerTypeRequestHeader callerPartnerType,
+                                             @RequestParam(required = false) PartnerTypeEnum partnerType,
+                                             @RequestParam(required = false) TypeEnum type,
+                                             @RequestParam(required = false) String name,
+                                             @RequestParam(required = false) String operator) {
+
         CallUtils.saveOutputStandardInCallThread(StandardEnum.TOMP_1_3_0);
         CallUtils.saveValidCodesInCallThread(Arrays.asList(200, 400, 401, 500));
-        if (partnerType != null) {
-            return partnerService.getPartnersMetaByType(partnerType);
+        List<PartnerMeta> partnerMetas;
+        PartnerMeta partnerMetaExample = new PartnerMeta();
+
+        if ((callerPartnerType == PartnerTypeRequestHeader.MAAS && partnerType == PartnerTypeEnum.MAAS) || (callerPartnerType == PartnerTypeRequestHeader.MSP && partnerType == PartnerTypeEnum.MSP)) {
+            throw new BadRequestException(new TompError(ILLEGAL_OPERATION_CODE, ILLEGAL_OPERATION, FORBIDDEN_TYPE_TITLE, CommonUtils.placeholderFormat(FORBIDDEN_TYPE_MESSAGE, FIRST_PLACEHOLDER, partnerType.value)));
+        } else if (partnerType != null) {
+            //We admit it's an admin that make the call
+            partnerMetaExample.setPartnerType(partnerType);
         }
-        return partnerService.getPartnersMeta();
+        //hydrate the example with filters
+        if (type != null) {
+            partnerMetaExample.setType(type);
+        }
+        if (name != null) {
+            partnerMetaExample.setName(name);
+        }
+        if (operator != null) {
+            partnerMetaExample.setOperator(operator);
+        }
+
+        partnerMetas = partnerService.getPartnersMetaByExample(partnerMetaExample, callerPartnerType);
+
+        return partnerMetas;
     }
 
 
@@ -91,7 +114,7 @@ public class APIController {
      * @return Partner Metadata object.
      */
 
-    @Operation(summary = "Get metadata for a given Partner", description = "Endpoint used to get metadata for a Partner and useful links", tags = "Partners Information")
+    @Operation(summary = "Retrieve information for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all information (metadata) and useful links for a specified partner.", tags = "Partners Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -116,7 +139,7 @@ public class APIController {
      * @return Global view.
      */
 
-    @Operation(summary = "Get a global view  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve a global view", tags = "Traveler Information")
+    @Operation(summary = "Retrieve a global view of all stations, assets and parkings (Standard TOMP v1.3.0).", description = "Route used to retrieve a global view of all stations, assets and parkings for all partners.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -142,7 +165,7 @@ public class APIController {
      * @return Global view.
      */
 
-    @Operation(summary = "Get a global view for around me  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve a global view for around me", tags = "Traveler Information")
+    @Operation(summary = "Retrieve a global view of stations, assets and parkings around a specified location (Standard TOMP v1.3.0).", description = "Route used to retrieve a global view of stations, assets and parkings around a specified location for all or specified partners.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -169,7 +192,7 @@ public class APIController {
      * @param areaType  Area type
      * @return object {@link PartnerZone}} for a Partner area.
      */
-    @Operation(summary = "Get specific area information for a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to get a specific area information for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all geographical areas for a specified type for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all geographical areas for a pecified type (Operating, No parking, Speed limit or Preferential parking) for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -195,7 +218,7 @@ public class APIController {
      * @return List of stations for the Partner.
      */
 
-    @Operation(summary = "Get all stations for a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve stations for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all stations for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all stations around a specified location (if given) for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = SUCCESSFUL_OPERATION, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -221,7 +244,7 @@ public class APIController {
      * @param partnerId Identifier of the Partner.
      * @return List of stations for the Partner.
      */
-    @Operation(summary = "Get all stations status for a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve status of stations for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve station status for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve status of all stations or a specified station (if given) for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = SUCCESSFUL_OPERATION, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -246,7 +269,7 @@ public class APIController {
      * @param partnerId Identifier of the Partner.
      * @return List of assets for the Partner.
      */
-    @Operation(summary = "Get all assets for a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve assets for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all assets for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all assets for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -284,7 +307,7 @@ public class APIController {
      * @param partnerId Identifier of the Partner.
      * @return List of available assets for the Partner.
      */
-    @Operation(summary = "Get all available assets for a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve available assets for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all available assets for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all available assets around a specified location (if given) or in a specified station (if given) for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -317,7 +340,7 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Get all types of vehicle from a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve all types of vehicle for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all types of vehicle for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all types of vehicle for a specified partner.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -337,7 +360,7 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Get all pricing plan from a Partner  (standard: TOMP v1.3.0)", description = "Endpoint used to retrieve all pricing plan for a Partner", tags = "Traveler Information")
+    @Operation(summary = "Retrieve all pricing plans for a specified partner (Standard TOMP v1.3.0).", description = "Route used to retrieve all pricing plans for a specified partner and, if given, for a specified station.", tags = "Traveler Information")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK_PRICING_PLAN, headers = {
                     @Header(name = "Content-Language", description = TOMP_HEADERS_DESCRIPTION, schema = @Schema(type = "string")),
@@ -363,7 +386,7 @@ public class APIController {
     /**
      * DriverJourneys End-point
      **/
-    @Operation(summary = "Search for matching punctual planned outward driver journeys.  (standard: COVOITURAGE)", description = "Route used to retrieve a collection of punctual planned outward driver journeys matching the provided criteria.", tags = {"Carpooling", "Traveler Information"})
+    @Operation(summary = "Search for matching punctual planned outward driver journeys for a specified partner (Standard Covoiturage v0.0.1).", description = "Route used to retrieve a collection of punctual planned outward driver journeys matching the provided criteria for a specified partner.", tags = {"Carpooling", "Traveler Information"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_IV_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -407,7 +430,7 @@ public class APIController {
     /**
      * Passengerjourneys End-point
      **/
-    @Operation(summary = "Search for matching punctual planned outward passenger journeys.  (standard: COVOITURAGE)", description = "Route used to retrieve a collection of punctual planned outward passenger journeys matching the provided criteria.", tags = {"Carpooling", "Traveler Information"})
+    @Operation(summary = "Search for matching punctual planned outward passenger journeys for a specified partner (Standard Covoiturage v0.0.1).", description = "Route used to retrieve a collection of punctual planned outward passenger journeys matching the provided criteria for a specified partner.", tags = {"Carpooling", "Traveler Information"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_IV_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -449,7 +472,7 @@ public class APIController {
     /**
      * PassengerRegularTrips End-point
      **/
-    @Operation(summary = "Search for matching passenger regular trips.  (standard: COVOITURAGE)", description = "Route used to retrieve a collection of passenger regular trips matching the provided criteria.", tags = {"Carpooling", "Traveler Information"})
+    @Operation(summary = "Search for matching passenger regular trips for a specified partner (Standard Covoiturage v0.0.1).", description = "Route used to retrieve a collection of passenger regular trips matching the provided criteria for a specified partner.", tags = {"Carpooling", "Traveler Information"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_IV_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -499,7 +522,7 @@ public class APIController {
     /**
      * DriverRegularTrips End-point
      **/
-    @Operation(summary = "Search for matching regular driver trips.  (standard: COVOITURAGE)", description = "Route used to retrieve a collection of driver regular trips matching the provided criteria.", tags = {"Carpooling", "Traveler Information"})
+    @Operation(summary = "Search for matching driver regular trips for a specified partner (Standard Covoiturage v0.0.1).", description = "Route used to retrieve a collection of driver regular trips matching the provided criteria for a specified partner.", tags = {"Carpooling", "Traveler Information"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_IV_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -544,7 +567,8 @@ public class APIController {
     /**
      * Send messages MaaS -> Msp
      **/
-    @Operation(summary = "Send a message to the owner of a retrieved journey.  (standard: COVOITURAGE)", description = "Route used to allow a user to connect back to the owner of a retrieved journey through a text message.", tags = {"Carpooling"})
+    @Operation(summary = "Send a message to the owner of a retrieved journey for a specified partner (Standard Covoiturage v0.0.1).",
+            description = "Route used to allow a user to connect back to the owner of a retrieved journey through a texte message for a specified partner.", tags = {"Carpooling"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = COVOITURAGE_MESSAGE_RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -587,7 +611,11 @@ public class APIController {
     }
 
 
-    @Operation(summary = "Create a punctual outward Booking request.  (standard: COVOITURAGE)", description = "Route used to synchronize a Booking request initiated by a platform to the second platform involved in the shared punctual outward journey. While posting a new Booking, its status must always be set first as status=WAITING_CONFIRMATION. Reminder: In case of booking without deeplink, the sender platform MUST also store the Booking object, and be ready to receive modifications of it through the PATCH /bookings API endpoint.", tags = {"Carpooling", "Booking"})
+    @Operation(summary = "Create a punctual outward booking request for a specified partner (Standard Covoiturage v0.0.1).",
+            description = "Route used to synchronize a booking request initiated by a platform to the second specified platform involved in the shared " +
+                    "punctual outward journey. While posting a new booking, its status must always be set first as status=WAITING_CONFIRMATION. " +
+                    "Reminder: In case of booking without deeplink, the sender platform MUST also store the booking object, and be ready to receive " +
+                    "modifications of it through the PATCH /bookings API endpoint.", tags = {"Carpooling", "Booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = COVOITURAGE_POST_BOOKING_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -626,7 +654,10 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Retrieves an existing Booking request.  (standard: COVOITURAGE)", description = "Route used to retrieve the details of an existing Booking request. Can only be used by the operator having created the Booking request. This route is provided to check if the Booking object state is similar between two operators, but its usage should be required to handle the full use case of a booking.", tags = {"Carpooling", "Booking"})
+    @Operation(summary = "Retrieve an existing booking request for a specified partner (Standard Covoiturage v0.0.1).",
+            description = "Route used to retrieve the details of an existing booking request for a specified partner. Can only be used by the operator" +
+                    " having created the booking request. This route is provided to check if the booking object state is similar between two operators, " +
+                    " but its usage should be required to handle the full use case of a booking.", tags = {"Carpooling", "Booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_GET_BOOKING_RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -658,7 +689,9 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Updates status of an existing Booking request.  (standard: COVOITURAGE)", description = "Route used to update the status of an existing Booking request. Should be used usually just to confirm, cancel, etc. an existing Booking.", tags = {"Carpooling", "Booking"})
+    @Operation(summary = "Update status of an existing booking request for a specified partner (Standard Covoiturage v0.0.1).",
+            description = "Route used to update the status of an existing booking request for a specified partner. " +
+                    "Should be used usually just to confirm, cancel, etc. an existing booking.", tags = {"Carpooling", "Booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_GET_BOOKING_RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -695,7 +728,10 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Sends booking information of a user connected with a third-party provider back to the provider.  (standard: COVOITURAGE)", description = "Route used to allow a carpool operator to send booking information to a third-party provider. This can be used in the context of a booking flow with deepLinking and when a passenger is using the Connect specification to link their accounts of a third-party service (e.g., a MaaS) and the operator.", tags = {"Carpooling", "Booking"})
+    @Operation(summary = "Send booking information of a user connected with a third-party provider back to the specified provider (Standard Covoiturage v0.0.1).",
+            description = "Route used to allow a carpool operator to send booking information to a third-party specified provider. " +
+                    "This can be used in the context of a booking flow with deeplinking and when a passenger is using the Connect specification" +
+                    " to link their accounts of a third-party service (e.g., a MaaS) and the operator.", tags = {"Carpooling", "Booking"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_POST_BOOKING_RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = COVOITURAGE_BAD_REQUEST, content = @Content(schema = @Schema(implementation = CarpoolError.class))),
@@ -740,7 +776,7 @@ public class APIController {
 
     /*******      PING     *******/
 
-    @Operation(summary = "Give health status of the webservice.", description = "", tags = {"Carpooling", "Partners Status"})
+    @Operation(summary = "Give health status of the webservice for a specified partner (Standard Covoiturage v0.0.1).", description = "", tags = {"Carpooling", "Partners Status"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = COVOITURAGE_STATUS_RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "429", description = COVOITURAGE_MANY_REQUESTS, content = @Content(schema = @Schema(hidden = true))),
@@ -767,7 +803,7 @@ public class APIController {
 
     }
 
-    @Operation(summary = "Give a health status of webservice of TOMP standard.", description = "", tags = {"Partners Status"})
+    @Operation(summary = "Test the healthcheck of a specified partner (Standard TOMP v1.3.0).", description = "Route used to test the healthcheck of a specified partner (Standard TOMP).", tags = {"Partners Status"})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = SUCCESSFUL_OPERATION, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "401", description = TOMP_UNAUTHENTICATED, content = @Content(schema = @Schema(implementation = TompError.class))),

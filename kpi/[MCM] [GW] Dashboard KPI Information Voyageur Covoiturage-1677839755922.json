@@ -1,0 +1,3122 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_[ELASTICSEARCH]_JSON API",
+      "label": "[ElasticSearch] JSON API",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "marcusolsson-json-datasource",
+      "pluginName": "JSON API"
+    },
+    {
+      "name": "DS_POSTGRESQL_[GRAVITEE]",
+      "label": "PostgreSQL [gravitee]",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    },
+    {
+      "name": "DS_POSTGRESQL",
+      "label": "PostgreSQL",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "bargauge",
+      "name": "Bar gauge",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.1.4"
+    },
+    {
+      "type": "panel",
+      "id": "marcusolsson-dynamictext-panel",
+      "name": "Dynamic Text",
+      "version": "2.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "marcusolsson-json-datasource",
+      "name": "JSON API",
+      "version": "1.3.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "table",
+      "name": "Table",
+      "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 66,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 7,
+            "x": 0,
+            "y": 1
+          },
+          "id": 56,
+          "options": {
+            "content": "# Aujourd'hui",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 14,
+            "x": 7,
+            "y": 1
+          },
+          "id": 55,
+          "options": {
+            "content": "# Sur les 30 derniers jours",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 0,
+            "y": 3
+          },
+          "id": 67,
+          "options": {
+            "content": "<!-- driver_journeys  -->\n\n<h4 style=\"text-align: center\">Recherches de trajets ponctuels proposés par des conducteurs  (abouties ou en erreur)</h4>\n\n<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": "count"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 3,
+            "y": 3
+          },
+          "id": 68,
+          "options": {
+            "content": "<!-- passenger_journeys  -->\n\n<h4 style=\"text-align: center\">Recherches de trajets ponctuels proposés par des passagers  (abouties ou en erreur)</h4>\n\n<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": ""
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 6,
+            "w": 14,
+            "x": 7,
+            "y": 3
+          },
+          "id": 78,
+          "options": {
+            "content": "<h3>Sommes :</h3>\n\n- Recherches de trajets ponctuels proposés par des conducteurs :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{count_driver_journeys}}</span> recherches (abouties ou en erreur) sur 30 jours\n\n- Recherches de trajets réguliers proposés par des conducteurs :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{count_driver_regular_trips}}</span> recherches (abouties ou en erreur) sur 30 jours\n\n- Recherches de trajets ponctuels proposés par des passagers:   <span style=\"color: green;font-weight:bold;font-size: 16px\">{{count_passenger_journeys}}</span> recherches (abouties ou en erreur) sur 30 jours\n- Recherches de trajets réguliers proposés par des passagers:   <span style=\"color: green;font-weight:bold;font-size: 16px\">{{count_passenger_regular_trips}}</span> recherches (abouties ou en erreur) sur 30 jours",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{ \r\n  \"aggs\": {\r\n    \"endpoints\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\",\r\n        \"min_doc_count\": 0, \r\n        \"include\": \"partnerId.*|.*\\\\carpooling.*|.*\\\\passenger.*\",\r\n        \"exclude\": \"partnerId.*|.*\\\\booking.*|.*\\\\booking.*\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {},\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\":{\r\n            \"default_field\":\"path\",\r\n            \"query\":\"*\\\\/${partner_id}*\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/driver_journeys\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "count_driver_journeys"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/driver_regular_trips\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "count_driver_regular_trips"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/passenger_journeys\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "count_passenger_journeys"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/passenger_regular_trips\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "count_passenger_regular_trips"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "extractFields",
+              "options": {}
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 0,
+            "y": 8
+          },
+          "id": 69,
+          "options": {
+            "content": "<!-- driver_regular_trips  -->\n\n<h4 style=\"text-align: center\">Recherches de trajets réguliers proposés par des conducteurs  (abouties ou en erreur)</h4>\n\n<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": ""
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 3,
+            "y": 8
+          },
+          "id": 70,
+          "options": {
+            "content": "<!-- passenger_regular_trips  -->\n\n<h4 style=\"text-align: center\">Recherches de trajets réguliers proposés par des passagers  (abouties ou en erreur) </h4>\n\n<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": ""
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 6,
+            "w": 14,
+            "x": 7,
+            "y": 9
+          },
+          "id": 87,
+          "options": {
+            "content": "<h3>Moyennes journalières : </h3>\n\n- Recherches de trajets ponctuels proposés par des conducteurs :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed count_driver_journeys 2}}</span> recherches  (abouties ou en erreur) / jour\n\n- Recherches de trajets réguliers proposés par des conducteurs :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed count_driver_regular_trips 2}}</span> recherches  (abouties ou en erreur) / jour\n\n- Recherches de trajets ponctuels proposés par des passagers:   <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed count_passenger_journeys 2}}</span> recherches  (abouties ou en erreur) / jour\n- Recherches de trajets réguliers proposés par des passagers:   <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed count_passenger_regular_trips 2}}</span> recherches  (abouties ou en erreur) / jour",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"aggs\": {\r\n    \"endpoints\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\",\r\n        \"min_doc_count\": 0, \r\n        \"include\": \"partnerId.*|.*\\\\carpooling.*|.*\\\\passenger.*\",\r\n        \"exclude\": \"partnerId.*|.*\\\\booking.*|.*\\\\booking.*\",\r\n        \"order\": {\r\n          \"_key\": \"desc\"\r\n        },\r\n        \"size\": 8\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-endpoint\": {\r\n          \"sum_bucket\": {\r\n            \"buckets_path\": \"histo-by-endpoint-bucket>_count\",\r\n            \"gap_policy\": \"insert_zeros\"\r\n          }\r\n        },\r\n        \"moyenne\": {\r\n          \"bucket_script\": {\r\n            \"buckets_path\": {\r\n              \"somme_mensuelle\": \"histo-by-endpoint\"\r\n            },\r\n            \"script\": \"params.somme_mensuelle/30\",\r\n            \"gap_policy\": \"insert_zeros\"\r\n          }\r\n        },\r\n        \"histo-by-endpoint-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 1\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {},\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\":{\r\n            \"default_field\":\"path\",\r\n            \"query\":\"*\\\\/${partner_id}*\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/driver_journeys\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "count_driver_journeys"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/driver_regular_trips\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "count_driver_regular_trips"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/passenger_journeys\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "count_passenger_journeys"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key==\"/partners/:partnerId/carpooling/passenger_regular_trips\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "count_passenger_regular_trips"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "transformations": [
+            {
+              "id": "extractFields",
+              "options": {}
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 5,
+            "w": 3,
+            "x": 2,
+            "y": 13
+          },
+          "id": 245,
+          "options": {
+            "content": "<!-- passenger_regular_trips  -->\n\n<h4 style=\"text-align: center\"> Total de recherches de trajets  (abouties ou en erreur)</h4>\n\n<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": ""
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 14,
+            "x": 7,
+            "y": 15
+          },
+          "id": 82,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.31,
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"endpoints\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\",\r\n        \"min_doc_count\": 0,\r\n        \"include\": \"partnerId.*|.*\\\\carpooling.*|.*\\\\passenger.*\",\r\n        \"exclude\": \"partnerId.*|.*\\\\booking.*|.*\\\\booking.*\",\r\n        \"order\": {\r\n          \"_key\": \"desc\"\r\n        },\r\n        \"size\": 8\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-endpoint-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"now-30d\",\r\n              \"max\": \"now\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {},\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\":{\r\n            \"default_field\":\"path\",\r\n            \"query\":\"*\\\\/${partner_id}*\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_journeys\")].histo-by-endpoint-bucket.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_journeys\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets ponctuels proposés par les conducteurs "
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/passenger_journeys\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets ponctuels demandés  par les passagers"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_regular_trips\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets réguliers proposés par les conducteurs "
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/passenger_regular_trips\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets réguliers demandés  par les passagers"
+                }
+              ],
+              "hide": false,
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-request-*/_search?size=0"
+            }
+          ],
+          "title": "Recherche de trajets   (abouties ou en erreur) sur les 30 derniers jours",
+          "type": "barchart"
+        }
+      ],
+      "title": "Informations Voyageur Statiques",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 272,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets ponctuels proposés par les conducteurs.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 0,
+            "y": 2
+          },
+          "id": 265,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n         {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search?timeout=9000s"
+            }
+          ],
+          "title": "Pour trajets ponctuels proposés par des conducteurs ",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets ponctuels demandés par les passagers.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 11,
+            "y": 2
+          },
+          "id": 261,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n          {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search?timeout=9000s"
+            }
+          ],
+          "title": "Pour trajets ponctuels demandés par des passagers",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets réguliers proposés par les conducteurs.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 0,
+            "y": 11
+          },
+          "id": 266,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n           {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search?timeout=9000s"
+            }
+          ],
+          "title": "Pour trajets réguliers proposés par des conducteurs",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets réguliers demandés par les passagers.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 11,
+            "y": 11
+          },
+          "id": 264,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n          {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search?timeout=9000s"
+            }
+          ],
+          "title": "Pour trajets réguliers demandés par des passagers",
+          "type": "bargauge"
+        }
+      ],
+      "title": "Nombre de recherches abouties en fonction du nombre de résultats retournés (sur les derniers 30 jours)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 53,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "",
+          "gridPos": {
+            "h": 3,
+            "w": 12,
+            "x": 0,
+            "y": 3
+          },
+          "id": 212,
+          "maxPerRow": 2,
+          "options": {
+            "content": "<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "Pas de résultat",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "repeat": "endpoints",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\":{\r\n            \"default_field\":\"path\",\r\n            \"query\":\"*\\\\/${partner_id}*\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"filter\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"bool\": {\r\n                        \"should\": [\r\n                          {\r\n                            \"match_phrase\": {\r\n                              \"mapped-path\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                            }\r\n                          }\r\n                        ]\r\n                      }\r\n                    },\r\n                    {\r\n                      \"bool\": {\r\n                        \"should\": [\r\n                          {\r\n                            \"match_phrase\": {\r\n                              \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                            }\r\n                          }\r\n                        ]\r\n                      }\r\n                    },\r\n                    {\r\n                      \"bool\": {\r\n                        \"should\": [\r\n                          {\r\n                            \"match_phrase\": {\r\n                              \"mapped-path\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                            }\r\n                          }\r\n                        ]\r\n                      }\r\n                    },\r\n                    {\r\n                      \"bool\": {\r\n                        \"should\": [\r\n                          {\r\n                            \"match_phrase\": {\r\n                              \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                            }\r\n                          }\r\n                        ]\r\n                      }\r\n                    }\r\n                  ]\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"query_string\": {\r\n                        \"query\": $endpoints,\r\n                        \"fields\": [\r\n                          \"mapped-path\"\r\n                        ]\r\n                      }\r\n                    }\r\n                  ]\r\n                }\r\n              }\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.count",
+                  "language": "jsonpath",
+                  "name": ""
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_count"
+            }
+          ],
+          "title": "Recherches de $endpoints  (abouties ou en erreur)",
+          "transformations": [],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "hue",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "decimals": 0,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 0,
+            "y": 12
+          },
+          "id": 217,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.31,
+            "legend": {
+              "calcs": [],
+              "displayMode": "table",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"endpoints\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\",\r\n        \"min_doc_count\": 0, \r\n       \"include\": \"partnerId.*|.*\\\\carpooling.*|.*\\\\passenger.*\",\r\n        \"exclude\": \"partnerId.*|.*\\\\booking.*|.*\\\\booking.*\",\r\n        \"order\": {\r\n          \"_key\": \"desc\"\r\n        },\r\n        \"size\": 8\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-endpoint-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"${__from:date:iso}\",\r\n              \"max\": \"${__to:date:iso}\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {},\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\":{\r\n            \"default_field\":\"path\",\r\n            \"query\":\"*\\\\/${partner_id}*\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"mapped-path\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_journeys\")].histo-by-endpoint-bucket.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_journeys\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets ponctuels proposés par les conducteurs "
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/passenger_journeys\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets ponctuels demandés  par les passagers"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/driver_regular_trips\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets réguliers proposés par les conducteurs "
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[?(@.key == \"/partners/:partnerId/carpooling/passenger_regular_trips\")].histo-by-endpoint-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Trajets réguliers demandés  par les passagers"
+                }
+              ],
+              "hide": false,
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-request-*/_search?size=0"
+            }
+          ],
+          "title": "Recherche  dynamique de trajets  (abouties ou en erreur)",
+          "type": "barchart"
+        }
+      ],
+      "title": "Informations Voyageur Dynamiques",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 274,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets ponctuels proposés par les conducteurs.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 0,
+            "y": 45
+          },
+          "id": 275,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n         {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/driver_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n               \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search"
+            }
+          ],
+          "title": "Pour trajets ponctuels proposés par des conducteurs",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets ponctuels demandés par les passagers.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 11,
+            "y": 45
+          },
+          "id": 276,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n          {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/passenger_journeys\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n               \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search"
+            }
+          ],
+          "title": "Pour trajets ponctuels demandés par des passagers",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets réguliers proposés par les conducteurs.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 11,
+            "x": 0,
+            "y": 54
+          },
+          "id": 277,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n           {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/driver_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n               \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search"
+            }
+          ],
+          "title": "Pour trajets réguliers proposés par des conducteurs",
+          "type": "bargauge"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "description": "Par palier de nombre de trajets retournés, ce graphe présente le nombre de recherches de trajets réguliers demandés par les passagers.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 11,
+            "y": 54
+          },
+          "id": 278,
+          "options": {
+            "displayMode": "gradient",
+            "minVizHeight": 10,
+            "minVizWidth": 0,
+            "orientation": "horizontal",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showUnfilled": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"aggs\": {\r\n    \"response-size\": {\r\n      \"range\": {\r\n        \"field\": \"client-response.headers.X-RESPONSE-SIZE\",\r\n        \"ranges\": [\r\n          {\r\n            \"key\": \"totalNonNull\",\r\n            \"from\": 1\r\n          },\r\n          {\r\n            \"key\": \"Null\",\r\n            \"from\": 0,\r\n            \"to\": 1\r\n          },\r\n          {\r\n            \"key\": \"faible\",\r\n            \"from\": 1,\r\n            \"to\": 6\r\n          },\r\n          {\r\n            \"key\": \"moyen\",\r\n            \"from\": 6,\r\n            \"to\": 11\r\n          },\r\n          {\r\n            \"key\": \"Haut\",\r\n            \"from\": 11\r\n          }\r\n        ]\r\n      }\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"client-response.headers.X-MAPPED-PATH\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"client-response.headers.X-RESPONSE-SIZE\": {\r\n      \"type\": \"long\"\r\n    }\r\n  },\r\n    \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"client-response.headers.X-MAPPED-PATH\": \"/partners/:partnerId/carpooling/passenger_regular_trips\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n               \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Null\")].doc_count",
+                  "name": "0 trajet"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"faible\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 1 et 5 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"moyen\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Entre 6 et 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"Haut\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Supérieur à 10 trajets"
+                },
+                {
+                  "jsonPath": "$.aggregations.response-size.buckets[?(@.key == \"totalNonNull\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "Total recherches avec au moins 1 trajet"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log*/_search"
+            }
+          ],
+          "title": "Pour trajets réguliers demandés par des passagers",
+          "type": "bargauge"
+        }
+      ],
+      "title": "Nombre de recherches abouties en fonction du nombre de résultats retournés (partie dynamique)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      },
+      "id": 37,
+      "panels": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_POSTGRESQL_[GRAVITEE]}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "name"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 207
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 10,
+            "x": 0,
+            "y": 46
+          },
+          "id": 29,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_POSTGRESQL_[GRAVITEE]}"
+              },
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "select name, id  from applications where status = 'ACTIVE';",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "applications",
+              "timeColumn": "time",
+              "where": []
+            },
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_POSTGRESQL_[GRAVITEE]}"
+              },
+              "format": "time_series",
+              "group": [],
+              "hide": false,
+              "metricColumn": "none",
+              "rawQuery": false,
+              "rawSql": "SELECT\n  $__time(time_column),\n  value1\nFROM\n  metric_table\nWHERE\n  $__timeFilter(time_column)\n",
+              "refId": "B",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "timeColumn": "time",
+              "where": [
+                {
+                  "name": "$__timeFilter",
+                  "params": [],
+                  "type": "macro"
+                }
+              ]
+            }
+          ],
+          "title": "Applications clientes de Gravitee",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_POSTGRESQL}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "filterable": true,
+                "inspect": true
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Msp/MaaS"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 106
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 13,
+            "x": 10,
+            "y": 46
+          },
+          "id": 30,
+          "options": {
+            "footer": {
+              "enablePagination": true,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 0,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "datasource": {
+                "type": "postgres",
+                "uid": "${DS_POSTGRESQL}"
+              },
+              "format": "table",
+              "group": [],
+              "metricColumn": "none",
+              "rawQuery": true,
+              "rawSql": "select pm.\"name\", pm.partner_type as \"Msp/MaaS\", partner_id from \r\nmsp.partner_meta pm \r\n",
+              "refId": "A",
+              "select": [
+                [
+                  {
+                    "params": [
+                      "value"
+                    ],
+                    "type": "column"
+                  }
+                ]
+              ],
+              "table": "applications",
+              "timeColumn": "time",
+              "where": []
+            }
+          ],
+          "title": "Partners",
+          "type": "table"
+        }
+      ],
+      "title": "Informations Identifiants ",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 5
+      },
+      "id": 4,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "200": {
+                      "color": "green",
+                      "index": 0
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 47
+          },
+          "id": 10,
+          "options": {
+            "footer": {
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"by_endpoint\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\"\r\n      },\r\n      \"aggs\": {\r\n        \"by-status\": {\r\n          \"terms\": {\r\n            \"field\": \"status\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/driver_journeys\")].by-status.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Nombre d'appels"
+                },
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/driver_journeys\")].by-status.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "Status",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": "driver_journeys",
+          "transformations": [],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Nombre d'appels"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 47
+          },
+          "id": 19,
+          "options": {
+            "footer": {
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"by_endpoint\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\"\r\n      },\r\n      \"aggs\": {\r\n        \"by-status\": {\r\n          \"terms\": {\r\n            \"field\": \"status\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/passenger_journeys\")].by-status.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Nombre d'appels"
+                },
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/passenger_journeys\")].by-status.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "Status",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_journeys",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": "passenger_journeys",
+          "transformations": [],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 51
+          },
+          "id": 14,
+          "options": {
+            "footer": {
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": [
+              {
+                "desc": false,
+                "displayName": "Endpoints"
+              }
+            ]
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"by_endpoint\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\"\r\n      },\r\n      \"aggs\": {\r\n        \"by-status\": {\r\n          \"terms\": {\r\n            \"field\": \"status\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/driver_regular_trips\")].by-status.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Nombre d'appels"
+                },
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/driver_regular_trips\")].by-status.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "Status",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "driver_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": "driver_regular_trips",
+          "transformations": [],
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "align": "auto",
+                "displayMode": "auto",
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Nombre d'appels"
+                },
+                "properties": [
+                  {
+                    "id": "custom.width",
+                    "value": 180
+                  }
+                ]
+              }
+            ]
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 6,
+            "y": 51
+          },
+          "id": 16,
+          "options": {
+            "footer": {
+              "enablePagination": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 1,
+            "showHeader": true,
+            "sortBy": []
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\",\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"by_endpoint\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\"\r\n      },\r\n      \"aggs\": {\r\n        \"by-status\": {\r\n          \"terms\": {\r\n            \"field\": \"status\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/passenger_regular_trips\")].by-status.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Nombre d'appels"
+                },
+                {
+                  "jsonPath": "$.aggregations.by_endpoint.buckets[?(@.key=\"/partners/:partnerId/carpooling/passenger_regular_trips\")].by-status.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "Status",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": "passenger_regular_trips",
+          "transformations": [],
+          "type": "table"
+        }
+      ],
+      "title": "Informations techniques Analytics Gravitee",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 6
+      },
+      "id": 39,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 57,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 9,
+            "w": 12,
+            "x": 0,
+            "y": 48
+          },
+          "id": 236,
+          "maxPerRow": 2,
+          "options": {
+            "barRadius": 0.1,
+            "barWidth": 0.21,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "asc"
+            },
+            "xField": "jour",
+            "xTickLabelMaxLength": 0,
+            "xTickLabelRotation": 90,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "9.1.4",
+          "repeat": "endpoints",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\":0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": $endpoints,\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"200\",\r\n            \"fields\": [\r\n              \"status\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"my-date-histogram\": {\r\n      \"date_histogram\": {\r\n        \"field\": \"@timestamp\",\r\n        \"calendar_interval\": \"1d\",\r\n        \"time_zone\": \"Europe/Paris\",\r\n        \"min_doc_count\": 0,\r\n        \"extended_bounds\": {\r\n          \"min\": \"${__from:date:iso}\",\r\n          \"max\": \"${__to:date:iso}\"\r\n        },\r\n        \"order\": {\r\n          \"_key\": \"asc\"\r\n        }\r\n      },\r\n      \"aggs\": {\r\n        \"avg-response-time\": {\r\n          \"avg\": {\r\n            \"field\": \"response-time\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n\r\n  \r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.my-date-histogram.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.my-date-histogram.buckets[*].avg-response-time.value",
+                  "language": "jsonpath",
+                  "name": "temps moyen de réponse",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": " $endpoints",
+          "transformations": [],
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "continuous-GrYlRd"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 80,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 0,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "/partners": {
+                      "color": "#e3f2e1",
+                      "index": 1,
+                      "text": "méta données des partenaires "
+                    },
+                    "/partners/:partnerId/carpooling/bookings": {
+                      "color": "light-green",
+                      "index": 9,
+                      "text": "Création de demande de réservation "
+                    },
+                    "/partners/:partnerId/carpooling/bookings/:bookingId": {
+                      "color": "light-green",
+                      "index": 8,
+                      "text": "demande d'informations réservations "
+                    },
+                    "/partners/:partnerId/carpooling/driver_journeys": {
+                      "color": "semi-dark-green",
+                      "index": 3,
+                      "text": "Trajets ponctuels proposés par les conducteurs "
+                    },
+                    "/partners/:partnerId/carpooling/driver_regular_trips": {
+                      "color": "semi-dark-green",
+                      "index": 5,
+                      "text": "Trajets réguliers proposés par les conducteurs "
+                    },
+                    "/partners/:partnerId/carpooling/messages": {
+                      "color": "light-green",
+                      "index": 7,
+                      "text": "messages échangés "
+                    },
+                    "/partners/:partnerId/carpooling/passenger_journeys": {
+                      "color": "semi-dark-green",
+                      "index": 4,
+                      "text": "Trajets ponctuels proposés par les passagers"
+                    },
+                    "/partners/:partnerId/carpooling/passenger_regular_trips": {
+                      "color": "semi-dark-green",
+                      "index": 6,
+                      "text": "Trajets réguliers proposés par les passagers"
+                    },
+                    "/partners/:partnerId/carpooling/status": {
+                      "color": "light-green",
+                      "index": 2,
+                      "text": "status du web service"
+                    }
+                  },
+                  "type": "value"
+                },
+                {
+                  "options": {
+                    "pattern": ".*/.*(_journeys|_trips)/*",
+                    "result": {
+                      "color": "dark-green",
+                      "index": 0
+                    }
+                  },
+                  "type": "regex"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "ms"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 13,
+            "w": 20,
+            "x": 0,
+            "y": 75
+          },
+          "id": 63,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.64,
+            "colorByField": "key",
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "horizontal",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "single",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 0,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"endpoints\": {\r\n      \"terms\": {\r\n        \"field\": \"mapped-path\",\r\n        \"order\": {\r\n          \"avg-response-time\": \"desc\"\r\n        },\r\n        \"size\": 50\r\n      },\r\n      \"aggs\": {\r\n        \"avg-response-time\": {\r\n          \"avg\": {\r\n            \"field\": \"response-time\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {},\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n           \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },\r\n         {\r\n           \"query_string\": {\r\n            \"default_field\": \"uri\",\r\n            \"query\": \"\\\\/api\\\\/*\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"format\": \"strict_date_optional_time\",\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[*].key",
+                  "language": "jsonpath",
+                  "type": "string"
+                },
+                {
+                  "jsonPath": "$.aggregations.endpoints.buckets[*].avg-response-time.value",
+                  "language": "jsonpath",
+                  "name": "",
+                  "type": "number"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-request-*/_search?size=0"
+            }
+          ],
+          "title": "Temps moyen des réponses (en ms)",
+          "type": "barchart"
+        }
+      ],
+      "title": "Temps moyen  de réponse par jour ( Temps entre l'appel du MAAS et la réponse fournie )",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 7
+      },
+      "id": 45,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 100,
+                "gradientMode": "opacity",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 0,
+            "y": 49
+          },
+          "id": 258,
+          "maxPerRow": 2,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 0.13,
+            "groupWidth": 0.7,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xTickLabelRotation": 90,
+            "xTickLabelSpacing": 0
+          },
+          "pluginVersion": "9.1.4",
+          "repeat": "endpoints",
+          "repeatDirection": "h",
+          "targets": [
+            {
+              "alias": "",
+              "body": "{\r\n  \"size\":0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"default_field\": \"path\",\r\n            \"query\": \"*\\\\/${partner_id}*\"\r\n          }\r\n        },{\r\n          \"query_string\": {\r\n            \"query\": $endpoints,\r\n            \"fields\": [\r\n              \"mapped-path\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"200\",\r\n            \"fields\": [\r\n              \"status\"\r\n            ]\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"my-date-histogram\": {\r\n      \"date_histogram\": {\r\n        \"field\": \"@timestamp\",\r\n        \"calendar_interval\": \"1M\",\r\n        \"time_zone\": \"Europe/Paris\",\r\n        \"min_doc_count\": 0,\r\n        \"extended_bounds\": {\r\n          \"min\": \"${__from:date:iso}\",\r\n          \"max\": \"${__to:date:iso}\"\r\n        },\r\n        \"order\": {\r\n          \"_key\": \"asc\"\r\n        }\r\n      },\r\n      \"aggs\": {\r\n        \"avg-response-time\": {\r\n          \"avg\": {\r\n            \"field\": \"response-time\"\r\n          }\r\n        }\r\n      }\r\n    }\r\n  }\r\n}",
+              "bucketAggs": [
+                {
+                  "field": "@timestamp",
+                  "id": "2",
+                  "settings": {
+                    "interval": "auto"
+                  },
+                  "type": "date_histogram"
+                }
+              ],
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.my-date-histogram.buckets[*].key_as_string",
+                  "language": "jsonpath",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.my-date-histogram.buckets[*].avg-response-time.value",
+                  "language": "jsonpath",
+                  "name": "Temps moyen de réponse",
+                  "type": "number"
+                }
+              ],
+              "headers": [
+                [
+                  "Content-Type",
+                  "application/json"
+                ]
+              ],
+              "hide": false,
+              "method": "POST",
+              "metrics": [
+                {
+                  "id": "1",
+                  "type": "count"
+                }
+              ],
+              "query": "",
+              "queryParams": "",
+              "refId": "passenger_regular_trips",
+              "timeField": "@timestamp",
+              "urlPath": "/gravitee-request*/_search"
+            }
+          ],
+          "title": " $endpoints",
+          "transformations": [],
+          "type": "barchart"
+        }
+      ],
+      "title": "Temps de réponse moyen par mois ( Temps entre l'appel du MAAS et la réponse fournie )",
+      "type": "row"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [
+    "gateway"
+  ],
+  "templating": {
+    "list": [
+      {
+        "allValue": "%",
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_POSTGRESQL}"
+        },
+        "definition": "select  name from msp.partner_meta order by name asc;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "partner_name",
+        "multi": false,
+        "name": "partner_name",
+        "options": [],
+        "query": "select  name from msp.partner_meta order by name asc;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_POSTGRESQL}"
+        },
+        "definition": "select partner_id from msp.partner_meta where name like  '$partner_name' ;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "partner_id",
+        "multi": false,
+        "name": "partner_id",
+        "options": [],
+        "query": "select partner_id from msp.partner_meta where name like  '$partner_name' ;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\"",
+        "current": {
+          "selected": false,
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "description": "",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Type recherche covoiturage",
+        "multi": true,
+        "name": "endpoints",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "Trajets ponctuels conducteur",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets réguliers conducteur",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets ponctuels passager",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets réguliers passager",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\""
+          },
+          {
+            "selected": false,
+            "text": "Tous trajets",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\""
+          }
+        ],
+        "query": "Trajets ponctuels conducteur : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\" , Trajets réguliers conducteur : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\" , Trajets ponctuels passager : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\" , Trajets réguliers passager : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\" , Tous trajets : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\"",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_POSTGRESQL_[GRAVITEE]}"
+        },
+        "definition": "select path from flows where enabled=true and (path LIKE '/partners/:partnerId/carpooling/%_regular_trips' or path LIKE '/partners/:partnerId/carpooling/%_journeys') group by path ",
+        "hide": 2,
+        "includeAll": true,
+        "multi": true,
+        "name": "operations",
+        "options": [],
+        "query": "select path from flows where enabled=true and (path LIKE '/partners/:partnerId/carpooling/%_regular_trips' or path LIKE '/partners/:partnerId/carpooling/%_journeys') group by path ",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "",
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "hide": 2,
+        "includeAll": true,
+        "label": "Type de réservation",
+        "multi": false,
+        "name": "bookingType",
+        "options": [
+          {
+            "selected": true,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": false,
+            "text": "full api",
+            "value": "\\\"MAAS\\\""
+          },
+          {
+            "selected": false,
+            "text": "deeplink",
+            "value": "\\\"MSP\\\""
+          }
+        ],
+        "query": "full api : \\\"MAAS\\\" , deeplink : \\\"MSP\\\" ",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now/d",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "[MCM] [GW] Dashboard KPI Information Voyageur Covoiturage",
+  "uid": "utqbWNdVk",
+  "version": 528,
+  "weekStart": ""
+}

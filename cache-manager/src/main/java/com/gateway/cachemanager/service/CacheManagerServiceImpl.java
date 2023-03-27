@@ -13,6 +13,7 @@ import com.gateway.commonapi.dto.data.PriceListDTO;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
@@ -27,7 +28,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -57,7 +57,9 @@ import static com.gateway.commonapi.constants.GlobalConstants.*;
 @Service
 public class CacheManagerServiceImpl implements CacheManagerService {
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
+
     @Value("${gateway.service.dataapi.baseUrl}")
     private String dataApiUri;
     @Value("${gateway.service.routingapi.baseurl}")
@@ -216,7 +218,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
     private void updateCacheGatewayParams(String key, String value) {
         log.info("Updating Gateway Param " + key + " in database and cache");
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 
@@ -245,7 +247,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
     private void createCacheGatewayParams(String key, String value) {
         log.info("Creating Gateway Param " + key + " in database");
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
 
@@ -275,7 +277,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
 
         // get the correlationId of the current thread and forward as http header
 
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
         HttpEntity<String> entity = new HttpEntity<>(httpHeaders);
@@ -345,7 +347,7 @@ public class CacheManagerServiceImpl implements CacheManagerService {
      * @return response
      */
     private Object getRouting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String partnerMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;

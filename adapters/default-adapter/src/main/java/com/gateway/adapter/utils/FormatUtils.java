@@ -51,7 +51,7 @@ public class FormatUtils {
      */
     public static Map<String, Object> formatValue(Object value, String format, String internalField, String timezone, DataMapperDTO mapperDTO) {
         log.info(FORMATTING_FUNCTION + mapperDTO.getDataMapperId().toString() + " :");
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             String function = "";
@@ -123,7 +123,7 @@ public class FormatUtils {
      */
     public static Map<String, Object> numericOperator(String operator, Float factor, Object value, String internalField) {
         log.info(NUMERIC_OPERATOR + operator + PARAMS_SEPARATOR + factor);
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         Map<String, Object> formattedData = new HashMap<>();
         Float result;
@@ -199,7 +199,7 @@ public class FormatUtils {
      */
     public static Map<String, Object> formatDate(String format, String timezone, Object value, String internalField) {
         log.info(FORMAT_DATE + format + "\"");
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         Map<String, Object> formattedData = new HashMap<>();
         try {

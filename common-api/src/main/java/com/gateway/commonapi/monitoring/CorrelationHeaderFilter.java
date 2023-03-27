@@ -45,6 +45,8 @@ public class CorrelationHeaderFilter implements Filter {
 
             } else {
                 log.debug("Found correlationId in Header for ({}) : {}", httpServletRequest.getServletPath(), currentCorrelationId);
+                // if header with corerlationId is present, use it as currentContextId
+                currentThreadUserContext.setContextId(currentCorrelationId);
             }
         }
         // add correlationId header to response headers for trace purpose

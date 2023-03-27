@@ -145,7 +145,7 @@ public class DataMapperDatabaseServiceImpl implements DataMapperDatabaseService 
     public List<DataMapper> findByActionPartnerActionId(UUID id) {
         List<DataMapper> datamappers = dataMapperRepository.findByActionPartnerActionId(id);
         if (datamappers == null || datamappers.isEmpty()) {
-            throw new NotFoundException(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_PARTNER_ACTIONS_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
+           log.info(MessageFormat.format(errorMessage.getTechnicalNotFoundDescription(), CommonUtils.placeholderFormat(DATA_MAPPER_PARTNER_ACTIONS_ID_IS_NOT_FOUND, FIRST_PLACEHOLDER, id.toString())));
         }
         return datamappers;
     }

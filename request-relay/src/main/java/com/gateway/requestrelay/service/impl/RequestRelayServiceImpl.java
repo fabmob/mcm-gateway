@@ -7,6 +7,7 @@ import com.gateway.commonapi.exception.BadGatewayException;
 import com.gateway.commonapi.exception.BadRequestException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
 import com.gateway.commonapi.utils.SanitizorUtils;
@@ -16,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -41,7 +41,8 @@ public class RequestRelayServiceImpl implements RequestRelayService {
 
     private static final List<String> ALLOWED_OUTBOUND_PROTOCOLS = List.of("http", "https");
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
 
     /**
      * Process a call.
@@ -85,6 +86,10 @@ public class RequestRelayServiceImpl implements RequestRelayService {
             }
         }
 
+        // finally add the correlationId header
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
+        httpHeaders.add(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+
         return httpHeaders;
     }
 
@@ -100,7 +105,8 @@ public class RequestRelayServiceImpl implements RequestRelayService {
     public ResponseEntity<String> makeCall(@SuppressWarnings("rawtypes") HttpEntity requestEntity, PartnerCallsFinalDTO callInfos, boolean preserveOriginalErrors) {
 
         // get the correlationId of the current thread
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
+
 
         ResponseEntity<String> response = null;
 
@@ -108,6 +114,7 @@ public class RequestRelayServiceImpl implements RequestRelayService {
             if (!this.isSafeUrl(callInfos.getUrl())) {
                 throw new BadRequestException(UNSUPPORTED_SCHEME);
             }
+
             response = restTemplate.exchange(callInfos.getUrl(), Objects.requireNonNull(HttpMethod.resolve(callInfos.getMethod())),
                     requestEntity, String.class);
 

@@ -772,7 +772,7 @@ class IVServiceImplTest extends ApiITTestCase {
     @Test
     void testGetGlobalView() throws IOException {
         List<PartnerMeta> mspListMocked = createMockedPartnerList();
-        lenient().when(partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP)).thenReturn(mspListMocked);
+        lenient().when(partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null)).thenReturn(mspListMocked);
 
         ResponseEntity<Object> stations = ResponseEntity.status(HttpStatus.OK).body(this.createMockStations());
         ResponseEntity<Object> stationStatus = ResponseEntity.status(HttpStatus.OK).body(this.createMockStationsStatus());
@@ -855,7 +855,7 @@ class IVServiceImplTest extends ApiITTestCase {
         List<UUID> partnerIds = new ArrayList<>();
         PartnerAroundMeRequest partnerAroundMeRequest = new PartnerAroundMeRequest((float) 6.169639, (float) 52.253279, 100F, 200, partnerIds);
 
-        lenient().when(partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP)).thenReturn(List.of(this.createMockedPartnerMeta()));
+        lenient().when(partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null)).thenReturn(List.of(this.createMockedPartnerMeta()));
         lenient().when(partnerService.getPartnerMeta(any())).thenReturn(this.createMockedPartnerMeta());
 
         ResponseEntity<Object> stations = ResponseEntity.status(HttpStatus.OK).body(this.createMockStations());

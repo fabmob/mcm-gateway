@@ -39,7 +39,7 @@ public class RoutingApiController {
     @Autowired
     private RoutingService adapterRouterService;
 
-    @Operation(summary = "Forward Get operation", tags = ROUTING_TAG)
+    @Operation(summary = "Create a route for a specified partner and a specified action.", description = "Route used to create a route for a specified partner and a specified action and, if specified, the standard used for output error and a valid code.", tags = ROUTING_TAG)
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = REPONSE_OK),
             @ApiResponse(responseCode = "400", description = REQUETE_MAL_FORMEE_OU_NON_VALIDE, content = @Content(schema = @Schema(implementation = BadRequest.class))),

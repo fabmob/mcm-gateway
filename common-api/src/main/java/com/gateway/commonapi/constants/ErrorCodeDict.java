@@ -3,7 +3,7 @@ package com.gateway.commonapi.constants;
 public class ErrorCodeDict {
     private ErrorCodeDict() {
     }
-
+    public static final Integer ILLEGAL_OPERATION_CODE = 1533;
     public static final Integer LATITUDE_CODE = 1540;
     public static final Integer LONGITUDE_CODE = 1541;
     public static final Integer TIME_OF_DAY_CODE = 1544;

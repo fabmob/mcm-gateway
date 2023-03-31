@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -49,8 +50,7 @@ import static com.gateway.api.util.constant.GatewayMessageDict.AREA_TYPE;
 import static com.gateway.commonapi.constants.GatewayApiPathDict.*;
 import static com.gateway.commonapi.utils.enums.ZoneType.OPERATING;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 /**
@@ -134,7 +134,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerMetas() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH, HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, null);
     }
 
     /**
@@ -146,7 +146,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerMetasById() throws Exception {
         testHttpRequestWithExpectedResult(CommonUtils.placeholderFormat(GET_PARTNERS_PATH + GET_PARTNER_BY_ID_PATH, PARTNER_ID, "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_BY_ID_OK_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get Partners by id", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get Partners by id", null, null);
     }
 
     /**
@@ -155,10 +155,35 @@ class ApiControllerTest extends ApiITTestCase {
      * @throws Exception
      */
     @Test
-    void testGetPartnerMetasByType() throws Exception {
+    void testGetPartnerMetasFilters() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + "?partnerType=MSP", HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, null);
+
+        testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + "?type=CARPOOLING", HttpMethod.GET, HttpStatus.OK,
+                null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, null);
+
+        testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + "?operator=mockable.io", HttpMethod.GET, HttpStatus.OK,
+                null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, null);
+
+        testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + "?name=le.taxi", HttpMethod.GET, HttpStatus.OK,
+                null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, null);
+        verify(mockPartnerServiceImpl, times(4)).getPartnersMetaByExample(any(), any());
+
+    }
+
+    @Test
+    void testGetPartnerMetasFiltersForMAAS() throws Exception {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        HttpHeaders headers1 = new HttpHeaders(headers);
+        headers.add("X-PARTNER-TYPE", "MAAS");
+        testHttpRequestWithExpectedResult(GET_PARTNERS_PATH, HttpMethod.GET, HttpStatus.OK,
+                null, GATEWAY_API_EXPECTED_GET_PARTNERS_OK_JSON,
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Partners", null, headers1);
+        verify(mockPartnerServiceImpl, times(1)).getPartnersMetaByExample(any(), any());
     }
 
 
@@ -171,7 +196,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetGlobalView() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNERS_GLOBAL_VIEW_PATH, HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_GLOBAL_VIEW_OK_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get global-view", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get global-view", null, null);
     }
 
     /**
@@ -183,7 +208,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetAroundMe() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNERS_AROUND_ME_PATH, HttpMethod.POST, HttpStatus.OK,
                 GATEWAY_API_REQUEST_AROUND_ME_JSON, GATEWAY_API_EXPECTED_GET_GLOBAL_VIEW_OK_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test post around-me", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test post around-me", null, null);
     }
 
 
@@ -196,7 +221,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerZone() throws Exception {
         testHttpRequestWithExpectedResult(CommonUtils.placeholderFormat(GET_PARTNERS_PATH + GET_PARTNER_AREAS_TYPE_PATH, PARTNER_ID, "87930fdf-34c1-41c9-885e-6ce66505b598", AREA_TYPE, OPERATING.value), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_ZONE_OK_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get Partner zone", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get Partner zone", null, null);
     }
 
 
@@ -235,7 +260,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerStations() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_STATIONS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_STATIONS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get stations by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get stations by partnerId", null, null);
     }
 
     /**
@@ -247,7 +272,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerStationsStatus() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_STATIONS_STATUS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_STATIONS_STATUS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get stations status by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get stations status by partnerId", null, null);
     }
 
 
@@ -260,7 +285,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerAssets() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_ASSETS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get assets by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get assets by partnerId", null, null);
     }
 
     @Test
@@ -269,7 +294,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getAssets(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"))).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.NOT_FOUND,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get assets by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test get assets by partnerId", null, null);
     }
 
     @Test
@@ -278,7 +303,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getAssets(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"))).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get assets by partnerId", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get assets by partnerId", null, null);
     }
 
     /**
@@ -290,7 +315,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerAvailableAssets() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_AVAILABLE_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PARTNER_AVAILABLE_ASSETS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get available assets by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get available assets by partnerId", null, null);
     }
 
 
@@ -300,7 +325,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getAvailableAssets(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), null, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_AVAILABLE_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.NOT_FOUND,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get available assets by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test get available assets by partnerId", null, null);
     }
 
     @Test
@@ -309,7 +334,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getAvailableAssets(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), null, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_AVAILABLE_ASSETS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get available assets by partnerId", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get available assets by partnerId", null, null);
     }
 
     /**
@@ -321,7 +346,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetVehicleTypes() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_VEHICLE_TYPES_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_VEHICLE_TYPES_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get vehicle types by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get vehicle types by partnerId", null, null);
     }
 
     /**
@@ -333,7 +358,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetPartnerPricingPlan() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PRICING_PLAN_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PRICE_LIST_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get pricing plan  by partnerId", null);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get pricing plan  by partnerId", null, null);
     }
 
     /**
@@ -352,7 +377,7 @@ class ApiControllerTest extends ApiITTestCase {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"),
                 HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_DRIVER_JOURNEYS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get driver journeys  by PartnerId", parameters);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get driver journeys  by PartnerId", parameters, null);
     }
 
     @Test
@@ -368,7 +393,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getDriverJourneys(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), 12f, 12f, 12f, 12f, 1655452466, 900, 1f, 1f, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get driver journeys by partnerId", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test get driver journeys by partnerId", parameters, null);
     }
 
     @Test
@@ -386,7 +411,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getDriverJourneys(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), 12f, 12f, 12f, 12f, 1655452466, 900, 1f, 1f, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver journeys by partnerId", parameters);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver journeys by partnerId", parameters, null);
     }
 
 
@@ -405,7 +430,7 @@ class ApiControllerTest extends ApiITTestCase {
         parameters.add("departureDate", String.valueOf(1655452466));
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PASSENGER_JOURNEYS_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get passenger journeys  by PartnerId", parameters);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get passenger journeys  by PartnerId", parameters, null);
     }
 
 
@@ -422,7 +447,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getPassengerJourneys(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), 12f, 12f, 12f, 12f, 1655452466, 900, 1f, 1f, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get passenger journeys by partnerId", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test get passenger journeys by partnerId", parameters, null);
     }
 
     @Test
@@ -440,7 +465,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockIVServiceImpl.getPassengerJourneys(UUID.fromString("87930fdf-34c1-41c9-885e-6ce66505b594"), 12f, 12f, 12f, 12f, 1655452466, 900, 1f, 1f, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_JOURNEY_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get passenger journeys by partnerId", parameters);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get passenger journeys by partnerId", parameters, null);
     }
 
 
@@ -466,7 +491,7 @@ class ApiControllerTest extends ApiITTestCase {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_REGULAR_TRIPS_PATH.replace("{partnerId}",
                         "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_DRIVER_REGULAR_TRIP_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get driver regular trip  by PartnerId", parameters);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get driver regular trip  by PartnerId", parameters, null);
     }
 
     @Test
@@ -490,7 +515,7 @@ class ApiControllerTest extends ApiITTestCase {
                 departureWeekdays, 900, 12.1f, 12.1f, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_REGULAR_TRIPS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get driver regular tri by partnerId", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test get driver regular tri by partnerId", parameters, null);
     }
 
     @Test
@@ -516,7 +541,7 @@ class ApiControllerTest extends ApiITTestCase {
                 departureWeekdays, 900, 12.1f, 12.1f, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_DRIVER_REGULAR_TRIPS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver regular tri by partnerId", parameters);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver regular tri by partnerId", parameters, null);
     }
 
 
@@ -540,7 +565,7 @@ class ApiControllerTest extends ApiITTestCase {
 
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_REGULAR_TRIPS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_EXPECTED_GET_PASSENGER_REGULAR_TRIP_OK_JSON,
-                JsonResponseTypeEnum.JSON_ARRAY, "Test get Passenger Regular Trip by PartnerId", parameters);
+                JsonResponseTypeEnum.JSON_ARRAY, "Test get Passenger Regular Trip by PartnerId", parameters, null);
     }
 
     @Test
@@ -564,7 +589,7 @@ class ApiControllerTest extends ApiITTestCase {
                 departureWeekdays, 900, 12.1f, 12.1f, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_REGULAR_TRIPS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get passenger regular tri by partnerId", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test get passenger regular tri by partnerId", parameters, null);
     }
 
     @Test
@@ -590,7 +615,7 @@ class ApiControllerTest extends ApiITTestCase {
                 departureWeekdays, 900, 12.1f, 12.1f, null, null, null)).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PARTNER_PASSENGER_REGULAR_TRIPS_PATH.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver regular tri by partnerId", parameters);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get driver regular tri by partnerId", parameters, null);
     }
 
     /**
@@ -605,7 +630,7 @@ class ApiControllerTest extends ApiITTestCase {
         doReturn(mockedBooking).when(mockBookingServiceImpl).postBooking(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598"), HttpMethod.POST, HttpStatus.CREATED,
                 GATEWAY_API_BOOKING_JSON, GATEWAY_API_BOOKING_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking", null, null);
     }
 
     @Test
@@ -614,7 +639,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockBookingServiceImpl.postBooking(any(), any())).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.UNAUTHORIZED,
                 GATEWAY_API_BOOKING_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test post booking", null);
+                JsonResponseTypeEnum.EMPTY, "Test post booking", null, null);
     }
 
     @Test
@@ -624,7 +649,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockBookingServiceImpl.postBooking(any(), any())).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.BAD_REQUEST,
                 GATEWAY_API_BOOKING_JSON, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking", null, null);
     }
 
     /**
@@ -639,7 +664,7 @@ class ApiControllerTest extends ApiITTestCase {
         doReturn(mockedBooking).when(mockBookingServiceImpl).getBooking(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.GET, HttpStatus.OK,
                 null, GATEWAY_API_BOOKING_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get booking", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get booking", null, null);
     }
 
     @Test
@@ -648,7 +673,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockBookingServiceImpl.getBooking(any(), any())).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.GET, HttpStatus.UNAUTHORIZED,
                 GATEWAY_API_BOOKING_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test get booking", null);
+                JsonResponseTypeEnum.EMPTY, "Test get booking", null, null);
     }
 
     @Test
@@ -659,7 +684,7 @@ class ApiControllerTest extends ApiITTestCase {
         Mockito.when(mockBookingServiceImpl.getBooking(any(), any())).thenThrow(exception);
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.GET, HttpStatus.BAD_REQUEST,
                 GATEWAY_API_BOOKING_JSON, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test get booking", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test get booking", null, null);
     }
 
     /**
@@ -674,7 +699,7 @@ class ApiControllerTest extends ApiITTestCase {
         parameters.add("message", "test");
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + PATCH_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b598").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.PATCH, HttpStatus.OK,
                 null, GATEWAY_API_BOOKING_JSON,
-                JsonResponseTypeEnum.EMPTY, "Test patch booking", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test patch booking", parameters, null);
     }
 
     @Test
@@ -686,7 +711,7 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockBookingServiceImpl).patchBooking(any(), any(), any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + PATCH_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.PATCH, HttpStatus.UNAUTHORIZED,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test patch booking", parameters);
+                JsonResponseTypeEnum.EMPTY, "Test patch booking", parameters, null);
     }
 
     @Test
@@ -701,7 +726,7 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockBookingServiceImpl).patchBooking(any(), any(), any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + PATCH_CARPOOLING_BOOKING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594").replace("{bookingId}", "3fa85f64-5717-4562-b3fc-2c963f66afa6"), HttpMethod.PATCH, HttpStatus.BAD_REQUEST,
                 null, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test patch booking", parameters);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test patch booking", parameters, null);
     }
 
 
@@ -709,7 +734,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testPostMessage() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_MESSAGE_MAAS_PARTNER.replace("{partnerId}", "a32eacc8-3302-406d-a4c5-68f6318c486f"), HttpMethod.POST, HttpStatus.CREATED,
                 GATEWAY_API_POST_MESSAGE_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test post message by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test post message by partnerId", null, null);
     }
 
     @Test
@@ -718,7 +743,7 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockIVServiceImpl).postMessage(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_MESSAGE_MAAS_PARTNER.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.UNAUTHORIZED,
                 GATEWAY_API_POST_MESSAGE_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test post Message", null);
+                JsonResponseTypeEnum.EMPTY, "Test post Message", null, null);
     }
 
     @Test
@@ -729,14 +754,14 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockIVServiceImpl).postMessage(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_MESSAGE_MAAS_PARTNER.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.BAD_REQUEST,
                 GATEWAY_API_POST_MESSAGE_JSON, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test post Message", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test post Message", null, null);
     }
 
     @Test
     void testPostBookingEvent() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_BOOKING_EVENTS.replace("{partnerId}", "a32eacc8-3302-406d-a4c5-68f6318c486f"), HttpMethod.POST, HttpStatus.OK,
                 GATEWAY_API_POST_BOOKING_EVENT_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test post booking event by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test post booking event by partnerId", null, null);
     }
 
     @Test
@@ -745,7 +770,7 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockBookingServiceImpl).postBookingEvents(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_BOOKING_EVENTS.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.UNAUTHORIZED,
                 GATEWAY_API_POST_BOOKING_EVENT_JSON, null,
-                JsonResponseTypeEnum.EMPTY, "Test post booking event", null);
+                JsonResponseTypeEnum.EMPTY, "Test post booking event", null, null);
     }
 
     @Test
@@ -756,7 +781,7 @@ class ApiControllerTest extends ApiITTestCase {
         doThrow(exception).when(mockBookingServiceImpl).postBookingEvents(any(), any());
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + POST_BOOKING_EVENTS.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b594"), HttpMethod.POST, HttpStatus.BAD_REQUEST,
                 GATEWAY_API_POST_BOOKING_EVENT_JSON, GATEWAY_API_CARPOOL_ERROR_JSON,
-                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking event", null);
+                JsonResponseTypeEnum.JSON_OBJECT, "Test post booking event", null, null);
     }
 
     /**
@@ -768,7 +793,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testGetStatus() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_STATUS.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b599"), HttpMethod.GET, HttpStatus.OK,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get status by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test get status by partnerId", null, null);
     }
 
     /**
@@ -780,7 +805,7 @@ class ApiControllerTest extends ApiITTestCase {
     void testPing() throws Exception {
         testHttpRequestWithExpectedResult(GET_PARTNERS_PATH + GET_PING.replace("{partnerId}", "87930fdf-34c1-41c9-885e-6ce66505b599"), HttpMethod.GET, HttpStatus.OK,
                 null, null,
-                JsonResponseTypeEnum.EMPTY, "Test get status by partnerId", null);
+                JsonResponseTypeEnum.EMPTY, "Test get status by partnerId", null, null);
     }
 
 
@@ -794,13 +819,20 @@ class ApiControllerTest extends ApiITTestCase {
      * @param expectedResultPath       path of the json expected answer file
      * @param resulType                JsonArray or JsonObject expected as result
      * @param message                  Message of the test running
+     * @param headers
      * @throws Exception
      */
     private void testHttpRequestWithExpectedResult(String uri, HttpMethod httpMethod,
                                                    HttpStatus httpStatusExpectedResult, String requestPayloadPath,
                                                    String expectedResultPath, JsonResponseTypeEnum resulType,
-                                                   final String message, MultiValueMap<String, String> parameters) throws Exception {
+                                                   final String message, MultiValueMap<String, String> parameters, HttpHeaders headers) throws Exception {
 
+        if (parameters == null) {
+            parameters = new LinkedMultiValueMap<>();
+        }
+        if (headers == null) {
+            headers = new HttpHeaders();
+        }
         List<PartnerMeta> partnerListMocked = createMockedPartnerList();
         GlobalView globalViewMocked = createMockedGlobalView();
         PartnerZone partnerZoneMocked = createMockedPartnerZone();
@@ -819,8 +851,8 @@ class ApiControllerTest extends ApiITTestCase {
 
 
         // mock all operations with a stub object from createMocked functions
-        doReturn(partnerListMocked).when(mockPartnerServiceImpl).getPartnersMeta();
-        doReturn(partnerListMocked).when(mockPartnerServiceImpl).getPartnersMetaByType(any());
+        doReturn(partnerListMocked).when(mockPartnerServiceImpl).getPartnersMetaByPartnerType(any(), any());
+        doReturn(partnerListMocked).when(mockPartnerServiceImpl).getPartnersMetaByExample(any(), any());
         doReturn(partnerListMocked.get(0)).when(mockPartnerServiceImpl).getPartnerMeta(any());
         doReturn(globalViewMocked).when(mockIVServiceImpl).getGlobalView();
         doReturn(globalViewMocked).when(mockIVServiceImpl).getAroundMe(any());
@@ -854,7 +886,7 @@ class ApiControllerTest extends ApiITTestCase {
 
         // trigger the call and check expected encoding and http status code
         String content;
-        if (parameters == null || parameters.isEmpty()) {
+        if (parameters.isEmpty() && headers.isEmpty()) {
             if (responseContentType != null && expectedResultPath != null) {
                 content = this.mockMvc.
                         perform(requestBuilder)
@@ -870,7 +902,7 @@ class ApiControllerTest extends ApiITTestCase {
             if (expectedResultPath != null) {
                 switch (httpMethod) {
                     case GET:
-                        content = this.mockMvc.perform(get("" + uri).params(parameters)).andExpect(mockResultMatcher).andExpect(MockMvcResultMatchers.content().contentType(responseContentType)).andReturn().getResponse().getContentAsString();
+                        content = this.mockMvc.perform(get("" + uri).headers(headers).params(parameters)).andExpect(mockResultMatcher).andExpect(MockMvcResultMatchers.content().contentType(responseContentType)).andReturn().getResponse().getContentAsString();
                         break;
                     case PATCH:
                         content = this.mockMvc.perform(patch("" + uri).params(parameters)).andExpect(mockResultMatcher).andReturn().getResponse().getContentAsString();

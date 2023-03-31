@@ -40,7 +40,7 @@ public class GatewayParamsController {
         this.gatewayParamsService = gatewayParamsService;
     }
 
-    @Operation(summary = "Create GatewayParams", description = "Create the specified GatewayParams", tags = {
+    @Operation(summary = "Create a specified gateway parameter.", description = "Route used to create a gateway parameter specified by a key and a value.", tags = {
             GATEWAY_PARAMS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -56,7 +56,7 @@ public class GatewayParamsController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified GatewayParams", description = "Get GatewayParams by specified paramKey", tags = {
+    @Operation(summary = "Retrieve the value of a specified gateway parameter.", description = "Route used to retrieve the value of a gateway parameter specified by its key.", tags = {
             GATEWAY_PARAMS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -72,7 +72,7 @@ public class GatewayParamsController {
 
     }
 
-    @Operation(summary = "Delete specified GatewayParams", description = "Delete GatewayParams by specified paramKey", tags = {
+    @Operation(summary = "Delete a specified gateway parameter.", description = "Route used to delete a gateway parameter specified by its key.", tags = {
             GATEWAY_PARAMS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -87,7 +87,7 @@ public class GatewayParamsController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All GatewayParams", description = "Get the list of all GatewayParams", tags = {
+    @Operation(summary = "Retrieve the key and value of all gateway parameters.", description = "Route used to retrieve the key and value of all gateway parameters.", tags = {
             GATEWAY_PARAMS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response Ok"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -103,7 +103,7 @@ public class GatewayParamsController {
 
     }
 
-    @Operation(summary = "Update specified GatewayParams", description = "Update the specified GatewayParams", tags = {
+    @Operation(summary = "Update the value of a specified gateway parameter.", description = "Route used to update the value of a gateway parameter specified by its key.", tags = {
             GATEWAY_PARAMS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

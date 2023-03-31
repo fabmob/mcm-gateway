@@ -42,7 +42,7 @@ public class DataMapperController {
         this.dataMapperService = datamapperService;
     }
 
-    @Operation(summary = "Create specified DataMapper", description = "Description Create the specified DataMapper", tags = {
+    @Operation(summary = "Create data mappers for partner actions.", description = "Route used to create one or several data mappers for one or several partner actions.", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -61,7 +61,7 @@ public class DataMapperController {
         return new ResponseEntity<>(mapperList, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Data Mapper", description = "Description Get the specified Data Mapper", tags = {
+    @Operation(summary = "Retrieve a specified data mapper.", description = "Route used to retrieve a specified data mapper.", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -77,7 +77,7 @@ public class DataMapperController {
 
     }
 
-    @Operation(summary = "Delete specified DataMapper", description = "Description delete the specified DataMapper", tags = {
+    @Operation(summary = "Delete a specified data mapper.", description = "Route used to delete a specified data mapper.", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -92,7 +92,7 @@ public class DataMapperController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All DataMapper or Get By PartnerActionsId", description = "Returns the list of DataMappers", tags = {
+    @Operation(summary = "Retrieve all data mappers for all or a specified partner action.", description = "Route used to retrieve all data mappers for all partner actions or for a specified partner action.", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response Ok"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -114,7 +114,7 @@ public class DataMapperController {
 
     }
 
-    @Operation(summary = "Update specified DataMapper", description = "Description Update the specified DataMapper", tags = {
+    @Operation(summary = "Update a specified data mapper.", description = "Route used to update a specified data mapper.", tags = {
             DATA_MAPPER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

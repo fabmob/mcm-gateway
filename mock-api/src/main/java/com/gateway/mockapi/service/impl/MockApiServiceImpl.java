@@ -59,7 +59,7 @@ public class MockApiServiceImpl implements MockApiService {
                 body = Files.readString(responsePath);
             } catch (IOException e) {
                 log.error(MessageFormat.format(ERROR_MOCKS_DURING_FILE_READ,
-                        CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER), e.getMessage()), e);
+                        CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER), e.getMessage()), e);
                 throw new InternalException(e.getMessage());
             }
         }

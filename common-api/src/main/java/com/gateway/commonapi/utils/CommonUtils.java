@@ -10,6 +10,7 @@ import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.utils.enums.FormatFunctions;
+import com.gateway.commonapi.utils.enums.PartnerTypeRequestHeader;
 import com.gateway.commonapi.utils.enums.StandardEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.StringSubstitutor;
@@ -36,7 +37,6 @@ public class CommonUtils {
     }
 
     public static final String FORMAT_REGEXP = "([A-Z_]*)(\\()(.*)(\\))";
-    public static final String VALUE = "value";
     public static final String PARAMS_SEPARATOR = ",";
     public static final String KEY_VALUE_SEPARATOR = "=";
 
@@ -125,6 +125,21 @@ public class CommonUtils {
         String correlationId = new ThreadLocalUserSession().get().getContextId();
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+        StandardEnum outPutStandard = new ThreadLocalUserSession().get().getOutPutStandard();
+        if (outPutStandard != null) {
+            httpHeaders.set(GlobalConstants.OUTPUT_STANDARD, outPutStandard.toString());
+        }
+        String validCodes = new ThreadLocalUserSession().get().getValidCodes();
+        if (validCodes != null && !validCodes.isEmpty()) {
+            httpHeaders.set(GlobalConstants.VALID_CODES, validCodes);
+        }
+        return new HttpEntity<>(httpHeaders);
+    }
+
+    public static HttpEntity<String> setHeaders(PartnerTypeRequestHeader callerPartnerType) {
+        String correlationId = new ThreadLocalUserSession().get().getContextId();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
         StandardEnum outpuStandard = new ThreadLocalUserSession().get().getOutPutStandard();
         if (outpuStandard != null) {
             httpHeaders.set(GlobalConstants.OUTPUT_STANDARD, outpuStandard.toString());
@@ -132,6 +147,9 @@ public class CommonUtils {
         String validCodes = new ThreadLocalUserSession().get().getValidCodes();
         if (validCodes != null && !validCodes.isEmpty()) {
             httpHeaders.set(GlobalConstants.VALID_CODES, validCodes);
+        }
+        if (callerPartnerType != null) {
+            httpHeaders.set("X-PARTNER-TYPE", callerPartnerType.value);
         }
         return new HttpEntity<>(httpHeaders);
     }

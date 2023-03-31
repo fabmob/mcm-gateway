@@ -54,7 +54,7 @@ public class AdaptersDatabaseServiceImpl implements AdaptersDatabaseService {
      */
     @Override
     public Adapters addAdapter(Adapters adapter) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         Adapters postedAdapter;
         try {

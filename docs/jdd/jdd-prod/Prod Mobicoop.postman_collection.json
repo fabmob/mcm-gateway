@@ -1,0 +1,802 @@
+{
+  "info": {
+    "_postman_id": "56cdc884-e28c-4cd4-9d48-c7be78b4cab0",
+    "name": "Prod Mobicoop",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "22328767"
+  },
+  "item": [
+    {
+      "name": "Init Msp Covoiturage IV",
+      "item": [
+        {
+          "name": "create msp meta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.environment.set(\"partnerId\", jsonData.partnerId);\r",
+                  "pm.environment.get(\"variable_key\");\r",
+                  "\r",
+                  "pm.test(\"Status code is 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"partnerType\":\"MSP\",\r\n  \"hasVehicle\": false,\r\n  \"hasStation\": false,\r\n  \"hasStationStatus\": false,\r\n  \"hasOperatingZone\": false,\r\n  \"hasNoParkingZone\": false,\r\n  \"hasPrefParkingZone\": false,\r\n  \"hasSpeedLimitZone\": false,\r\n  \"hasParking\": false,\r\n  \"hasHold\": false,\r\n  \"hasVehicleTypes\": false,\r\n  \"hasPricingPlan\": false,\r\n  \"hasPing\": false,\r\n  \"hasCarpoolingBookingPost\": false,\r\n  \"hasCarpoolingBookingPatch\": false,\r\n  \"hasCarpoolingBookingGet\": false,\r\n  \"hasCarpoolingDriverJourney\": true,\r\n  \"hasCarpoolingPassengerJourney\": true,\r\n  \"hasCarpoolingDriverTrip\": true,\r\n  \"hasCarpoolingPassengerTrip\": true,\r\n  \"hasCarpoolingMessages\": false,\r\n  \"hasCarpoolingStatus\": false,\r\n  \"hasCarpoolingBookingEvent\" : false,\r\n  \"hasAroundMe\": false,\r\n  \"urlWebview\": true,\r\n  \"name\": \"Mobicoop\",\r\n  \"operator\": \"mobicoop.fr\",\r\n  \"type\": \"CARPOOLING\",\r\n  \"url\": \"https://interop.mobicoop.fr\",\r\n  \"logoUrl\": null,\r\n  \"logoFormat\": null,\r\n  \"primaryColor\": \"#0054BB\",\r\n  \"secondaryColor\": \"#0054BB\",\r\n  \"priceList\": null,\r\n  \"isEnabled\": true\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/partner-metas",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "partner-metas"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "create adapter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = pm.response.json();\r",
+                  "pm.environment.set(\"adapterId\", jsonData.adapterId);\r",
+                  "\r",
+                  "pm.test(\"Status code is 201 OR 500 if adapter already exists\", function () {\r",
+                  "    console.log(pm.response.json().description);\r",
+                  "    if (pm.response.code==500) {\r",
+                  "        pm.expect(pm.response.json().description).to.include(\"duplicate value\");\r",
+                  "    } else {\r",
+                  "        pm.response.to.have.status(201);\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"adapterName\": \"default-adapter\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{URL}}/adapters",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "adapters"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Init JDD adapter",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var jsonData = JSON.parse(responseBody);\r",
+                  "\r",
+                  "for(var i=0; i< jsonData.length; i++) {\r",
+                  "    console.log(jsonData[i].adapterName);\r",
+                  "    console.log(jsonData[i].adapterId);\r",
+                  "\r",
+                  "    if(jsonData[i].adapterName === \"default-adapter\") {\r",
+                  "        postman.setEnvironmentVariable(\"adapterId\", jsonData[i].adapterId);\r",
+                  "        console.log(\"adapter found \"+jsonData[i].adapterId);\r",
+                  "    }\r",
+                  "}\r",
+                  "\r",
+                  "pm.test(\"Status code is 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "X-API-KEY",
+                "value": "{{API_KEY}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{URL}}/adapters",
+              "host": [
+                "{{URL}}"
+              ],
+              "path": [
+                "adapters"
+              ]
+            }
+          },
+          "response": []
+        }
+      ],
+      "description": "Le dossier init Covoiturage crée un partenaire MSP du standard Covoiturage. Ainsi qu'un adaptateur indiquant quel adapteur doit être utilisé dans la Gateway, ici : 'default-adapter'.  \nSi jamais cet adaptateur est déjà créé, alors on le récupère via le GET. Ces données sont utilisées pour toutes les actions(dossiers) suivantes."
+    },
+    {
+      "name": "Covoiturage IV Mobicoop",
+      "item": [
+        {
+          "name": "Driver-journeys-endpoint",
+          "item": [
+            {
+              "name": "create action",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "pm.environment.set(\"DRIVER_JOURNEYS_actionId\", jsonData.partnerActionId);\r",
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Mobicoop\",\r\n  \"action\": \"DRIVER_JOURNEYS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0,\r\n  \"selector\": null\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-actions",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-actions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create call",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"url\": \"https://interop.mobicoop.fr/driver_journeys\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{DRIVER_JOURNEYS_actionId}}\",\r\n      \"body\": null,\r\n      \"headers\": [\r\n       {\r\n      \"key\": \"x-api-key\",\r\n      \"sensitive\": 1,\r\n      \"value\": \"xxxxxxxxxxx\"\r\n      }\r\n    ],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-calls",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-calls"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create standard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{DRIVER_JOURNEYS_actionId}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-standards",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-standards"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Passenger-journeys-endpoint",
+          "item": [
+            {
+              "name": "create action",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "pm.environment.set(\"PASSENGER_JOURNEYS_action-id\", jsonData.partnerActionId);\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Mobicoop\",\r\n  \"action\": \"PASSENGER_JOURNEYS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-actions",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-actions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create call",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"url\": \"https://interop.mobicoop.fr/passenger_journeys\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{PASSENGER_JOURNEYS_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [\r\n      {\r\n        \"key\": \"x-api-key\",\r\n        \"sensitive\": 1,\r\n        \"value\": \"xxxxxxxxxxx\"  \r\n      }\r\n    ],\r\n      \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-calls",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-calls"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create standard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{PASSENGER_JOURNEYS_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-standards",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-standards"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "description": "Création de l'action PASSENGER_JOURNEYS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /passenger-journeys pour le MSP Covoiturage créé."
+        },
+        {
+          "name": "Driver-regular-trips-endpoint",
+          "item": [
+            {
+              "name": "create action",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "pm.environment.set(\"DRIVER_REGULAR_TRIPS_action-id\", jsonData.partnerActionId);\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Mobicoop\",\r\n  \"action\": \"DRIVER_REGULAR_TRIPS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-actions",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-actions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create call",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"url\": \"https://interop.mobicoop.fr/driver_regular_trips\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{DRIVER_REGULAR_TRIPS_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [\r\n      {\r\n        \"key\": \"x-api-key\",\r\n        \"sensitive\": 1,\r\n        \"value\": \"xxxxxxxxxxxx\"  \r\n      }\r\n    ],\r\n        \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureTimeOfDay\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureTimeOfDay\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },{\r\n        \"key\": \"departureWeekdays\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureWeekdays\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"minDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"minDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"maxDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"maxDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-calls",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-calls"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create standard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{DRIVER_REGULAR_TRIPS_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-standards",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-standards"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "description": "Création de l'action DRIVER_TRIPS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /driver-regular-trips pour le MSP Covoiturage créé."
+        },
+        {
+          "name": "Passenger-regular-trips-endpoint",
+          "item": [
+            {
+              "name": "create action",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "var jsonData = pm.response.json();\r",
+                      "pm.environment.set(\"PASSENGER_REGULAR_TRIP_action-id\", jsonData.partnerActionId);\r",
+                      "\r",
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Mobicoop\",\r\n  \"action\": \"PASSENGER_REGULAR_TRIPS_SEARCH\",\r\n  \"isAuthentication\": false,\r\n  \"isRefreshAuthentication\": 0,\r\n  \"isPagination\": 0,\r\n  \"selector\": {\r\n    \"key\": \"null\",\r\n    \"value\": null\r\n  }\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-actions",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-actions"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create call",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"url\": \"https://interop.mobicoop.fr/passenger_regular_trips\",\r\n      \"method\": \"GET\",\r\n      \"isMocked\": 1,\r\n      \"nbCalls\": 1,\r\n      \"executionOrder\": 1,\r\n      \"partnerActionId\": \"{{PASSENGER_REGULAR_TRIP_action-id}}\",\r\n      \"body\": null,\r\n      \"headers\": [\r\n      {\r\n        \"key\": \"x-api-key\",\r\n        \"sensitive\": 1,\r\n        \"value\": \"xxxxxxxxxxxxxx\"  \r\n      }\r\n    ],\r\n        \"params\": [\r\n      {\r\n        \"key\": \"departureLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLat\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLat\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalLng\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"arrivalLng\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureTimeOfDay\",\r\n        \"sensitive\": 0,\r\n        \"value\": null,\r\n        \"keyMapper\": \"departureTimeOfDay\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },{\r\n        \"key\": \"departureWeekdays\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureWeekdays\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"timeDelta\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"timeDelta\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"departureRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"departureRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"arrivalRadius\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"arrivalRadius\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"minDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"minDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"maxDepartureDate\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"maxDepartureDate\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      },\r\n      {\r\n        \"key\": \"count\",\r\n        \"sensitive\": 0,\r\n        \"value\": \"null\",\r\n        \"keyMapper\": \"count\",\r\n        \"precision\": null,\r\n        \"timezone\": null\r\n      }\r\n    ],\r\n    \"paramsMultiCalls\": []\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-calls",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-calls"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "create standard",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "\r",
+                      "pm.test(\"Status code is 201\", function () {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "X-API-KEY",
+                    "value": "{{API_KEY}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n      \"standardName\": \"standard-covoiturage\",\r\n      \"isActive\": true,\r\n      \"versionStandard\": \"V1\",\r\n      \"versionDataMapping\": \"V1.0\",\r\n      \"partnerId\": \"{{partnerId}}\",\r\n      \"partnerActionsId\": \"{{PASSENGER_REGULAR_TRIP_action-id}}\",\r\n      \"adaptersId\": \"{{adapterId}}\"\r\n    }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{URL}}/partner-standards",
+                  "host": [
+                    "{{URL}}"
+                  ],
+                  "path": [
+                    "partner-standards"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ],
+          "description": "Création de l'action PASSENGER_TRIPS_SEARCH et des données associées (action, call, standard). Ici il n'y a pas de datamapper car le MSP appelé suit déjà le standard Covoiturage (passe plat sur les réponses), et pas de cache-param car les données ne sont pas cachables.\n\nL'insertion de cette action permet l'utilisation du endpoint GET /passenger-regular-trips pour le MSP Covoiturage créé."
+        }
+      ],
+      "description": "Le dossier Covoiturage insère en base un MSP du standard Covoiturage et sa configuration complète pour supporter les actions associées à tous les endpoints Covoiturage.\n\nLe sous dossier Init Covoiturage initialise le MSP, puis chacun des autres dossiers suivants (Driver-journeys-endpoint, Passenger-journeys-endpoint...) permet l'insertion du datamapping complet d'un service pour ce MSP (action, datamapper, call, standard, cacheParam)."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "URL",
+      "value": "https://apim-gateway.preprod-gw.moncomptemobilite.fr/dataapi/v1",
+      "type": "string",
+      "disabled": true
+    },
+    {
+      "key": "API_KEY",
+      "value": "54bf26f2-6cde-4215-9402-55e2cf3f0485",
+      "type": "string",
+      "disabled": true
+    },
+    {
+      "key": "URL",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "API_KEY",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

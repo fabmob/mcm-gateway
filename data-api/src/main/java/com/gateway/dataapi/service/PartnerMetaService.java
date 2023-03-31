@@ -2,7 +2,7 @@ package com.gateway.dataapi.service;
 
 import com.gateway.commonapi.dto.data.PartnerMetaDTO;
 import com.gateway.commonapi.exception.NotFoundException;
-import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
+import com.gateway.database.model.PartnerMeta;
 
 import java.util.List;
 import java.util.Map;
@@ -12,19 +12,8 @@ import java.util.UUID;
  * data Mapping interface between the PartnerMeta object in the database and the one exposed by the web service
  */
 public interface PartnerMetaService {
-    /**
-     * Retrieve a list of PartnerMeta transported into PartnerMetaDTO
-     *
-     * @return List of  PartnerMetaDTO
-     */
-    List<PartnerMetaDTO> getPartnerMetasByPartnerType(PartnerTypeEnum partnerType);
 
-    /**
-     * Retrieve a list of PartnerMeta transported into PartnerMetaDto
-     *
-     * @return List of  PartnerMetaDTO
-     */
-    List<PartnerMetaDTO> getPartnerMetas();
+    List<PartnerMetaDTO> getPartnerMetasByExample(PartnerMeta partnerMetaExample);
 
     /**
      * Retrieve a PartnerMetaDto information.

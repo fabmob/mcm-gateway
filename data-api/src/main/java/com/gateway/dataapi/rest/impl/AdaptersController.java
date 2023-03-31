@@ -35,7 +35,7 @@ public class AdaptersController {
         this.adaptersService = adaptersService;
     }
 
-    @Operation(summary = "Create specified Adapter", description = "Description Create the specified Adapter", tags = {
+    @Operation(summary = "Create an adapter.", description = "Route used to create an adapter specified by a name.", tags = {
             ADAPTERS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -51,7 +51,7 @@ public class AdaptersController {
         return new ResponseEntity<>(adapters, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Adapter", description = "Description Get the specified Adapter", tags = {
+    @Operation(summary = "Retrieve details for a specified adapter.", description = "Route used to retrieve details for a specified adapter.", tags = {
             ADAPTERS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -66,7 +66,7 @@ public class AdaptersController {
         return ResponseEntity.ok(adapter);
     }
 
-    @Operation(summary = "Remove specified Adapter", description = "Description delete the specified Adapter", tags = {
+    @Operation(summary = "Delete details for a specified adapter.", description = "Route used to delete details for a specified adapter.", tags = {
             ADAPTERS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -75,14 +75,14 @@ public class AdaptersController {
             @ApiResponse(responseCode = "500", description = INTERNAL_SERVER_ERROR, content = @Content(schema = @Schema(implementation = GenericError.class))),
             @ApiResponse(responseCode = "502", description = BAD_GATEWAY, content = @Content(schema = @Schema(implementation = BadGateway.class)))})
     @DeleteMapping(value = ADAPTER_PATH, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.ALL_VALUE)
-    public ResponseEntity<Object> deleteAction(@PathVariable(name = "id") UUID id) {
+    public ResponseEntity<Object> deleteAdapter(@PathVariable(name = "id") UUID id) {
         log.info(DELETE_ADAPTER);
         adaptersService.deleteAdapters(id);
         return ResponseEntity.noContent().build();
     }
 
 
-    @Operation(summary = "Get all Adapters", description = "Returns the list of Adapters", tags = {
+    @Operation(summary = "Retrieve details for all managed adapters.", description = "Route used to retrieve details for all managed adapters.", tags = {
             ADAPTERS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

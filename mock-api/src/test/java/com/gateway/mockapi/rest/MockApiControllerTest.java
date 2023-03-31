@@ -23,6 +23,7 @@ import org.springframework.web.context.WebApplicationContext;
 import static com.gateway.mockapi.utils.constant.MockApiPathDict.MOCK_API_PATH;
 import static com.gateway.mockapi.utils.constant.MockApiPathDict.MOCK_OPERATION_NAME;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 
 /**
@@ -54,14 +55,25 @@ class MockApiControllerTest extends MockApiITTestCase {
 
     @Test
     void testImplementedMockResponses() throws Exception {
-        assertEquals("{}", this.testHttpControllerCall(HttpMethod.GET, "200/response.json", 200));
-        assertEquals("{}", this.testHttpControllerCall(HttpMethod.POST, "200/response.json", 200));
-        assertEquals("{}", this.testHttpControllerCall(HttpMethod.PUT, "200/response.json", 200));
-        assertEquals("{}", this.testHttpControllerCall(HttpMethod.PATCH, "200/response.json", 200));
-        assertEquals("{}", this.testHttpControllerCall(HttpMethod.DELETE, "200/response.json", 200));
+        assertEquals("{}", this.testHttpControllerCall(HttpMethod.GET, "200/response.json", 200, 0));
+        assertEquals("{}", this.testHttpControllerCall(HttpMethod.POST, "200/response.json", 200, 0));
+        assertEquals("{}", this.testHttpControllerCall(HttpMethod.PUT, "200/response.json", 200, 0));
+        assertEquals("{}", this.testHttpControllerCall(HttpMethod.PATCH, "200/response.json", 200, 0));
+        assertEquals("{}", this.testHttpControllerCall(HttpMethod.DELETE, "200/response.json", 200, 0));
     }
 
-    private String testHttpControllerCall(HttpMethod method, String mockPath, int expectedResponseCode) throws Exception {
+    @Test
+    void testImplementedMockDelayResponses() throws Exception {
+        long chronoStart = java.lang.System.currentTimeMillis();
+        this.testHttpControllerCall(HttpMethod.GET, "200/response.json", 200, 2500);
+        long chronoEnd = java.lang.System.currentTimeMillis();
+        long duration = chronoEnd - chronoStart;
+        log.info("Method responded in : " + duration + "ms");
+        assertTrue(chronoEnd - chronoStart > 2500);
+
+    }
+
+    private String testHttpControllerCall(HttpMethod method, String mockPath, int expectedResponseCode, Integer delay) throws Exception {
         MediaType responseContentType = MediaType.APPLICATION_JSON;
         ResultMatcher mockResultMatcher = WsTestUtil.getResultMatcher(HttpStatus.valueOf(expectedResponseCode));
         MockHttpServletRequestBuilder requestBuilder = WsTestUtil.getMockHttpServletRequestBuilder("", MOCK_API_PATH + "/" + MOCK_OPERATION_NAME, method, "");
@@ -70,7 +82,7 @@ class MockApiControllerTest extends MockApiITTestCase {
         Mockito.when(service.getMockedBody(anyString())).thenReturn("{}");
 
         return this.mockMvc.
-                perform(requestBuilder.header("mock-path", mockPath))
+                perform(requestBuilder.header("mock-path", mockPath).header("mock-delay", delay))
                 .andExpect(mockResultMatcher)
                 .andExpect(MockMvcResultMatchers.content().contentType(responseContentType))
                 .andReturn()

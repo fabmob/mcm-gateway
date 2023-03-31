@@ -44,7 +44,7 @@ public class DefaultAdapterController {
     @Autowired
     private DefaultAdapterService defaultAdapterService;
 
-    @Operation(summary = "Default GET request adapter ", description = "Convert a maas request regarding datamapping into the partner format", tags = {
+    @Operation(summary = "Retrieve an adapter for specified action and partner.", description = "Route used to retrieve an adapter for specified action and partner and, if specified, the standard used for output error and a valid code.", tags = {
             "adapter"})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -69,7 +69,7 @@ public class DefaultAdapterController {
     }
 
 
-    @Operation(summary = "Default POST request adapter ", description = "Convert a maas request regarding datamapping into the partner format", tags = {
+    @Operation(summary = "Create an adapter for specified action and partner.", description = "Route used to create an adapter for specified action and partner and, if specified, the standard used for output error and a valid code. The adapter converts a MaaS request regarding datamapping into the partner format.", tags = {
             "adapter"})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

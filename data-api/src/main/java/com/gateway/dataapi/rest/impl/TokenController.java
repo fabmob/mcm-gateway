@@ -41,7 +41,7 @@ public class TokenController {
      * @param token to add
      * @return the token posted
      */
-    @Operation(summary = "Create specified Token", description = "Description Create the specified Token", tags = {
+    @Operation(summary = "Create a token for a specified partner and a specified access token.", description = "Route used to create a token for a specified partner and a specified access token with an expiration date.", tags = {
             TOKENS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -57,7 +57,7 @@ public class TokenController {
         return new ResponseEntity<>(newToken, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Token", description = "Description Get the specified Token", tags = {
+    @Operation(summary = "Retrieve data for a specified token.", description = "Route used to retrieve data for a specified token.", tags = {
             TOKENS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -73,7 +73,7 @@ public class TokenController {
 
     }
 
-    @Operation(summary = "Remove Token", description = "Description Delete the specified Token", tags = {TOKENS_TAG})
+    @Operation(summary = "Delete a specified token.", description = "Route used to delete a specified token.", tags = {TOKENS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response OK", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -87,7 +87,7 @@ public class TokenController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get Token By PartnerMetaId", description = "Description list of Tokens", tags = {TOKENS_TAG})
+    @Operation(summary = "Retrieve token data for a specified partner.", description = "Route used to retrieve token data for a specified partner.", tags = {TOKENS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),

@@ -55,7 +55,7 @@ public class RequestRelayController {
      */
 
 
-    @Operation(summary = "Relay requests to partners", description = "Execute request received from adaptor process")
+    @Operation(summary = "Create a request relay for a specified protocol.", description = "Route used to create a request relay for a specified protocol and, if specified, the standard used for output error and a valid code. The request relay executes the request received from the adaptor process.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(schema = @Schema(implementation = BadRequest.class))),

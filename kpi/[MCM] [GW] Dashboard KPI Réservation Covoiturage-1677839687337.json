@@ -1,0 +1,1537 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    },
+    {
+      "name": "DS_[ELASTICSEARCH]_JSON API",
+      "label": "[ElasticSearch] JSON API",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "marcusolsson-json-datasource",
+      "pluginName": "JSON API"
+    },
+    {
+      "name": "DS_POSTGRESQL",
+      "label": "PostgreSQL",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "postgres",
+      "pluginName": "PostgreSQL"
+    }
+  ],
+  "__elements": {},
+  "__requires": [
+    {
+      "type": "panel",
+      "id": "barchart",
+      "name": "Bar chart",
+      "version": ""
+    },
+    {
+      "type": "grafana",
+      "id": "grafana",
+      "name": "Grafana",
+      "version": "9.1.4"
+    },
+    {
+      "type": "panel",
+      "id": "marcusolsson-dynamictext-panel",
+      "name": "Dynamic Text",
+      "version": "2.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "marcusolsson-json-datasource",
+      "name": "JSON API",
+      "version": "1.3.2"
+    },
+    {
+      "type": "datasource",
+      "id": "postgres",
+      "name": "PostgreSQL",
+      "version": "1.0.0"
+    },
+    {
+      "type": "datasource",
+      "id": "prometheus",
+      "name": "Prometheus",
+      "version": "1.0.0"
+    },
+    {
+      "type": "panel",
+      "id": "text",
+      "name": "Text",
+      "version": ""
+    }
+  ],
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 4,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 6,
+            "x": 0,
+            "y": 1
+          },
+          "id": 6,
+          "options": {
+            "content": "# Aujoud'hui",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 18,
+            "x": 6,
+            "y": 1
+          },
+          "id": 26,
+          "options": {
+            "content": "# Sur les 30 derniers jours",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 3
+          },
+          "id": 2,
+          "maxPerRow": 2,
+          "options": {
+            "content": "<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "repeat": "bookingType",
+          "repeatDirection": "v",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"$bookingType\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.hits.total.value",
+                  "name": "count"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": "Réservations effectuées en $bookingType",
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 6,
+            "y": 3
+          },
+          "id": 11,
+          "options": {
+            "content": "<h3>Sommes :</h3>\n\n- Nombre de réservations confirmées effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_full_api}}</span>  réservations sur 30 jours\n\n- Nombre de réservations confirmées effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_deeplink}}</span>  réservations sur 30 jours",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{ \r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n     \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n     \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n     }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].doc_count",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 15,
+            "y": 3
+          },
+          "id": 24,
+          "options": {
+            "content": "<h3>Moyennes journalières : </h3>\n\n- Nombre de réservations confirmées effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_full_api 2}}</span>  réservations sur 30 jours\n\n- Nombre de réservations confirmées effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_deeplink 2}}</span>  réservations sur 30 jours",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{ \r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      },\r\n       \"aggs\": {\r\n        \"histo-by-reservation\": {\r\n          \"sum_bucket\": {\r\n            \"buckets_path\": \"histo-by-reservation-bucket>_count\"\r\n          }\r\n        },\r\n        \"moyenne\": {\r\n          \"bucket_script\": {\r\n            \"buckets_path\": {\r\n              \"somme_mensuelle\": \"histo-by-reservation\"\r\n            },\r\n            \"script\": \"params.somme_mensuelle/30\"\r\n          }\r\n        },\r\n        \"histo-by-reservation-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 1\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n     \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    }, \r\n     \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n     }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].moyenne.value",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 7
+          },
+          "id": 9,
+          "options": {
+            "content": "<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.hits.total.value",
+                  "name": "count"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": "Total des réservations confirmées ",
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "msp1": {
+                      "index": 0,
+                      "text": "covoiturage"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 9,
+            "x": 6,
+            "y": 8
+          },
+          "id": 63,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"MAAS\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-partner-id\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-partner-id\"\r\n      },\r\n            \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"now-30d\",\r\n              \"max\": \"now\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        } \r\n      }\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"483346e1-95df-46fc-b70d-77b3f3acaddf\")].histo-by-msp-bucket.buckets[*].key",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"483346e1-95df-46fc-b70d-77b3f3acaddf\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Coopgo"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Mobicoop"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations confirmées effectuées en full api sur les derniers 30 jours",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [
+                {
+                  "options": {
+                    "msp1": {
+                      "index": 0,
+                      "text": "covoiturage"
+                    }
+                  },
+                  "type": "value"
+                }
+              ],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": null
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 9,
+            "x": 15,
+            "y": 8
+          },
+          "id": 61,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"MSP\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-partner-id\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-partner-id\"\r\n      },\r\n            \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"now-30d\",\r\n              \"max\": \"now\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        } \r\n      }\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"483346e1-95df-46fc-b70d-77b3f3acaddf\")].histo-by-msp-bucket.buckets[*].key",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Klaxit"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations confirmées effectuées en deeplink sur les derniers 30 jours",
+          "type": "barchart"
+        }
+      ],
+      "title": "Réservations confirmées (tous MSP confondus)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 15,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 6,
+            "x": 0,
+            "y": 2
+          },
+          "id": 25,
+          "options": {
+            "content": "# Aujoud'hui",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${DS_PROMETHEUS}"
+          },
+          "gridPos": {
+            "h": 2,
+            "w": 18,
+            "x": 6,
+            "y": 2
+          },
+          "id": 7,
+          "options": {
+            "content": "# Sur les 30 derniers jours",
+            "mode": "markdown"
+          },
+          "pluginVersion": "9.1.4",
+          "type": "text"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 4
+          },
+          "id": 17,
+          "options": {
+            "content": "<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "repeat": "bookingType",
+          "repeatDirection": "v",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"$bookingType\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.hits.total.value",
+                  "name": "count"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": "Réservations effectuées en $bookingType",
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 6,
+            "y": 4
+          },
+          "id": 27,
+          "options": {
+            "content": "<h3>Sommes :</h3>\n\n- Nombre de réservations soumises effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_full_api}}</span>  réservations sur 30 jours\n\n- Nombre de réservations soumises effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_deeplink}}</span>  réservations sur 30 jours",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{ \r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n     \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n     \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n     }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].doc_count",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].doc_count",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 5,
+            "w": 9,
+            "x": 15,
+            "y": 4
+          },
+          "id": 12,
+          "options": {
+            "content": "<h3>Moyennes journalières : </h3>\n\n- Nombre de réservations soumises effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_full_api 2}}</span>  réservations sur 30 jours\n\n- Nombre de réservations soumises effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_deeplink 2}}</span>  réservations sur 30 jours",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{ \r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      },\r\n       \"aggs\": {\r\n        \"histo-by-reservation\": {\r\n          \"sum_bucket\": {\r\n            \"buckets_path\": \"histo-by-reservation-bucket>_count\"\r\n          }\r\n        },\r\n        \"moyenne\": {\r\n          \"bucket_script\": {\r\n            \"buckets_path\": {\r\n              \"somme_mensuelle\": \"histo-by-reservation\"\r\n            },\r\n            \"script\": \"params.somme_mensuelle/30\"\r\n          }\r\n        },\r\n        \"histo-by-reservation-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 1\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n     \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].moyenne.value",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 6,
+            "x": 0,
+            "y": 8
+          },
+          "id": 21,
+          "options": {
+            "content": "<div style=\"text-align:center; font-size: 45px\">\n<span style=\"color: rgb(115, 191, 105);font-weight:bold;\">{{count}}</span>\n</div>",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "pluginVersion": "9.1.4",
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0,\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now/d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.hits.total.value",
+                  "name": "count"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": "Total des réservations soumises",
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 6,
+            "y": 9
+          },
+          "id": 62,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"MAAS\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-partner-id\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-partner-id\"\r\n      },\r\n            \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"now-30d\",\r\n              \"max\": \"now\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        } \r\n      }\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].key",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Coopgo"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"483346e1-95df-46fc-b70d-77b3f3acaddf\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Mobicoop"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations soumises effectuées en full api sur les derniers 30 jours",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 9,
+            "x": 15,
+            "y": 9
+          },
+          "id": 64,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"size\": 0, \r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"MSP\",\r\n            \"default_field\": \"proxy-request.headers.X-PARTNER-TYPE\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        }\r\n      ]\r\n    }\r\n  },\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-partner-id\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n       \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n       \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-partner-id\"\r\n      },\r\n            \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"now-30d\",\r\n              \"max\": \"now\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        } \r\n      }\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].key",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets[?(@.key == \"8ec79811-81f0-4b34-9d9a-e81681475535\")].histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "Klaxit"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations soumises effectuées en deeplink sur les derniers 30 jours",
+          "type": "barchart"
+        }
+      ],
+      "title": "Réservations soumises (tous MSP confondus)",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 2
+      },
+      "id": 31,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 11,
+            "x": 0,
+            "y": 3
+          },
+          "id": 33,
+          "options": {
+            "content": "<h3>Sommes :</h3>\n\n- Nombre de réservations confirmées effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_full_api}}</span>  réservations \n\n- Nombre de réservations confirmées effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_deeplink}}</span>  réservations",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"filters\": {\r\n        \"filters\": {\r\n          \"MAAS\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n            }\r\n          },\r\n          \"MSP\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets.MAAS.doc_count",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets.MSP.doc_count",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 11,
+            "y": 3
+          },
+          "id": 65,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xField": "jour",
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"filters\": {\r\n        \"filters\": {\r\n          \"MAAS\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n            }\r\n          },\r\n          \"MSP\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n            }\r\n          }\r\n        }\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"${__from:date:iso}\",\r\n              \"max\": \"${__to:date:iso}\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MAAS.histo-by-msp-bucket.buckets[*].key",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MAAS.histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "fullApi"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MSP.histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations confirmées effectuées en full api  et deeplink ",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 11,
+            "x": 0,
+            "y": 7
+          },
+          "id": 34,
+          "options": {
+            "content": "<h3>Moyennes journalières : </h3>\n\n- Nombre de réservations confirmées effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_full_api 2}}</span>  réservations \n\n- Nombre de réservations confirmées effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_deeplink 2}}</span>  réservations",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-reservation\": {\r\n          \"sum_bucket\": {\r\n            \"buckets_path\": \"histo-by-reservation-bucket>_count\"\r\n          }\r\n        },\r\n        \"moyenne\": {\r\n          \"bucket_script\": {\r\n            \"buckets_path\": {\r\n              \"somme_mensuelle\": \"histo-by-reservation\"\r\n            },\r\n            \"script\": \"params.somme_mensuelle/ (( new SimpleDateFormat(\\\"yyyy-MM-dd\\\").parse(\\\"${__to:date:iso}\\\").getTime() - new SimpleDateFormat(\\\"yyyy-MM-dd\\\").parse(\\\"${__from:date:iso}\\\").getTime())/(3600*24*1000)  ) \"\r\n          }\r\n        },\r\n        \"histo-by-reservation-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 1\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"CONFIRMED\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"PATCH\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].moyenne.value",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        }
+      ],
+      "title": "Réservations confirmées par MSP",
+      "type": "row"
+    },
+    {
+      "collapsed": true,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 3
+      },
+      "id": 36,
+      "panels": [
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 11,
+            "x": 0,
+            "y": 4
+          },
+          "id": 37,
+          "options": {
+            "content": "<h3>Sommes :</h3>\n\n- Nombre de réservations soumises effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_full_api}}</span>  réservations \n\n- Nombre de réservations soumises effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{confirmed_deeplink}}</span>  réservations",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"filters\": {\r\n        \"filters\": {\r\n          \"MAAS\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n            }\r\n          },\r\n          \"MSP\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets.MAAS.doc_count",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets.MSP.doc_count",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "fillOpacity": 52,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "lineWidth": 1,
+                "scaleDistribution": {
+                  "type": "linear"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 12,
+            "x": 11,
+            "y": 4
+          },
+          "id": 58,
+          "options": {
+            "barRadius": 0,
+            "barWidth": 1,
+            "groupWidth": 0.37,
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "orientation": "auto",
+            "showValue": "auto",
+            "stacking": "none",
+            "tooltip": {
+              "mode": "multi",
+              "sort": "none"
+            },
+            "xTickLabelRotation": -90,
+            "xTickLabelSpacing": 0
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"group-by-uri\": {\r\n      \"filters\": {\r\n        \"filters\": {\r\n          \"MAAS\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n            }\r\n          },\r\n          \"MSP\": {\r\n            \"term\": {\r\n              \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n            }\r\n          }\r\n        }\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-msp-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 0,\r\n            \"extended_bounds\": {\r\n              \"min\": \"${__from:date:iso}\",\r\n              \"max\": \"${__to:date:iso}\"\r\n            },\r\n            \"order\": {\r\n              \"_key\": \"asc\"\r\n            }\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"client-response.status\": {\r\n              \"lt\": 299,\r\n              \"gte\": 200\r\n            }\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"${__from:date:iso}\",\r\n              \"lt\": \"${__to:date:iso}\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MAAS.histo-by-msp-bucket.buckets[*].key",
+                  "language": "jsonpath",
+                  "name": "jour",
+                  "type": "time"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MAAS.histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "fullApi"
+                },
+                {
+                  "jsonPath": "$.aggregations.group-by-uri.buckets.MSP.histo-by-msp-bucket.buckets[*].doc_count",
+                  "language": "jsonpath",
+                  "name": "deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "title": " Réservations soumises effectuées en full api  et deeplink ",
+          "type": "barchart"
+        },
+        {
+          "datasource": {
+            "type": "marcusolsson-json-datasource",
+            "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+          },
+          "gridPos": {
+            "h": 4,
+            "w": 11,
+            "x": 0,
+            "y": 8
+          },
+          "id": 38,
+          "options": {
+            "content": "<h3>Moyennes journalières : </h3>\n\n- Nombre de réservations soumises effectuées en full api :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_full_api 2}}</span>  réservations \n\n- Nombre de réservations soumises effectuées en deeplink :  <span style=\"color: green;font-weight:bold;font-size: 16px\">{{toFixed confirmed_deeplink 2}}</span>  réservations",
+            "defaultContent": "The query didn't return any results.",
+            "everyRow": true
+          },
+          "targets": [
+            {
+              "body": "{\r\n  \"aggs\": {\r\n    \"reservations\": {\r\n      \"terms\": {\r\n        \"field\": \"proxy-request.headers.X-PARTNER-TYPE\",\r\n        \"order\": {\r\n          \"_count\": \"desc\"\r\n        },\r\n        \"size\": 5\r\n      },\r\n      \"aggs\": {\r\n        \"histo-by-reservation\": {\r\n          \"sum_bucket\": {\r\n            \"buckets_path\": \"histo-by-reservation-bucket>_count\"\r\n          }\r\n        },\r\n        \"moyenne\": {\r\n          \"bucket_script\": {\r\n            \"buckets_path\": {\r\n              \"somme_mensuelle\": \"histo-by-reservation\"\r\n            },\r\n            \"script\": \"params.somme_mensuelle/ (( new SimpleDateFormat(\\\"yyyy-MM-dd\\\").parse(\\\"${__to:date:iso}\\\").getTime() - new SimpleDateFormat(\\\"yyyy-MM-dd\\\").parse(\\\"${__from:date:iso}\\\").getTime())/(3600*24*1000)  ) \"\r\n          }\r\n        },\r\n        \"histo-by-reservation-bucket\": {\r\n          \"date_histogram\": {\r\n            \"field\": \"@timestamp\",\r\n            \"calendar_interval\": \"1d\",\r\n            \"time_zone\": \"Europe/Paris\",\r\n            \"min_doc_count\": 1\r\n          }\r\n        }\r\n      }\r\n    }\r\n  },\r\n  \"size\": 0,\r\n  \"script_fields\": {},\r\n  \"stored_fields\": [\r\n    \"*\"\r\n  ],\r\n  \"runtime_mappings\": {\r\n    \"proxy-request.headers.X-PARTNER-TYPE\": {\r\n      \"type\": \"keyword\"\r\n    },\r\n    \"proxy-request.headers.X-BOOKING-status\": {\r\n      \"type\": \"keyword\"\r\n    }\r\n  },\r\n  \"query\": {\r\n    \"bool\": {\r\n      \"must\": [\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"WAITING_CONFIRMATION\",\r\n            \"default_field\": \"proxy-request.headers.X-BOOKING-status\"\r\n          }\r\n        },\r\n        {\r\n          \"query_string\": {\r\n            \"query\": \"POST\",\r\n            \"default_field\": \"proxy-request.method\"\r\n          }\r\n        }\r\n      ],\r\n      \"filter\": [\r\n        {\r\n          \"match_phrase\": {\r\n            \"client-request.uri\": \"*/${partner_id}*\"\r\n          }\r\n        },\r\n        {\r\n          \"bool\": {\r\n            \"should\": [\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MAAS\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              },\r\n              {\r\n                \"bool\": {\r\n                  \"should\": [\r\n                    {\r\n                      \"match_phrase\": {\r\n                        \"proxy-request.headers.X-PARTNER-TYPE\": \"MSP\"\r\n                      }\r\n                    }\r\n                  ],\r\n                  \"minimum_should_match\": 1\r\n                }\r\n              }\r\n            ],\r\n            \"minimum_should_match\": 1\r\n          }\r\n        },\r\n        {\r\n          \"range\": {\r\n            \"@timestamp\": {\r\n              \"gte\": \"now-30d\",\r\n              \"lt\": \"now\"\r\n            }\r\n          }\r\n        }\r\n      ],\r\n      \"should\": [],\r\n      \"must_not\": []\r\n    }\r\n  }\r\n}",
+              "cacheDurationSeconds": 0,
+              "datasource": {
+                "type": "marcusolsson-json-datasource",
+                "uid": "${DS_[ELASTICSEARCH]_JSON API}"
+              },
+              "fields": [
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MAAS\")].moyenne.value",
+                  "name": "confirmed_full_api"
+                },
+                {
+                  "jsonPath": "$.aggregations.reservations.buckets[?(@.key==\"MSP\")].moyenne.value",
+                  "language": "jsonpath",
+                  "name": "confirmed_deeplink"
+                }
+              ],
+              "method": "POST",
+              "queryParams": "",
+              "refId": "A",
+              "urlPath": "/gravitee-log-*/_search"
+            }
+          ],
+          "type": "marcusolsson-dynamictext-panel"
+        }
+      ],
+      "title": "Réservations soumises par MSP",
+      "type": "row"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [
+    "gateway"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_POSTGRESQL}"
+        },
+        "definition": "select  name from msp.partner_meta order by name asc;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "partner_name",
+        "multi": false,
+        "name": "partner_name",
+        "options": [],
+        "query": "select  name from msp.partner_meta order by name asc;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {},
+        "datasource": {
+          "type": "postgres",
+          "uid": "${DS_POSTGRESQL}"
+        },
+        "definition": "select partner_id from msp.partner_meta where name like  '$partner_name' ;",
+        "hide": 0,
+        "includeAll": false,
+        "label": "partner_id",
+        "multi": false,
+        "name": "partner_id",
+        "options": [],
+        "query": "select partner_id from msp.partner_meta where name like  '$partner_name' ;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "allValue": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\"",
+        "current": {
+          "selected": false,
+          "text": "Trajets ponctuels conducteur",
+          "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\""
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Type recherche covoiturage",
+        "multi": false,
+        "name": "endpoints",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "Trajets ponctuels conducteur",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets réguliers conducteur",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets ponctuels passager",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\""
+          },
+          {
+            "selected": false,
+            "text": "Trajets réguliers passager",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\""
+          },
+          {
+            "selected": false,
+            "text": "Tous trajets",
+            "value": "\"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\""
+          }
+        ],
+        "query": "Trajets ponctuels conducteur : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_journeys\" , Trajets réguliers conducteur : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/driver_regular_trips\" , Trajets ponctuels passager : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_journeys\" , Trajets réguliers passager : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/passenger_regular_trips\" , Tous trajets : \"\\\\/partners\\\\/\\\\:partnerId\\\\/carpooling\\\\/*\"",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "full api",
+          "value": "\\\"MAAS\\\""
+        },
+        "hide": 0,
+        "includeAll": true,
+        "label": "Type de réservation",
+        "multi": false,
+        "name": "bookingType",
+        "options": [
+          {
+            "selected": false,
+            "text": "All",
+            "value": "$__all"
+          },
+          {
+            "selected": true,
+            "text": "full api",
+            "value": "\\\"MAAS\\\""
+          },
+          {
+            "selected": false,
+            "text": "deeplink",
+            "value": "\\\"MSP\\\""
+          }
+        ],
+        "query": "full api : \\\"MAAS\\\" , deeplink : \\\"MSP\\\" ",
+        "queryValue": "",
+        "skipUrlSync": false,
+        "type": "custom"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "[MCM] [GW] Dashboard KPI Réservation Covoiturage",
+  "uid": "mWnfO1pVk",
+  "version": 190,
+  "weekStart": ""
+}

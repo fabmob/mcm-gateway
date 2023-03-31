@@ -14,6 +14,7 @@ import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.monitoring.UserContext;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.enums.BookingStatus;
@@ -24,7 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -47,8 +47,6 @@ public class BookingServiceImpl implements BookingService {
     @Value("${gateway.service.routingapi.baseurl}")
     private String routingApiUri;
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
-
     @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
@@ -60,6 +58,9 @@ public class BookingServiceImpl implements BookingService {
 
     @Autowired
     ValidityUtils validityUtils;
+
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
 
     private static final String STATUS = "status";
     private static final String MESSAGE = "message";
@@ -214,7 +215,7 @@ public class BookingServiceImpl implements BookingService {
      * @return response
      */
     private Object getRouting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String mspMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;

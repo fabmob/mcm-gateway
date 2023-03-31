@@ -20,7 +20,7 @@ public class CarpoolBookingEvent   {
     private UUID id = null;
 
     @JsonProperty("idToken")
-    @Schema(required = true, example = "stringtokenid")
+    @Schema(description = "ID token of the user retrieved using the OpenID Connect flows.", required = true, example = "stringtokenid")
     @NotNull
     private String idToken = null;
 

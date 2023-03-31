@@ -4,13 +4,13 @@ package com.gateway.commonapi.cache;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.data.GatewayParamsDTO;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CommonUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -36,7 +36,8 @@ public class GatewayParamStatusManager extends CacheManager<GatewayParamsDTO> {
     @Value("${gateway.service.dataapi.baseUrl}")
     private String uri;
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
 
 
     /**

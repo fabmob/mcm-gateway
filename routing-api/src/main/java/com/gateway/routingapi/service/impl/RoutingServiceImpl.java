@@ -9,6 +9,7 @@ import com.gateway.commonapi.exception.InternalException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.enums.StandardEnum;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
@@ -38,8 +38,8 @@ import static com.gateway.routingapi.util.constant.RoutingMessageDict.*;
 @Service
 public class RoutingServiceImpl implements RoutingService {
 
-
-    RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
     @Value("${gateway.service.dataapi.baseUrl}")
     private String dataApiUri;
     @Value("${gateway.service.adapter.default-adapter.baseUrl}")
@@ -49,7 +49,7 @@ public class RoutingServiceImpl implements RoutingService {
     @Autowired
     private ErrorMessages errorMessages;
 
-     private static final String SEPARATOR = ": ";
+    private static final String SEPARATOR = ": ";
 
     @Override
     public Object routeOperation(Map<String, String> params, UUID partnerId, String actionName, Optional<Map<String, Object>> body) {
@@ -85,7 +85,7 @@ public class RoutingServiceImpl implements RoutingService {
         urlGetVersion = dataApiUri + CommonUtils.placeholderFormat(GET_VERSION_PATH + GET_BY_ACTIONS_NAME_PATH, PARTNER_ACTIONS_NAME, actionName
                 + GET_BY_MSP_META_ID_PATH, MSP_ID_PARAM, mspMetaIdValue + GET_IS_ACTIVE_TRUE_PATH);
         log.debug(ROUTING_SERVICE_CALL_URL, urlGetVersion);
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerStandardDTO[]> mspStandardDTO = restTemplate.exchange(urlGetVersion, HttpMethod.GET, CommonUtils.setHeaders(), PartnerStandardDTO[].class);
@@ -118,7 +118,7 @@ public class RoutingServiceImpl implements RoutingService {
 
         String adapterName;
         String urlGetAdapterWithId = dataApiUri + CommonUtils.placeholderFormat(GET_ADAPTERS_BY_ID_PATH, ADAPTERS_ID_PARAM, adaptersId.toString());
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<AdaptersDTO> mspActionDTO = restTemplate.exchange(urlGetAdapterWithId, HttpMethod.GET, CommonUtils.setHeaders(), AdaptersDTO.class);
@@ -191,7 +191,7 @@ public class RoutingServiceImpl implements RoutingService {
         if (StringUtils.isNotBlank(outputStandard)) {
             preserveOriginalErrors = CommonUtils.shouldPreserveResponseStatus(outputStandard);
         }
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<Object> response = restTemplate.exchange(urlTemplate, HttpMethod.POST, entity, Object.class);

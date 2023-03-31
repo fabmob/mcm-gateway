@@ -47,7 +47,7 @@ public class CacheManagerController {
      * @param partnerIds List of partners to delete from cache
      * @return no content
      */
-    @Operation(summary = "Clear cache", description = "Clear all cache or only cache on specified partners", tags = {CACHE_MANAGER_TAG})
+    @Operation(summary = "Delete all cache values for all partners or, if specified, a list of partners.", description = "Route used to delete all cache values for all partners or, if specified, a list of partners.", tags = {CACHE_MANAGER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -66,7 +66,7 @@ public class CacheManagerController {
      *
      * @return CacheStatus singleton
      */
-    @Operation(summary = "Get the current cache status", description = "Indicate if cache is active or not", tags = {CACHE_MANAGER_TAG})
+    @Operation(summary = "Retrieve the current value of the cache status.", description = "Route used to retrieve the current value of the cache status. The cache status specifies if the cache is active or not.", tags = {CACHE_MANAGER_TAG})
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -87,7 +87,7 @@ public class CacheManagerController {
      * @param isEnabled new cache status
      * @return CacheStatus singleton
      */
-    @Operation(summary = "Update the cache status", description = "Activate or deactivate cache", tags = {CACHE_MANAGER_TAG})
+    @Operation(summary = "Update the value of the cache status.", description = "Route used to update the value of the cache status.", tags = {CACHE_MANAGER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = UPDATE_WITH_BODY),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -104,7 +104,7 @@ public class CacheManagerController {
     /***
      * Refresh partners meta-data of cache
      */
-    @Operation(summary = "Refresh partners' cache", description = "Refresh meta-data of all partners in cache", tags = {CACHE_MANAGER_TAG})
+    @Operation(summary = "Refresh all metadata in cache for all partners.", description = "Route used to refresh all metadata in cache for all partners.", tags = {CACHE_MANAGER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = UPDATE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -126,7 +126,7 @@ public class CacheManagerController {
      * @param positions  List of coordinates to scan to retrieve all data
      * @return
      */
-    @Operation(summary = "Refresh cache", description = "Refresh specified data in cache", tags = {CACHE_MANAGER_TAG})
+    @Operation(summary = "Refresh the cache value for specified partner and action.", description = "Route used to refresh the cache value for specified partner and action. Coordinates (latitude, longitude and radius) may complete this cache value.", tags = {CACHE_MANAGER_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = UPDATE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),

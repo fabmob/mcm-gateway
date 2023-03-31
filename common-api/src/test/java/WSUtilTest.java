@@ -7,6 +7,7 @@ import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.tests.UTTestCase;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.utils.CommonUtils;
+import com.gateway.commonapi.utils.enums.PartnerTypeRequestHeader;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONObject;
@@ -171,6 +172,18 @@ public class WSUtilTest extends UTTestCase {
         HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
 
         Assertions.assertEquals(httpEntity, setHeaders());
+    }
+
+    @Test
+    public void testSetHeadersWithCallerPartnerType() {
+        String correlationId = new ThreadLocalUserSession().get().getContextId();
+        org.springframework.http.HttpHeaders httpHeaders = new org.springframework.http.HttpHeaders();
+        httpHeaders.set(GlobalConstants.CORRELATION_ID_HEADER, correlationId);
+        httpHeaders.set("X-PARTNER-TYPE", "MAAS");
+        HttpEntity<String> httpEntity = new HttpEntity<>(httpHeaders);
+
+        assertEquals(httpEntity.getHeaders().get("Correlation-Id"), setHeaders(PartnerTypeRequestHeader.MAAS).getHeaders().get("Correlation-Id"));
+        assertEquals(httpEntity.getHeaders().get("X-PARTNER-TYPE"), setHeaders(PartnerTypeRequestHeader.MAAS).getHeaders().get("X-PARTNER-TYPE"));
     }
 
 

@@ -37,7 +37,7 @@ public class PartnerCallsController {
         this.callService = callService;
     }
 
-    @Operation(summary = "Create specified Partner Call", description = "Description Create the specified Partner Calls", tags = {
+    @Operation(summary = "Create a partner call for an existing partner action.", description = "Route used to create a partner call for an existing partner action.", tags = {
             PARTNER_CALLS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -53,7 +53,7 @@ public class PartnerCallsController {
         return new ResponseEntity<>(addCall, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Partner Call", description = "Description Get the specified Partner Calls", tags = {
+    @Operation(summary = "Retrieve data of a specified partner call.", description = "Route used to retrieve data of a specified partner call.", tags = {
             PARTNER_CALLS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -69,7 +69,7 @@ public class PartnerCallsController {
 
     }
 
-    @Operation(summary = "Remove specified Partner Call", description = "Description Delete the specified Partner Call", tags = {
+    @Operation(summary = "Delete data of a specified partner call.", description = "Route used to delete data of a specified partner call.", tags = {
             PARTNER_CALLS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response Ok", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -84,7 +84,7 @@ public class PartnerCallsController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get all Partner Calls", description = "Returns the list of Partner Calls", tags = {PARTNER_CALLS_TAG})
+    @Operation(summary = "Retrieve data of partner calls for all or a specified partner action.", description = "Route used to retrieve all data of partner calls for all partner actions or for a specified partner action.", tags = {PARTNER_CALLS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -105,7 +105,7 @@ public class PartnerCallsController {
 
     }
 
-    @Operation(summary = "Update specified Partner Call", description = "Description update the specified Partner Call", tags = {
+    @Operation(summary = "Update data of a specified partner call.", description = "Route used to update data of a specified partner call.", tags = {
             PARTNER_CALLS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response OK", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

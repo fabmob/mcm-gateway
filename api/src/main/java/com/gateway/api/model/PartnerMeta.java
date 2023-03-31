@@ -62,7 +62,7 @@ public class PartnerMeta implements Serializable {
      */
     @Schema(
             name = "name",
-            description = "Partner name",
+            description = "The operator trade name",
             example = "Voi")
     @JsonProperty("name")
     private String name;
@@ -72,7 +72,7 @@ public class PartnerMeta implements Serializable {
      */
     @Schema(
             name = "operator",
-            description = "Partner operator name",
+            description = "The operator identifier. MUST be a Root Domain (example operator.org) owned by the operator or a Fully Qualified Domain Name (example carpool.mycity.com) exclusively operated by the operator",
             example = "Voi Trottinettes")
     @JsonProperty("operator")
     private String operator;

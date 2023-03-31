@@ -61,6 +61,10 @@ public class GatewayErrorMessage {
     public static final String DEFAULT_TOMP_INSTANCE = "Gateway callId ";
     public static final String UNAUTHORIZED_TITLE = "Unauthorized";
     public static final String FORBIDDEN_TITLE = "Forbidden";
+    public static final String FORBIDDEN_TYPE_TITLE = "Forbidden type of partner";
+
+    public static final String FORBIDDEN_TYPE_MESSAGE = "Forbidden type of partner [{0}]. You are not allowed to search this type of partner.";
+    public static final String ILLEGAL_OPERATION = "Illegal Operation";
     public static final String DETAIL_MESSAGE_AUTHENTICATION = "The request requires user authentication.";
     public static final String DETAIL_MESSAGE_FORBIDDEN = "The server understood the request, but is refusing to fulfill it.";
     public static final String TITLE_FORMAT = "Gateway error : {0}";

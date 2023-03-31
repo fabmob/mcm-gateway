@@ -39,7 +39,7 @@ public class PartnerStandardController {
         this.partnerStandardService = partnerStandardService;
     }
 
-    @Operation(summary = "Create specified Partner Standard", description = "Description Create the specified Partner Call", tags = {
+    @Operation(summary = "Create data for a new partner standard for specified partner, partner action and adapter.", description = "Route used to create data for a new partner standard for specified partner, partner action and adapter.", tags = {
             PARTNER_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -56,7 +56,7 @@ public class PartnerStandardController {
         return new ResponseEntity<>(addStandard, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Partner Standard", description = "Description Get the specified Partner Standard", tags = {
+    @Operation(summary = "Retrieve data for a specified partner standard.", description = "Route used to retrieve data for a specified partner standard.", tags = {
             PARTNER_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -72,7 +72,7 @@ public class PartnerStandardController {
 
     }
 
-    @Operation(summary = "Update Partner Standard", description = "Description the update Partner Standard", tags = {PARTNER_STANDARDS_TAG})
+    @Operation(summary = "Update data for a specified partner standard.", description = "Route used to update data for a specified partner standard.", tags = {PARTNER_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -87,7 +87,7 @@ public class PartnerStandardController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All Partner Standards Or Get By Specific Criteria(PartnerMetaId,PartnerActionsId,VersionStandard,VersionDatamapping,Active) ", description = "Description list of Partner Standard", tags = {
+    @Operation(summary = "Retrieve data for all partner standards or for specified partner, partner action, partner action name, standard version, datamapping version and/or if is active or not.", description = "Route used to retrieve data for all partner standards. Filters may be used on partner, partner action, partner action name, standard version, datamapping version and/or if the partner standard is active or not.", tags = {
             PARTNER_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -111,7 +111,7 @@ public class PartnerStandardController {
         return new ResponseEntity<>(partnerStandards, HttpStatus.OK);
     }
 
-    @Operation(summary = "Delete specified Partner Standard", description = "Description delete the specified Partner Standard", tags = {
+    @Operation(summary = "Delete data for a specified partner standard.", description = "Route used to delete all data for a specified partner standard.", tags = {
             PARTNER_STANDARDS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

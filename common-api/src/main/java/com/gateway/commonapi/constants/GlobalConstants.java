@@ -33,6 +33,9 @@ public class GlobalConstants {
     public static final String ERROR_FOR_URL_CALL = "Error calling url {}. {}";
     public static final String LOG_URL_CALL = "Calling {}";
 
+    public static final String GATEWAY_TIMEOUT = "GATEWAY_TIMEOUT";
+    public static final int DEFAULT_TIMEOUT = 30;
+
     private GlobalConstants() {
     }
 }

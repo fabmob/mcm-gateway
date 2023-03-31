@@ -41,7 +41,7 @@ public class CacheParamController {
     private final CacheParamService cacheParamService;
 
 
-    @Operation(summary = "Create specified CacheParam", description = "Description Create the specified CacheParam", tags = {CACHE_PARAMTAG})
+    @Operation(summary = "Create cache parameters for a specified partner.", description = "Route used to create cache parameters for a specified partner. The parameters described the action type, soft and hard TTL, and refresh cache delay.", tags = {CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = CREATED),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -56,7 +56,7 @@ public class CacheParamController {
         return new ResponseEntity<>(cacheParamResponse, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Cache Param with Partner Id and Action type", description = "Description Get the specified Cache Param", tags = {
+    @Operation(summary = "Retrieve a specified cache parameters.", description = "Route used to retrieve a specified cache parameters.", tags = {
             CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = DataApiMessageDict.RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -72,7 +72,7 @@ public class CacheParamController {
     }
 
 
-    @Operation(summary = "Update CacheParam", description = "update CacheParam", tags = {CACHE_PARAMTAG})
+    @Operation(summary = "Update a specified cache parameters.", description = "Route used to update a specified cache parameters.", tags = {CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = DataApiMessageDict.RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -87,7 +87,7 @@ public class CacheParamController {
     }
 
 
-    @Operation(summary = "Delete specified CacheParam", description = "delete the specified CacheParam", tags = {CACHE_PARAMTAG})
+    @Operation(summary = "Delete a specified cache parameters.", description = "Route used to delete a specified cache parameters.", tags = {CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = DataApiMessageDict.RESPONSE_OK, content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),
@@ -101,7 +101,7 @@ public class CacheParamController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get All CacheParam", description = "the list of CacheParams", tags = {CACHE_PARAMTAG})
+    @Operation(summary = "Retrieve cache parameters for all or a specified partner and action type.", description = "Route used to retrieve cache parameters for all or a specified partner and action type.", tags = {CACHE_PARAMTAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = DataApiMessageDict.RESPONSE_OK),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
             @ApiResponse(responseCode = "401", description = UNAUTHORIZED, content = @Content(schema = @Schema(implementation = Unauthorized.class))),

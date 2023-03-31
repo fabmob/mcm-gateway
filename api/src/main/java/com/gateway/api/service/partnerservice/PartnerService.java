@@ -4,6 +4,7 @@ import com.gateway.api.model.PartnerMeta;
 import com.gateway.commonapi.dto.api.PartnerZone;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
+import com.gateway.commonapi.utils.enums.PartnerTypeRequestHeader;
 import com.gateway.commonapi.utils.enums.ZoneType;
 
 import java.util.List;
@@ -29,11 +30,22 @@ public interface PartnerService {
     List<PartnerMeta> getPartnersMeta();
 
     /**
-     * Retrieve a list of Partners metadata.
+     * Will call data-api to filter on the example given and corresponds to all given attributs
+     *
+     * @param partnerMetaExample give an example of PartnerMeta
+     * @param callPartnerType    partner type of the caller MSP ? MAAS ? ADMIN ?
+     * @return a list of PartneMeta that correspond to the example
+     */
+    List<PartnerMeta> getPartnersMetaByExample(PartnerMeta partnerMetaExample, PartnerTypeRequestHeader callPartnerType);
+
+    /**
+     * Retrieve a list of Partners metadata using partner type (MaaS, MSP).
      *
      * @return List of {@link PartnerMeta} Partners metadata.
      */
-    List<PartnerMeta> getPartnersMetaByType(PartnerTypeEnum partnerType);
+
+
+    List<PartnerMeta> getPartnersMetaByPartnerType(PartnerTypeEnum partnerType, PartnerTypeRequestHeader callPartnerType);
 
     /**
      * Retrieve a Partner metadata information.
@@ -57,5 +69,7 @@ public interface PartnerService {
      * @param mspId Identifier of the Partner.
      */
     void ping(UUID mspId);
+
+
 }
 

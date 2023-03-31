@@ -19,10 +19,7 @@ import com.gateway.commonapi.monitoring.ThreadLocalUserSession;
 import com.gateway.commonapi.properties.ErrorMessages;
 import com.gateway.commonapi.tests.WsTestUtil;
 import com.gateway.commonapi.utils.cache.CacheService;
-import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
-import com.gateway.commonapi.utils.enums.StandardEnum;
-import com.gateway.commonapi.utils.enums.TypeEnum;
-import com.gateway.commonapi.utils.enums.ZoneType;
+import com.gateway.commonapi.utils.enums.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,8 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 
@@ -122,7 +118,7 @@ class PartnerServiceImplTest {
         HttpHeaders httpHeaders = new HttpHeaders();
         ResponseEntity<PartnerMetaDTO[]> PartnerMetasDto = new ResponseEntity<>(partnerListMocked, httpHeaders, HttpStatus.OK);
         Mockito.when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenReturn(PartnerMetasDto);
-        assertEquals(UUID.fromString("ada5039d-81a5-4676-9885-516384ccdc83"), partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP).get(0).getPartnerId());
+        assertEquals(UUID.fromString("ada5039d-81a5-4676-9885-516384ccdc83"), partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null).get(0).getPartnerId());
     }
 
     @Test
@@ -131,7 +127,7 @@ class PartnerServiceImplTest {
         PartnerMetaDTO[] partnerListCache = createMockedPartnerList();
 
         Mockito.when(partnerMetaCacheManager.getAllPartnersFromCache()).thenReturn(List.of(partnerListCache));
-        assertEquals("Voi Trotti", partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP).get(0).getOperator());
+        assertEquals("Voi Trotti", partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null).get(0).getOperator());
     }
 
 
@@ -144,7 +140,7 @@ class PartnerServiceImplTest {
         new ResponseEntity<>(partnerListMocked, httpHeaders, HttpStatus.OK);
         Mockito.when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenReturn(null);
 
-        assertThrows(NullPointerException.class, () -> partnerService.getPartnersMetaByType(PartnerTypeEnum.MSP));
+        assertThrows(NullPointerException.class, () -> partnerService.getPartnersMetaByPartnerType(PartnerTypeEnum.MSP, null));
     }
 
     @Test
@@ -208,6 +204,40 @@ class PartnerServiceImplTest {
         PartnerMetaDTO[] partnersMetaCache = createMockedPartnerList();
         Mockito.when(partnerMetaCacheManager.getAllPartnersFromCache()).thenReturn(List.of(partnersMetaCache));
         assertEquals("PNG", partnerService.getPartnersMeta().get(0).getLogoFormat());
+    }
+
+    @Test
+    void testGetPartnerMetasWithExample() throws IOException {
+        PartnerMetaDTO[] partnerListMocked = createMockedPartnerList();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        ResponseEntity<PartnerMetaDTO[]> PartnerMetasDto = new ResponseEntity<>(partnerListMocked, httpHeaders, HttpStatus.OK);
+
+        PartnerMeta partnerMetaExample = new PartnerMeta();
+        partnerMetaExample.setPartnerType(PartnerTypeEnum.MSP);
+        partnerMetaExample.setType(TypeEnum.CARPOOLING);
+        partnerMetaExample.setName("Voi");
+        partnerMetaExample.setOperator("mock");
+
+        Mockito.when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenReturn(PartnerMetasDto);
+        assertDoesNotThrow(() -> partnerService.getPartnersMetaByExample(partnerMetaExample, PartnerTypeRequestHeader.MSP));
+    }
+
+    @Test
+    void testGetPartnerMetasWithExampleWithCache() throws IOException {
+        lenient().when(cacheService.useCache()).thenReturn(true);
+
+        PartnerMetaDTO[] partnerListMocked = createMockedPartnerList();
+        HttpHeaders httpHeaders = new HttpHeaders();
+        ResponseEntity<PartnerMetaDTO[]> PartnerMetasDto = new ResponseEntity<>(partnerListMocked, httpHeaders, HttpStatus.OK);
+
+        PartnerMeta partnerMetaExample = new PartnerMeta();
+        partnerMetaExample.setPartnerType(PartnerTypeEnum.MSP);
+        partnerMetaExample.setType(TypeEnum.CARPOOLING);
+        partnerMetaExample.setName("Voi");
+        partnerMetaExample.setOperator("mock");
+
+        Mockito.when(restTemplate.exchange(anyString(), any(), any(), any(Class.class))).thenReturn(PartnerMetasDto);
+        assertDoesNotThrow(() -> partnerService.getPartnersMetaByExample(partnerMetaExample, PartnerTypeRequestHeader.MSP));
     }
 
     @Test

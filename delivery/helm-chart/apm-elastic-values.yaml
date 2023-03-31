@@ -16,8 +16,6 @@ apmConfig:
 
 replicas: 1
 
-elasticsearchCredentialSecret: ""
-
 # additionals labels
 labels: {}
 

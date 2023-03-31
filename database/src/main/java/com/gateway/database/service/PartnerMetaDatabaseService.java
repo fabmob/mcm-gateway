@@ -11,11 +11,12 @@ import java.util.UUID;
 public interface PartnerMetaDatabaseService {
 
     /**
-     * Retrieve a list of partnerMeta.
+     * Will call database to filter on the example given and corresponds or contains all given attributes ignoring case (uppercase, lowercase)
      *
-     * @return List of  partnerMeta.
+     * @param partnerMetaExample give an example of PartnerMeta
+     * @return a list of PartnerMeta that correspond to the example
      */
-    List<PartnerMeta> findAllByPartnerType(String partnerType);
+    List<PartnerMeta> findAllByExample(PartnerMeta partnerMetaExample);
 
     /**
      * Retrieve a list of PartnerMeta.

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gateway.api.model.PartnerMeta;
 import com.gateway.api.model.mapper.PartnerMetaDTOMapper;
 import com.gateway.api.rest.APIController;
-import com.gateway.api.service.ivservice.impl.IVServiceImpl;
 import com.gateway.api.service.partnerservice.PartnerService;
 import com.gateway.api.util.ValidityUtils;
 import com.gateway.commonapi.cache.PartnerMetaCacheManager;
 import com.gateway.commonapi.cache.ZoneCacheManager;
+import com.gateway.commonapi.constants.AttributeDict;
 import com.gateway.commonapi.constants.GlobalConstants;
 import com.gateway.commonapi.dto.api.PartnerZone;
 import com.gateway.commonapi.dto.data.CacheParamDTO;
@@ -17,11 +17,13 @@ import com.gateway.commonapi.dto.data.PartnerMetaDTO;
 import com.gateway.commonapi.dto.exceptions.GenericError;
 import com.gateway.commonapi.exception.*;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
 import com.gateway.commonapi.utils.cache.CacheService;
 import com.gateway.commonapi.utils.enums.PartnerTypeEnum;
+import com.gateway.commonapi.utils.enums.PartnerTypeRequestHeader;
 import com.gateway.commonapi.utils.enums.StandardEnum;
 import com.gateway.commonapi.utils.enums.ZoneType;
 import lombok.extern.slf4j.Slf4j;
@@ -32,12 +34,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
@@ -49,6 +53,7 @@ import static com.gateway.commonapi.constants.ErrorCodeDict.PARTNER_ID_CODE;
 import static com.gateway.commonapi.constants.GatewayApiPathDict.*;
 import static com.gateway.commonapi.constants.GatewayErrorMessage.UNKNOWN_PARTNER_ID;
 import static com.gateway.commonapi.constants.GatewayErrorMessage.UNKNOWN_PARTNER_ID_MESSAGE;
+import static com.gateway.commonapi.utils.CommonUtils.setHeaders;
 import static com.gateway.commonapi.utils.enums.ActionsEnum.*;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -57,16 +62,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @Service
 public class PartnerServiceImpl implements PartnerService {
 
-
     @Value("${gateway.service.dataapi.baseUrl}")
     private String uri;
     @Value("${gateway.service.routingapi.baseurl}")
     private String routingApiUri;
     private static final String SEPARATOR = ": ";
-    @Autowired
-    private IVServiceImpl ivService;
-
-    RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
 
     @Autowired
     private CacheService cacheService;
@@ -85,6 +85,9 @@ public class PartnerServiceImpl implements PartnerService {
     @Autowired
     ValidityUtils validityUtils;
 
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
+
     @Override
     public PartnerZone getPartnerZone(UUID partnerId, ZoneType areaType) {
         validityUtils.checkPartnerId(partnerId);
@@ -100,7 +103,7 @@ public class PartnerServiceImpl implements PartnerService {
             }
         } else {
 
-            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
             Map<String, String> params = new HashMap<>();
             params.put(ZONE_TYPE, areaType.toString());
@@ -156,12 +159,12 @@ public class PartnerServiceImpl implements PartnerService {
 
     private void makePartnerMetaRealCall(String outputStandard, List<PartnerMeta> partnerMetaList) {
         // get the correlationId of the current thread and forward as http header
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String urlGetMetas = uri + PARTNER_META_ENDPOINT;
 
         try {
-            ResponseEntity<PartnerMetaDTO[]> mspMetasDto = restTemplate.exchange(urlGetMetas, HttpMethod.GET, CommonUtils.setHeaders(), PartnerMetaDTO[].class);
+            ResponseEntity<PartnerMetaDTO[]> mspMetasDto = restTemplate.exchange(urlGetMetas, HttpMethod.GET, setHeaders(), PartnerMetaDTO[].class);
             //Convert MspMetaDTO into MSPMeta
             List<PartnerMeta> mspsMetas = mapper.mapDataApiDtoToApiDto(Arrays.asList(mspMetasDto.getBody()));
             //add _links
@@ -196,7 +199,69 @@ public class PartnerServiceImpl implements PartnerService {
     }
 
     @Override
-    public List<PartnerMeta> getPartnersMetaByType(PartnerTypeEnum partnerType) {
+    public List<PartnerMeta> getPartnersMetaByExample(PartnerMeta partnerMetaExample, PartnerTypeRequestHeader callPartnerType) {
+        String msg = CommonUtils.placeholderFormat(GET_ALL_FROM_CACHE_ERREUR, FIRST_PLACEHOLDER, PARTNER_META_BY_EXAMPLE);
+        String outputStandard = CallUtils.getOutputStandardFromCallThread();
+        CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
+
+        List<PartnerMeta> partnerMetaList = new ArrayList<>();
+        List<PartnerMeta> mappedListPartners;
+        List<PartnerMetaDTO> partnerMetaDTOList;
+
+        if (Boolean.TRUE.equals(cacheService.useCache())) {
+            try {
+                partnerMetaDTOList = partnerMetaCache.getAllPartnersFromCache();
+                mappedListPartners = mapper.mapDataApiDtoToApiDto(partnerMetaDTOList);
+                if (partnerMetaExample.getPartnerType() != null) {
+                    mappedListPartners = mappedListPartners.stream().filter(c -> c.getPartnerType().value.contains(partnerMetaExample.getPartnerType().value)).collect(Collectors.toList());
+                }
+                if (partnerMetaExample.getType() != null) {
+                    mappedListPartners = mappedListPartners.stream().filter(c -> c.getType().toString().contains(partnerMetaExample.getType().toString())).collect(Collectors.toList());
+                }
+                if (partnerMetaExample.getOperator() != null) {
+                    mappedListPartners = mappedListPartners.stream().filter(c -> c.getOperator().contains(partnerMetaExample.getOperator())).collect(Collectors.toList());
+                }
+                if (partnerMetaExample.getName() != null) {
+                    mappedListPartners = mappedListPartners.stream().filter(c -> c.getName().contains(partnerMetaExample.getName())).collect(Collectors.toList());
+                }
+
+                log.debug("get partners meta by example from cache");
+
+                generateListOfLinks(mappedListPartners, partnerMetaList, msg);
+
+            } catch (Exception e) {
+                this.exceptionHandler(e, msg, null);
+            }
+        } else {
+            // get the correlationId of the current thread and forward as http header
+            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
+
+            MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
+            String urlGetMetas = uri + PARTNER_METAS_PATH_PARAM;
+
+
+            if (partnerMetaExample.getPartnerType() != null) {
+                parameters.add(AttributeDict.PARTNER_TYPE_ATTRIBUTE, partnerMetaExample.getPartnerType().value);
+            }
+            if (partnerMetaExample.getType() != null) {
+                parameters.add(AttributeDict.TYPE_ATTRIBUTE, partnerMetaExample.getType().toString());
+            }
+            if (partnerMetaExample.getOperator() != null) {
+                parameters.add(AttributeDict.OPERATOR_ATTRIBUTE, partnerMetaExample.getOperator());
+            }
+            if (partnerMetaExample.getName() != null) {
+                parameters.add(AttributeDict.NAME_ATTRIBUTE, partnerMetaExample.getName());
+            }
+
+            UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(urlGetMetas).queryParams(parameters);
+            generatePartnersList(callPartnerType, msg, outputStandard, partnerMetaList, correlationId, uriBuilder.toUriString());
+        }
+        return partnerMetaList;
+    }
+
+
+    @Override
+    public List<PartnerMeta> getPartnersMetaByPartnerType(PartnerTypeEnum partnerType, PartnerTypeRequestHeader callPartnerType) {
 
         String msg = CommonUtils.placeholderFormat(GET_ALL_FROM_CACHE_ERREUR, FIRST_PLACEHOLDER, "partnerMetaByType");
         String outputStandard = CallUtils.getOutputStandardFromCallThread();
@@ -220,31 +285,35 @@ public class PartnerServiceImpl implements PartnerService {
             }
         } else {
             // get the correlationId of the current thread and forward as http header
-            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
             String urlGetMetas = uri + PARTNER_META_ENDPOINT + PARTNER_TYPE_FILTER + partnerType.toString();
-            try {
-                ResponseEntity<PartnerMetaDTO[]> mspMetasDto = restTemplate.exchange(urlGetMetas, HttpMethod.GET, CommonUtils.setHeaders(), PartnerMetaDTO[].class);
-                //Convert MspMetaDTO into MSPMeta
-                List<PartnerMeta> mspsMetas = mapper.mapDataApiDtoToApiDto(Arrays.asList(Objects.requireNonNull(mspMetasDto.getBody())));
-                //add _links
-                generateListOfLinks(mspsMetas, partnerMetaList, msg);
-
-            } catch (HttpClientErrorException.NotFound e) {
-                log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
-                throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
-            } catch (RestClientException e) {
-                log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
-                throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
-            } catch (Exception e) {
-                log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
-                throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
-            } finally {
-                CallUtils.saveOutputStandardInCallThread(outputStandard);
-            }
+            generatePartnersList(callPartnerType, msg, outputStandard, partnerMetaList, correlationId, urlGetMetas);
         }
         return partnerMetaList;
     }
+
+    private void generatePartnersList(PartnerTypeRequestHeader callPartnerType, String msg, String outputStandard, List<PartnerMeta> partnerMetaList, String correlationId, String urlGetMetas) {
+        try {
+            ResponseEntity<PartnerMetaDTO[]> mspMetasDto = restTemplate.exchange(urlGetMetas, HttpMethod.GET, setHeaders(callPartnerType), PartnerMetaDTO[].class);
+            //Convert MspMetaDTO into MSPMeta
+            List<PartnerMeta> mspsMetas = mapper.mapDataApiDtoToApiDto(Arrays.asList(Objects.requireNonNull(mspMetasDto.getBody())));
+            //add _links
+            generateListOfLinks(mspsMetas, partnerMetaList, msg);
+
+        } catch (HttpClientErrorException.NotFound e) {
+            throw ExceptionUtils.getMappedGatewayRuntimeException(e, MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
+        } catch (RestClientException e) {
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new BadGatewayException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
+        } catch (Exception e) {
+            log.error(MessageFormat.format(CALL_ID_MESSAGE_PATTERN, correlationId, e.getMessage()), e);
+            throw new UnavailableException(MessageFormat.format(errorMessages.getTechnicalRestHttpClientError(), urlGetMetas));
+        } finally {
+            CallUtils.saveOutputStandardInCallThread(outputStandard);
+        }
+    }
+
 
     private void generateListOfLinks(List<PartnerMeta> mappedListPartners, List<PartnerMeta> partnerMetaList, String msg) {
         if (mappedListPartners != null) {
@@ -257,8 +326,6 @@ public class PartnerServiceImpl implements PartnerService {
                 }
             }
         }
-
-
     }
 
     private GenericError getGenericErrorForNotFoundPartners(UUID partnerId) {
@@ -305,13 +372,13 @@ public class PartnerServiceImpl implements PartnerService {
         } else {
 
             // get the correlationId of the current thread and forward as http header
-            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+            String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
             String urlGetMeta = uri + PARTNER_META_ENDPOINT + partnerId.toString();
 
             try {
                 ResponseEntity<PartnerMetaDTO> mspMetasDto = restTemplate.exchange(urlGetMeta,
-                        HttpMethod.GET, CommonUtils.setHeaders(), PartnerMetaDTO.class);
+                        HttpMethod.GET, setHeaders(), PartnerMetaDTO.class);
 
                 //Convert MspMetaDTO into MSPMeta
                 partnerMeta = mapper.mapDataApiDtoToApiDto(mspMetasDto.getBody());
@@ -351,6 +418,7 @@ public class PartnerServiceImpl implements PartnerService {
         validityUtils.checkPartnerId(mspId);
         this.getRouting(mspId, PING.value, Optional.empty(), null);
     }
+
 
     /**
      * Add links to MSP metadata.
@@ -555,7 +623,7 @@ public class PartnerServiceImpl implements PartnerService {
      * @return
      */
     private Object getRouting(UUID partnerId, String actionName, Optional<Map<String, Object>> body, Map<String, String> params) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String partnerMetaIdValue = partnerId != null ? partnerId.toString() : null;
         Object partnerBusinessResponse = null;
@@ -563,7 +631,7 @@ public class PartnerServiceImpl implements PartnerService {
                 + GET_ACTION_NAME_PATH, ACTION_NAME, actionName);
 
         String urlTemplate = CommonUtils.constructUrlTemplate(urlCall, params);
-        HttpEntity<Optional<Map<String, Object>>> entity = new HttpEntity<>(body, CommonUtils.setHeaders().getHeaders());
+        HttpEntity<Optional<Map<String, Object>>> entity = new HttpEntity<>(body, setHeaders().getHeaders());
         log.debug(LOG_URL_CALL, urlTemplate);
 
         boolean preserveOriginalErrors = false;
@@ -617,7 +685,7 @@ public class PartnerServiceImpl implements PartnerService {
      * @param e
      */
     private void exceptionHandler(Exception e, String msg, UUID partnerId) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         if (e.getMessage() != null) {
             log.error(MessageFormat.format(BASE_ERROR_MESSAGE, correlationId, e.getMessage()), e);

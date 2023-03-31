@@ -18,6 +18,7 @@ import com.gateway.commonapi.exception.InternalException;
 import com.gateway.commonapi.exception.NotFoundException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CallUtils;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
@@ -34,7 +35,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -75,7 +75,8 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
     ParseUtils parseUtils = new ParseUtils();
 
-    RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
 
     private static final String SEPARATOR = ": ";
 
@@ -90,7 +91,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         PartnerActionDTO partnerBusinessAction;
         PartnerStandardDTO partnerStandard;
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         String urlGetActionById = dataApiUri + CommonUtils.placeholderFormat(GET_ACTION_BY_ID_PATH, ACTION_ID_PARAM, partnerActionId.toString());
         try {
@@ -145,7 +146,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
 
         String urlGetPartnerByPartnerId = dataApiUri + CommonUtils.placeholderFormat(GET_PARTNER_META_BY_ID_PATH, ID_PARAM, id.toString());
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerMetaDTO> partnerMetaDto = restTemplate.exchange(urlGetPartnerByPartnerId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerMetaDTO.class);
@@ -235,7 +236,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         HttpEntity<Object> entity = new HttpEntity<>(tokenDTO, CommonUtils.setHttpHeaders());
         String urlPostToken = dataApiUri + CommonUtils.placeholderFormat(GET_TOKEN_PATH);
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<TokenDTO> tokenResponse = restTemplate.exchange(urlPostToken, HttpMethod.POST, entity, TokenDTO.class);
@@ -261,7 +262,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<PartnerActionDTO> actionList;
         String urlGetCallsByActionId = dataApiUri + CommonUtils.placeholderFormat(PARTNER_ACTIONS_BASE_PATH + GET_BY_PARTNER_META_ID_PATH, PARTNER_ID_PARAM, String.valueOf(partnerId));
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerActionDTO[]> partnerCallsDTO = restTemplate.exchange(urlGetCallsByActionId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerActionDTO[].class);
@@ -423,7 +424,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         CallUtils.saveOutputStandardInCallThread(StandardEnum.GATEWAY);
 
         String urlGetTokenByPartnerId = dataApiUri + CommonUtils.placeholderFormat(GET_TOKEN_PATH + GET_BY_PARTNER_META_ID_PATH, PARTNER_ID_PARAM, String.valueOf(partnerId));
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<TokenDTO> tokenDTO = restTemplate.exchange(urlGetTokenByPartnerId, HttpMethod.GET, CommonUtils.setHeaders(), TokenDTO.class);
@@ -698,7 +699,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<PartnerCallsDTO> partnerBusinessCalls;
         String urlGetCallsByActionId = dataApiUri + CommonUtils.placeholderFormat(GET_CALLS_PATH + GET_BY_ACTIONS_ID_PATH, ACTION_ID_PARAM, String.valueOf(actionId));
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<PartnerCallsDTO[]> partnerCallsDTO = restTemplate.exchange(urlGetCallsByActionId, HttpMethod.GET, CommonUtils.setHeaders(), PartnerCallsDTO[].class);
@@ -730,7 +731,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
 
         List<DataMapperDTO> dataMappers;
         String urlGetActionById = dataApiUri + CommonUtils.placeholderFormat(GET_DATA_MAPPER_BY_ID_PATH + GET_BY_ACTIONS_ID_PATH, ACTION_ID_PARAM, actionId.toString());
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<DataMapperDTO[]> dataMappersDTO = restTemplate.exchange(urlGetActionById, HttpMethod.GET, CommonUtils.setHeaders(), DataMapperDTO[].class);
@@ -856,7 +857,7 @@ public class DefaultAdapterServiceImpl implements DefaultAdapterService {
         if (StringUtils.isNotBlank(initialOutputStandard)) {
             preserveOriginalErrors = CommonUtils.shouldPreserveResponseStatus(initialOutputStandard);
         }
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
 
         try {
             ResponseEntity<String> partnerResponse = restTemplate.exchange(urlPostRequest, HttpMethod.POST, entity, String.class);

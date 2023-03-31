@@ -100,6 +100,7 @@ deployments:
               ELASTIC_APM_APPLICATION_PACKAGES: com.gateway,org.springframework
               ELASTIC_APM_SERVER_URL: http://apm-server.elasticsearch-${BASE_KUBE_NAMESPACE_WITH_BRANCH}.svc.cluster.local:8200
               ELASTIC_APM_ENVIRONMENT: ${LANDSCAPE_ENV}
+              GATEWAY_TIMEOUT: ${GATEWAY_TIMEOUT}
             image: ${ROUTING_API_IMAGE_NAME}
             name: routing-api
             ports:

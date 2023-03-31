@@ -75,7 +75,7 @@ public class GenericError {
         this.timestamp = simpleDateFormat.format(new Date());
     }
 
-    public GenericError(HttpStatus statusCode, Integer errorCode, String label, String description) {
+    public GenericError(HttpStatus statusCode, Integer errorCode, String title, String detail) {
         this.timestamp = simpleDateFormat.format(new Date());
         if (statusCode != null) {
             this.status = statusCode.value();
@@ -83,8 +83,8 @@ public class GenericError {
             this.status = HttpStatus.INTERNAL_SERVER_ERROR.value();
         }
         this.errorCode = errorCode;
-        this.label = label;
-        this.description = description;
+        this.label = title;
+        this.description = detail;
     }
 
     public GenericError(String message) {

@@ -37,7 +37,7 @@ public class PartnerActionsController {
         this.actionService = actionService;
     }
 
-    @Operation(summary = "Create specified  Partner Action", description = "Description Create the specified Partner Action", tags = {
+    @Operation(summary = "Create data of a partner action.", description = "Route used to create data of a new partner action.", tags = {
             PARTNER_ACTIONS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -53,7 +53,7 @@ public class PartnerActionsController {
         return new ResponseEntity<>(actions, HttpStatus.CREATED);
     }
 
-    @Operation(summary = "Get the specified Partner Action", description = "Description Get the specified Partner Action", tags = {
+    @Operation(summary = "Retrieve data of a specified partner action.", description = "Route used to retrieve data of a specified partner action.", tags = {
             PARTNER_ACTIONS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -68,7 +68,7 @@ public class PartnerActionsController {
         return ResponseEntity.ok(partnerAction);
     }
 
-    @Operation(summary = "Delete specified Partner Action", description = "Description delete the specified Partner Action", tags = {
+    @Operation(summary = "Delete data of a specified partner action.", description = "Route used to delete data of a specified partner action.", tags = {
             PARTNER_ACTIONS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "201", description = "Created"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -83,7 +83,7 @@ public class PartnerActionsController {
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Get all Partner Action or Get By PartnerMetaId", description = "Returns the list of Partner Actions", tags = {
+    @Operation(summary = "Retrieve data of partner actions for all or a specified partner.", description = "Route used to retrieve all data of partner actions for all partners or for a specified partner id.", tags = {
             PARTNER_ACTIONS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Response OK"),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),
@@ -104,7 +104,7 @@ public class PartnerActionsController {
 
     }
 
-    @Operation(summary = "Update specified Partner Action", description = "Description update the specified Partner Action", tags = {
+    @Operation(summary = "Update data of a specified partner action.", description = "Route used to update data of a specified partner action.", tags = {
             PARTNER_ACTIONS_TAG})
     @ApiResponses(value = {@ApiResponse(responseCode = "204", description = "Response OK", content = @Content(schema = @Schema(hidden = true))),
             @ApiResponse(responseCode = "400", description = BAD_REQUEST, content = @Content(schema = @Schema(implementation = BadRequest.class))),

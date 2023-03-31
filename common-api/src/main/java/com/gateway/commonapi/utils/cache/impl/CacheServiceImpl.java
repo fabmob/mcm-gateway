@@ -6,6 +6,7 @@ import com.gateway.commonapi.dto.data.CacheParamDTO;
 import com.gateway.commonapi.exception.BadGatewayException;
 import com.gateway.commonapi.exception.UnavailableException;
 import com.gateway.commonapi.properties.ErrorMessages;
+import com.gateway.commonapi.restConfig.RestConfig;
 import com.gateway.commonapi.utils.CommonUtils;
 import com.gateway.commonapi.utils.ExceptionUtils;
 import com.gateway.commonapi.utils.cache.CacheService;
@@ -14,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientException;
@@ -35,7 +35,9 @@ import static com.gateway.commonapi.constants.GatewayApiPathDict.CACHE_PARAM_END
 @Slf4j
 public class CacheServiceImpl implements CacheService {
 
-    private RestTemplate restTemplate = new RestTemplate(new HttpComponentsClientHttpRequestFactory());
+    RestConfig restConfig = new RestConfig();
+    RestTemplate restTemplate = restConfig.restTemplate();
+
     @Value("${gateway.service.dataapi.baseUrl}")
     private String uri;
     @Autowired
@@ -44,7 +46,7 @@ public class CacheServiceImpl implements CacheService {
     private GatewayParamStatusManager gatewayParamStatusManager;
 
     private List<CacheParamDTO> getCacheParamDatabase(UUID partnerId, String actionType) {
-        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().get(GlobalConstants.CORRELATION_ID_HEADER));
+        String correlationId = String.valueOf(CommonUtils.setHeaders().getHeaders().getFirst(GlobalConstants.CORRELATION_ID_HEADER));
         List<CacheParamDTO> cacheParams;
         String urlGetCacheParam = uri + CACHE_PARAM_ENDPOINT + "?partnerId=" + partnerId + "&actionType=" + actionType;
         try {
